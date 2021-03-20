@@ -46,6 +46,13 @@ static int rtc_counter = 0;
 #define CHECK_FLAG(flags, bit)   ((flags) & (1 << (bit)))
 
 
+/*
+ * naive_exception_handler
+ * This function is the handler of an exception
+ * Input: num -- exception vector
+ * Output: None.
+ * Side effect: Print message on screen
+ */
 void naive_exception_handler(uint32_t num){
 //    clear();
     printf("------------------------------------------------\n");
@@ -54,6 +61,13 @@ void naive_exception_handler(uint32_t num){
     while(1){}
 }
 
+/*
+ * naive_system_call_handler
+ * This function is the handler of a system call
+ * Input: num -- system call vector, which will always be 0x80
+ * Output: None.
+ * Side effect: Print message on screen
+ */
 void naive_system_call_handler(uint32_t num){
     clear();
     printf("------------------------------------------------\n");
@@ -61,11 +75,18 @@ void naive_system_call_handler(uint32_t num){
     printf("------------------------------------------------\n");
 }
 
-
+/*
+ * init_IDT
+ * This function will initialize the IDT with dummy handlers
+ * Input: None
+ * Output: None.
+ * Side effect: Fill in the IDT
+ */
 void init_IDT(){
-    clear(); ////
-    printf("now in the start of INITIDT\n");
     int i;
+
+    // clear the screen
+    clear();
 
     // the initialization of exception entry
     for(i = 0; i < IDT_END_OF_EXCEPTION; i++){
@@ -140,8 +161,7 @@ void init_IDT(){
     idt[IDT_SYSTEM_CALL].dpl = 3;
 
     LOAD_IDTR(idt_desc_ptr);
-    printf("The initialization of IDT is finished!!\n");
-    // clear();
+
 }
 
 
@@ -269,7 +289,8 @@ void entry(unsigned long magic, unsigned long addr) {
 
     /* Init the PIC */
     i8259_init();
-    
+
+    /* Init the IDT */
 
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
@@ -279,9 +300,9 @@ void entry(unsigned long magic, unsigned long addr) {
     enable_irq(8); // RTC is IRQ8
     rtc_restart_interrupt();
 
-    /* Enable interrupts */
     init_IDT();
-    puts("IDT initialized successfully");
+    /* Enable interrupts */
+
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
      * without showing you any output */
@@ -300,7 +321,7 @@ void entry(unsigned long magic, unsigned long addr) {
 
 /*
  * keyboard_interrupt
- *   DESCRIPTION: Handle the interrupt from keyboard 
+ *   DESCRIPTION: Handle the interrupt from keyboard
  *   INPUTS: scan code from port 0x60
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -310,19 +331,19 @@ void entry(unsigned long magic, unsigned long addr) {
 void keyboard_interrupt_handler() {
     cli();
     uint8_t input = inb(KEYBOARD_PORT);
-    if (input < KEY_BOARD_PRESSED) 
-        if (scan_code_table[input]) 
+    if (input < KEY_BOARD_PRESSED)
+        if (scan_code_table[input])
             putc(scan_code_table[input]);
     sti();
 }
 
 /*
  * rtc_init
- *   DESCRIPTION: Initialize rtc 
+ *   DESCRIPTION: Initialize rtc
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
- *   SIDE EFFECTS: having rtc Initialized 
+ *   SIDE EFFECTS: having rtc Initialized
  */
 
 void rtc_init() {
@@ -338,7 +359,7 @@ void rtc_init() {
 
 /*
  * rtc_interrupt_handler
- *   DESCRIPTION: Handle the interrupt from rtc 
+ *   DESCRIPTION: Handle the interrupt from rtc
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none
@@ -358,7 +379,7 @@ void rtc_interrupt_handler() {
 
 /*
  * rtc_restart_interrupt
- *   DESCRIPTION: restart the interrupt of rtc 
+ *   DESCRIPTION: restart the interrupt of rtc
  *   INPUTS: none
  *   OUTPUTS: none
  *   RETURN VALUE: none

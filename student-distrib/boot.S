@@ -24,6 +24,7 @@ _start:
     jmp     continue
 
 continue:
+
     # using gdtr_ptr defined in x86_desc.S to load GDT
     lgdt gdtr_ptr
 
