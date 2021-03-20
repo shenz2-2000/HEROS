@@ -45,7 +45,7 @@ void i8259_init(void) {
     outb(slave_mask, SLAVE_DATA_PORT);      /* restore slave IRQ mask */
 
     // enable slave cascade port, which is 0x02
-    enable(SLAVE_CAS_PORT);
+    enable_irq(SLAVE_CAS_PORT);
 
     // lock ???
 

@@ -17,7 +17,7 @@
 
 
 void naive_exception_handler(uint32_t num){
-    clear();
+//    clear();
     printf("------------------------------------------------\n");
     printf("WARNING! EXCEPTION %u HAPPENS!\n",num);
     printf("------------------------------------------------\n");
@@ -33,6 +33,8 @@ void naive_system_call_handler(uint32_t num){
 
 
 void init_IDT(){
+    clear(); ////
+    printf("now in the start of INITIDT\n");
     int i;
 
     // the initialization of exception entry
@@ -97,7 +99,9 @@ void init_IDT(){
 
     // set the system call entry
     SET_IDT_ENTRY(idt[IDT_SYSTEM_CALL],exception_handler_128);
-
+    LOAD_IDTR(idt_desc_ptr);
+    printf("The initialization of IDT is finished!!\n");
+    // clear();
 }
 
 
@@ -225,7 +229,7 @@ void entry(unsigned long magic, unsigned long addr) {
 
     /* Init the PIC */
     i8259_init();
-
+    printf("in entry, before INITIDT\n");
     /* Init the IDT */
     init_IDT();
 

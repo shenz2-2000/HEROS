@@ -33,8 +33,8 @@
 extern void init_IDT();
 
 // two naive handlers
-extern void naive_exception_handler(uint32_t num);
-extern void naive_system_call_handler(uint32_t num);
+//extern void naive_exception_handler(uint32_t num);
+//extern void naive_system_call_handler(uint32_t num);
 
 // declaration of the exception_handlers
 extern void exception_handler_0();
@@ -61,6 +61,15 @@ extern void exception_handler_19();
 // system call handler
 extern void exception_handler_128();
 
+////
+#define LOAD_IDTR(reg)            \
+do{                               \
+    asm volatile ("lidt (%0)"     \
+                  :               \
+                  :"g"(reg)       \
+                  :"memory"       \
+    );                            \
+}while(0)
 
 /* This structure is used to load descriptor base registers
  * like the GDTR and IDTR */
