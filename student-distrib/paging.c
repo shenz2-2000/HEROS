@@ -3,6 +3,13 @@
 //
 #include "x86_desc.h"
 
+/**
+ * fill_page
+ * Description: Fill the page directory and page table
+ * Input: None.
+ * Output: None.
+ * Side effect: modify x86_desc.S
+ */
 void fill_page(){
     // --------------------------Fill the Page Directory--------------------
     int i;
@@ -62,6 +69,7 @@ void fill_page(){
 
     }
 
+    // --------------------------Fill the Page Table--------------------
     for(i = 0; i < PAGE_TABLE_SIZE; i++){
         // points to the start of vedio memory
         if(i == VIDEO_MEMORY_INDEX){
