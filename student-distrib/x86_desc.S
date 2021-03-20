@@ -12,6 +12,9 @@
 .globl gdt_ptr
 .globl idt_desc_ptr, idt
 
+# The linkage of GDTR pointer
+.globl gdtr_ptr
+
 .align 4
 
 
@@ -93,9 +96,14 @@ ldt_bottom:
 
 .align 4
     .word 0 # Padding
+
 idt_desc_ptr:
     .word idt_bottom - idt - 1
     .long idt
+
+gdtr_ptr:
+    .word gdt_bottom - gdt - 1
+    .long gdt
 
 
     .align  16
