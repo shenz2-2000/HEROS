@@ -10,7 +10,7 @@
 	printf("[TEST %s] Running %s at %s:%d\n", __FUNCTION__, __FUNCTION__, __FILE__, __LINE__)
 #define TEST_OUTPUT(name, result)	\
 	printf("[TEST %s] Result = %s\n", name, (result) ? "PASS" : "FAIL");
-
+extern int get_rtc_counter();
 static inline void assertion_failure(){
 	/* Use exception #15 for assertions, otherwise
 	   reserved by Intel */
@@ -19,8 +19,6 @@ static inline void assertion_failure(){
 
 
 /* Checkpoint 1 tests */
-static unsigned long password_state = 0;
-static unsigned long rtc_counter = 0;
 
 /* IDT Test - Example
  * 
@@ -89,55 +87,23 @@ int dereference_null_test() {
     return FAIL;
 }
 
-int keyboard_test() {
-    TEST_HEADER;
-
-    unsigned long state;
-    printf("\nEnter gp14 to test\n");
-    while(1) {
-        cli(); {
-            state = password_state;
-        }
-        sti();
-        if (state == 4) {
-            break;
-        }
-    }
-    return PASS;
-}
 
 int rtc_test() {
     TEST_HEADER;
 
-    unsigned long tmp;
-    printf("Waiting for 1024 RTC interrupts...\n");
-    cli(); {
-        rtc_counter = 0;
-    }
-    sti();
+    int ref = get_rtc_counter();
+    int ctr;
+    printf("Count for 1 sec...\n");
     while(1) {
         cli(); {
-            tmp = rtc_counter;
+            ctr = get_rtc_counter();
         }
         sti();
-        if (tmp > 1024) {
+        if (ctr - ref > 1024) {
             break;
         }
     }
     return PASS;
-}
-
-void cp1_handle_typing(char c) {
-    if (password_state == 0 && c == 'g') password_state = 1;
-    else if (password_state == 1 && c == 'p') password_state = 2;
-    else if (password_state == 2 && c == '1') password_state = 3;
-    else if (password_state == 3 && c == '4') password_state = 4;
-    else password_state = 0;
-}
-
-void cp1_handle_rtc() {
-    rtc_counter++;
-    if (rtc_counter > 100000) rtc_counter = 0;  // avoid overflow
 }
 
 /* Checkpoint 2 tests */
@@ -149,9 +115,11 @@ void cp1_handle_rtc() {
 /* Test suite entry point */
 void launch_tests(){
     // tests cp1
-    // clear();
+    clear();
+    reset_screen();
 	TEST_OUTPUT("idt_test", idt_test());
-    // TEST_OUTPUT("div0_test", div0_test());
-    
-	// launch your tests here
+    TEST_OUTPUT("rtc_test", rtc_test());
+
+    //TEST_OUTPUT("div0_test", div0_test());
+	TEST_OUTPUT("dereference_null_test", dereference_null_test());
 }

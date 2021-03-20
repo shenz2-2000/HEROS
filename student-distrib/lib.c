@@ -24,6 +24,15 @@ void clear(void) {
     }
 }
 
+/* void reset_screen(void);
+ * Inputs: void
+ * Return Value: none
+ * Function: Clears screen position */
+void reset_screen() {
+    screen_x = 0;
+    screen_y = 0;
+}
+
 /* Standard printf().
  * Only supports the following format strings:
  * %%  - print a literal '%' character

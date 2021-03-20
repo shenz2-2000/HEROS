@@ -22,7 +22,7 @@ void rtc_restart_interrupt();
 #define RTC_PORT_0    0x70
 #define RTC_PORT_1    0x71
 #define KEY_BOARD_PRESSED 0x60
-#define RTC_LIMIT         300
+#define RTC_LIMIT         10000
 #define IDT_ENTRY_KEYBOARD 0x21
 #define IDT_ENTRY_RTC 0x28
 #define IDT_SYSTEM_CALL 0x80
@@ -370,11 +370,12 @@ void rtc_interrupt_handler() {
     cli();
     ++rtc_counter;
     if (rtc_counter>=RTC_LIMIT){
-        printf("RECEIVE %d RTC Interrupts\n", rtc_counter);
+//        printf("RECEIVE %d RTC Interrupts\n", rtc_counter);
         rtc_counter = 0;
     }
     rtc_restart_interrupt();
     sti();
+    //test_interrupts();
 }
 
 /*
