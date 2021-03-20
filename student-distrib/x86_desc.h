@@ -22,7 +22,56 @@
 /* Number of vectors in the interrupt descriptor table (IDT) */
 #define NUM_VEC     256
 
+// the partition of IDT
+#define IDT_END_OF_EXCEPTION 0x20
+#define IDT_SYSTEM_CALL 0x80
+
+
 #ifndef ASM
+
+// init IDT
+extern void init_IDT();
+
+// two naive handlers
+//extern void naive_exception_handler(uint32_t num);
+//extern void naive_system_call_handler(uint32_t num);
+
+// declaration of the exception_handlers
+extern void exception_handler_0();
+extern void exception_handler_1();
+extern void exception_handler_2();
+extern void exception_handler_3();
+extern void exception_handler_4();
+extern void exception_handler_5();
+extern void exception_handler_6();
+extern void exception_handler_7();
+extern void exception_handler_8();
+extern void exception_handler_9();
+extern void exception_handler_10();
+extern void exception_handler_11();
+extern void exception_handler_12();
+extern void exception_handler_13();
+extern void exception_handler_14();
+extern void exception_handler_15();
+extern void exception_handler_16();
+extern void exception_handler_17();
+extern void exception_handler_18();
+extern void exception_handler_19();
+
+// system call handler
+extern void exception_handler_128();
+// Interrupt Handler
+extern void interrupt_entry_1();
+extern void interrupt_entry_8();
+////
+#define LOAD_IDTR(reg)            \
+do{                               \
+    asm volatile ("lidt (%0)"     \
+                  :               \
+                  :"g"(reg)       \
+                  :"memory"       \
+    );                            \
+}while(0)
 
 /* This structure is used to load descriptor base registers
  * like the GDTR and IDTR */

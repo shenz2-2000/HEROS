@@ -19,6 +19,8 @@ static inline void assertion_failure(){
 
 
 /* Checkpoint 1 tests */
+static unsigned long password_state = 0;
+static unsigned long rtc_counter = 0;
 
 /* IDT Test - Example
  * 
@@ -45,7 +47,98 @@ int idt_test(){
 	return result;
 }
 
-// add more tests here
+int page_test() {
+    printf("No paging test.");
+}
+
+/* Zero division Test
+ *
+ * Divide 0 to see if handled correctly
+ * Inputs: None
+ * Outputs: None
+ * Side Effects: Cause zero-division error
+ * Coverage: Divide Error exception
+ * Files: boot.S, kernel.C
+ */
+int div0_test() {
+    TEST_HEADER;
+    unsigned long a = 0;
+    unsigned long b = 1 / a;
+
+    // should never get here
+    printf("1 / 0 = %u", b);
+    return FAIL;
+}
+
+/* NULL Deference Test
+ *
+ * Deference 0 to see if handled correctly
+ * Inputs: None
+ * Outputs: None
+ * Side Effects: Cause paging exception if paging is turning on
+ * Coverage: paging exception
+ * Files: boot.S, kernel.C
+ */
+int dereference_null_test() {
+    TEST_HEADER;
+    unsigned long i = 0;
+    unsigned long j = *((unsigned long *)i);
+
+    // should Never get here
+    printf("*0 = %u", j);
+    return FAIL;
+}
+
+int keyboard_test() {
+    TEST_HEADER;
+
+    unsigned long state;
+    printf("\nEnter gp14 to test\n");
+    while(1) {
+        cli(); {
+            state = password_state;
+        }
+        sti();
+        if (state == 4) {
+            break;
+        }
+    }
+    return PASS;
+}
+
+int rtc_test() {
+    TEST_HEADER;
+
+    unsigned long tmp;
+    printf("Waiting for 1024 RTC interrupts...\n");
+    cli(); {
+        rtc_counter = 0;
+    }
+    sti();
+    while(1) {
+        cli(); {
+            tmp = rtc_counter;
+        }
+        sti();
+        if (tmp > 1024) {
+            break;
+        }
+    }
+    return PASS;
+}
+
+void cp1_handle_typing(char c) {
+    if (password_state == 0 && c == 'g') password_state = 1;
+    else if (password_state == 1 && c == 'p') password_state = 2;
+    else if (password_state == 2 && c == '1') password_state = 3;
+    else if (password_state == 3 && c == '4') password_state = 4;
+    else password_state = 0;
+}
+
+void cp1_handle_rtc() {
+    rtc_counter++;
+    if (rtc_counter > 100000) rtc_counter = 0;  // avoid overflow
+}
 
 /* Checkpoint 2 tests */
 /* Checkpoint 3 tests */
@@ -55,6 +148,10 @@ int idt_test(){
 
 /* Test suite entry point */
 void launch_tests(){
+    // tests cp1
+    // clear();
 	TEST_OUTPUT("idt_test", idt_test());
+    // TEST_OUTPUT("div0_test", div0_test());
+    
 	// launch your tests here
 }

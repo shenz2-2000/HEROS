@@ -15,13 +15,17 @@
 void idt_init();
 void keyboard_interrupt_handler();
 void rtc_interrupt_handler();
-
+void rtc_init();
+void rtc_restart_interrupt();
 /* Declaration of constant in interrupt */
 #define KEYBOARD_PORT 0x60
 #define RTC_PORT_0    0x70
 #define RTC_PORT_1    0x71
 #define KEY_BOARD_PRESSED 0x60
 #define RTC_LIMIT         300
+#define IDT_ENTRY_KEYBOARD 0x21
+#define IDT_ENTRY_RTC 0x28
+#define IDT_SYSTEM_CALL 0x80
 // Using scan code set 1 for we use "US QWERTY" keyboard
 // The table transform scan code to the echo character
 static const char scan_code_table[128] = {
@@ -40,6 +44,107 @@ static int rtc_counter = 0;
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
 #define CHECK_FLAG(flags, bit)   ((flags) & (1 << (bit)))
+
+
+void naive_exception_handler(uint32_t num){
+//    clear();
+    printf("------------------------------------------------\n");
+    printf("WARNING! EXCEPTION %u HAPPENS!\n",num);
+    printf("------------------------------------------------\n");
+    while(1){}
+}
+
+void naive_system_call_handler(uint32_t num){
+    clear();
+    printf("------------------------------------------------\n");
+    printf("SYSTEM CALL HAPPENS\n");
+    printf("------------------------------------------------\n");
+}
+
+
+void init_IDT(){
+    clear(); ////
+    printf("now in the start of INITIDT\n");
+    int i;
+
+    // the initialization of exception entry
+    for(i = 0; i < IDT_END_OF_EXCEPTION; i++){
+
+        // reserve field
+        idt[i].reserved0 = 0;
+        idt[i].reserved1 = 1;
+        idt[i].reserved2 = 1;
+        idt[i].reserved3 = 1;
+        idt[i].reserved4 = 0;
+
+        // dpl,size and present bit
+        idt[i].dpl = 0;
+        idt[i].size = 1;
+        idt[i].present = 1;
+
+        // segment selector
+        idt[i].seg_selector = KERNEL_CS;
+    }
+
+    // the initialization of interrupt and other entry
+    for(i = IDT_END_OF_EXCEPTION; i < NUM_VEC; i++){
+
+        // reserve field
+        idt[i].reserved0 = 0;
+        idt[i].reserved1 = 1;
+        idt[i].reserved2 = 1;
+        idt[i].reserved3 = 1;
+        idt[i].reserved4 = 0;
+
+        // dpl,size and present bit
+        idt[i].dpl = 0;
+        idt[i].size = 1;
+        idt[i].present = 0;
+
+        // segment selector
+        idt[i].seg_selector = KERNEL_CS;
+    }
+
+    // set all the interrupt handler for exceptions
+    SET_IDT_ENTRY(idt[0],exception_handler_0);
+    SET_IDT_ENTRY(idt[1],exception_handler_1);
+    SET_IDT_ENTRY(idt[2],exception_handler_2);
+    SET_IDT_ENTRY(idt[3],exception_handler_3);
+    SET_IDT_ENTRY(idt[4],exception_handler_4);
+    SET_IDT_ENTRY(idt[5],exception_handler_5);
+    SET_IDT_ENTRY(idt[6],exception_handler_6);
+    SET_IDT_ENTRY(idt[7],exception_handler_7);
+    SET_IDT_ENTRY(idt[8],exception_handler_8);
+    SET_IDT_ENTRY(idt[9],exception_handler_9);
+    SET_IDT_ENTRY(idt[10],exception_handler_10);
+    SET_IDT_ENTRY(idt[11],exception_handler_11);
+    SET_IDT_ENTRY(idt[12],exception_handler_12);
+    SET_IDT_ENTRY(idt[13],exception_handler_13);
+    SET_IDT_ENTRY(idt[14],exception_handler_14);
+    SET_IDT_ENTRY(idt[15],exception_handler_15);
+    SET_IDT_ENTRY(idt[16],exception_handler_16);
+    SET_IDT_ENTRY(idt[17],exception_handler_17);
+    SET_IDT_ENTRY(idt[18],exception_handler_18);
+    SET_IDT_ENTRY(idt[19],exception_handler_19);
+
+    // Set keyboard handler (defined in boot.S)
+    SET_IDT_ENTRY(idt[IDT_ENTRY_KEYBOARD], interrupt_entry_1);
+    idt[IDT_ENTRY_KEYBOARD].present = 1;
+
+    // Set RTC handler (defined in boot.S)
+    SET_IDT_ENTRY(idt[IDT_ENTRY_RTC], interrupt_entry_8);
+    idt[IDT_ENTRY_RTC].present = 1;
+
+    // set the system call entry
+    SET_IDT_ENTRY(idt[IDT_SYSTEM_CALL],exception_handler_128);
+    idt[IDT_SYSTEM_CALL].dpl = 3;
+
+    LOAD_IDTR(idt_desc_ptr);
+    printf("The initialization of IDT is finished!!\n");
+    // clear();
+}
+
+
 
 /* Check if MAGIC is valid and print the Multiboot information structure
    pointed by ADDR. */
@@ -164,11 +269,19 @@ void entry(unsigned long magic, unsigned long addr) {
 
     /* Init the PIC */
     i8259_init();
+    
 
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
+    enable_irq(1);   // Keyboard is IRQ1
+    /*Init RTC*/
+    rtc_init();
+    enable_irq(8); // RTC is IRQ8
+    rtc_restart_interrupt();
 
     /* Enable interrupts */
+    init_IDT();
+    puts("IDT initialized successfully");
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
      * without showing you any output */
@@ -217,14 +330,14 @@ void rtc_init() {
     outb(0x8B, RTC_PORT_0); // Select register B, and disable NMI
     char prev = inb(RTC_PORT_1); // Read current value of register B
     outb(0x8B, RTC_PORT_0); // Set the index again
-    outb(RTC_PORT_1, prev|0x40); // write the previous value ORed with 0x40. This turns on bit 6 of register B
+    outb(prev|0x40, RTC_PORT_1); // write the previous value ORed with 0x40. This turns on bit 6 of register B
     sti();
 
     //Reference: https://wiki.osdev.org/RTC
 }
 
 /*
- * rtc_interrupt
+ * rtc_interrupt_handler
  *   DESCRIPTION: Handle the interrupt from rtc 
  *   INPUTS: none
  *   OUTPUTS: none
@@ -232,18 +345,29 @@ void rtc_init() {
  *   SIDE EFFECTS: none
  */
 
-void rtc_interrupt() {
+void rtc_interrupt_handler() {
     cli();
     ++rtc_counter;
     if (rtc_counter>=RTC_LIMIT){
-        printf("RECEIVE %d RTC Interrupts", rtc_counter);
+        printf("RECEIVE %d RTC Interrupts\n", rtc_counter);
         rtc_counter = 0;
     }
-    outb(0x8C, RTC_PORT_0);
-    inb(RTC_PORT_1);
+    rtc_restart_interrupt();
     sti();
 }
 
+/*
+ * rtc_restart_interrupt
+ *   DESCRIPTION: restart the interrupt of rtc 
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: none
+ */
+void rtc_restart_interrupt(){
+    outb(0x8C, RTC_PORT_0);
+    inb(RTC_PORT_1);
+}
 /*
  * get_rtc_counter
  *   DESCRIPTION: Return the rtc_counter when external request
