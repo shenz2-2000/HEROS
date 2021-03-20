@@ -55,3 +55,81 @@ keep_going:
 halt:
     hlt
     jmp     halt
+
+
+# here we define the exception handler
+
+.macro EXCEPTION_HANDLER num,func_ptr
+
+.globl exception_handler_\num
+exception_handler_\num:
+
+         # ----------------------push all registers--------------------
+         pushl %eax
+         pushl %ecx
+         pushl %edx
+         pushl %esi
+         pushl %edi
+         pushl %ebx
+         pushf
+
+         # ---------------------push the entry number------------------
+         pushl $\num
+
+         # ---------------------call handler function------------------
+         call \func_ptr
+
+         addl $4, %esp
+
+         # ---------------------restore all registers------------------
+         popf
+         popl %ebx
+         popl %edi
+         popl %esi
+         popl %edx
+         popl %ecx
+         popl %eax
+
+         IRET
+
+.endm
+
+# setup all 20 naive handlers (only print something to screen and freeze the system)
+
+EXCEPTION_HANDLER 0, naive_exception_handler
+EXCEPTION_HANDLER 1, naive_exception_handler
+EXCEPTION_HANDLER 2, naive_exception_handler
+EXCEPTION_HANDLER 3, naive_exception_handler
+EXCEPTION_HANDLER 4, naive_exception_handler
+EXCEPTION_HANDLER 5, naive_exception_handler
+EXCEPTION_HANDLER 6, naive_exception_handler
+EXCEPTION_HANDLER 7, naive_exception_handler
+EXCEPTION_HANDLER 8, naive_exception_handler
+EXCEPTION_HANDLER 9, naive_exception_handler
+EXCEPTION_HANDLER 10, naive_exception_handler
+EXCEPTION_HANDLER 11, naive_exception_handler
+EXCEPTION_HANDLER 12, naive_exception_handler
+EXCEPTION_HANDLER 13, naive_exception_handler
+EXCEPTION_HANDLER 14, naive_exception_handler
+EXCEPTION_HANDLER 15, naive_exception_handler
+EXCEPTION_HANDLER 16, naive_exception_handler
+EXCEPTION_HANDLER 17, naive_exception_handler
+EXCEPTION_HANDLER 18, naive_exception_handler
+EXCEPTION_HANDLER 19, naive_exception_handler
+
+# system call handler
+EXCEPTION_HANDLER 128, naive_system_call_handler
+
+
+
+
+
+
+
+
+
+
+
+
+
+
