@@ -83,66 +83,320 @@ halt:
 
 # here we define the exception handler
 
-.macro EXCEPTION_HANDLER num,func_ptr
-
-.globl exception_handler_\num
-exception_handler_\num:
+.globl exception_handler_0
+exception_handler_0:
          # ----------------------push all registers--------------------
          SAVE_ALL_REGS
          # ---------------------push the entry number------------------
-         pushl $\num
+         pushl $0
          # ---------------------call handler function------------------
-         call \func_ptr
+         call naive_exception_handler
          addl $4, %esp
          # ---------------------restore all registers------------------
          RESTORE_ALL_REGS
          IRET
-.endm
 
-# setup all 20 naive handlers (only print something to screen and freeze the system)
 
-EXCEPTION_HANDLER 0, naive_exception_handler
-EXCEPTION_HANDLER 1, naive_exception_handler
-EXCEPTION_HANDLER 2, naive_exception_handler
-EXCEPTION_HANDLER 3, naive_exception_handler
-EXCEPTION_HANDLER 4, naive_exception_handler
-EXCEPTION_HANDLER 5, naive_exception_handler
-EXCEPTION_HANDLER 6, naive_exception_handler
-EXCEPTION_HANDLER 7, naive_exception_handler
-EXCEPTION_HANDLER 8, naive_exception_handler
-EXCEPTION_HANDLER 9, naive_exception_handler
-EXCEPTION_HANDLER 10, naive_exception_handler
-EXCEPTION_HANDLER 11, naive_exception_handler
-EXCEPTION_HANDLER 12, naive_exception_handler
-EXCEPTION_HANDLER 13, naive_exception_handler
-EXCEPTION_HANDLER 14, naive_exception_handler
-EXCEPTION_HANDLER 15, naive_exception_handler
-EXCEPTION_HANDLER 16, naive_exception_handler
-EXCEPTION_HANDLER 17, naive_exception_handler
-EXCEPTION_HANDLER 18, naive_exception_handler
-EXCEPTION_HANDLER 19, naive_exception_handler
+.globl exception_handler_1
+exception_handler_1:
+         # ----------------------push all registers--------------------
+         SAVE_ALL_REGS
+         # ---------------------push the entry number------------------
+         pushl $1
+         # ---------------------call handler function------------------
+         call naive_exception_handler
+         addl $4, %esp
+         # ---------------------restore all registers------------------
+         RESTORE_ALL_REGS
+         IRET
 
-# Interrupt entries
-.macro DEF_INTERRUPT_ENTRY irq, func
-.globl interrupt_entry_\irq
-interrupt_entry_\irq:
+
+.globl exception_handler_2
+exception_handler_2:
+         # ----------------------push all registers--------------------
+         SAVE_ALL_REGS
+         # ---------------------push the entry number------------------
+         pushl $2
+         # ---------------------call handler function------------------
+         call naive_exception_handler
+         addl $4, %esp
+         # ---------------------restore all registers------------------
+         RESTORE_ALL_REGS
+         IRET
+
+
+.globl exception_handler_3
+exception_handler_3:
+         # ----------------------push all registers--------------------
+         SAVE_ALL_REGS
+         # ---------------------push the entry number------------------
+         pushl $3
+         # ---------------------call handler function------------------
+         call naive_exception_handler
+         addl $4, %esp
+         # ---------------------restore all registers------------------
+         RESTORE_ALL_REGS
+         IRET
+
+
+.globl exception_handler_4
+exception_handler_4:
+         # ----------------------push all registers--------------------
+         SAVE_ALL_REGS
+         # ---------------------push the entry number------------------
+         pushl $4
+         # ---------------------call handler function------------------
+         call naive_exception_handler
+         addl $4, %esp
+         # ---------------------restore all registers------------------
+         RESTORE_ALL_REGS
+         IRET
+
+
+.globl exception_handler_5
+exception_handler_5:
+         # ----------------------push all registers--------------------
+         SAVE_ALL_REGS
+         # ---------------------push the entry number------------------
+         pushl $5
+         # ---------------------call handler function------------------
+         call naive_exception_handler
+         addl $4, %esp
+         # ---------------------restore all registers------------------
+         RESTORE_ALL_REGS
+         IRET
+
+
+.globl exception_handler_6
+exception_handler_6:
+         # ----------------------push all registers--------------------
+         SAVE_ALL_REGS
+         # ---------------------push the entry number------------------
+         pushl $6
+         # ---------------------call handler function------------------
+         call naive_exception_handler
+         addl $4, %esp
+         # ---------------------restore all registers------------------
+         RESTORE_ALL_REGS
+         IRET
+
+
+.globl exception_handler_7
+exception_handler_7:
+         # ----------------------push all registers--------------------
+         SAVE_ALL_REGS
+         # ---------------------push the entry number------------------
+         pushl $7
+         # ---------------------call handler function------------------
+         call naive_exception_handler
+         addl $4, %esp
+         # ---------------------restore all registers------------------
+         RESTORE_ALL_REGS
+         IRET
+
+
+.globl exception_handler_8
+exception_handler_8:
+         # ----------------------push all registers--------------------
+         SAVE_ALL_REGS
+         # ---------------------push the entry number------------------
+         pushl $8
+         # ---------------------call handler function------------------
+         call naive_exception_handler
+         addl $4, %esp
+         # ---------------------restore all registers------------------
+         RESTORE_ALL_REGS
+         IRET
+
+
+.globl exception_handler_9
+exception_handler_9:
+         # ----------------------push all registers--------------------
+         SAVE_ALL_REGS
+         # ---------------------push the entry number------------------
+         pushl $9
+         # ---------------------call handler function------------------
+         call naive_exception_handler
+         addl $4, %esp
+         # ---------------------restore all registers------------------
+         RESTORE_ALL_REGS
+         IRET
+
+
+.globl exception_handler_10
+exception_handler_10:
+         # ----------------------push all registers--------------------
+         SAVE_ALL_REGS
+         # ---------------------push the entry number------------------
+         pushl $10
+         # ---------------------call handler function------------------
+         call naive_exception_handler
+         addl $4, %esp
+         # ---------------------restore all registers------------------
+         RESTORE_ALL_REGS
+         IRET
+
+
+.globl exception_handler_11
+exception_handler_11:
+         # ----------------------push all registers--------------------
+         SAVE_ALL_REGS
+         # ---------------------push the entry number------------------
+         pushl $11
+         # ---------------------call handler function------------------
+         call naive_exception_handler
+         addl $4, %esp
+         # ---------------------restore all registers------------------
+         RESTORE_ALL_REGS
+         IRET
+
+
+.globl exception_handler_12
+exception_handler_12:
+         # ----------------------push all registers--------------------
+         SAVE_ALL_REGS
+         # ---------------------push the entry number------------------
+         pushl $12
+         # ---------------------call handler function------------------
+         call naive_exception_handler
+         addl $4, %esp
+         # ---------------------restore all registers------------------
+         RESTORE_ALL_REGS
+         IRET
+
+
+.globl exception_handler_13
+exception_handler_13:
+         # ----------------------push all registers--------------------
+         SAVE_ALL_REGS
+         # ---------------------push the entry number------------------
+         pushl $13
+         # ---------------------call handler function------------------
+         call naive_exception_handler
+         addl $4, %esp
+         # ---------------------restore all registers------------------
+         RESTORE_ALL_REGS
+         IRET
+
+
+.globl exception_handler_14
+exception_handler_14:
+         # ----------------------push all registers--------------------
+         SAVE_ALL_REGS
+         # ---------------------push the entry number------------------
+         pushl $14
+         # ---------------------call handler function------------------
+         call naive_exception_handler
+         addl $4, %esp
+         # ---------------------restore all registers------------------
+         RESTORE_ALL_REGS
+         IRET
+
+
+.globl exception_handler_15
+exception_handler_15:
+         # ----------------------push all registers--------------------
+         SAVE_ALL_REGS
+         # ---------------------push the entry number------------------
+         pushl $15
+         # ---------------------call handler function------------------
+         call naive_exception_handler
+         addl $4, %esp
+         # ---------------------restore all registers------------------
+         RESTORE_ALL_REGS
+         IRET
+
+
+.globl exception_handler_16
+exception_handler_16:
+         # ----------------------push all registers--------------------
+         SAVE_ALL_REGS
+         # ---------------------push the entry number------------------
+         pushl $16
+         # ---------------------call handler function------------------
+         call naive_exception_handler
+         addl $4, %esp
+         # ---------------------restore all registers------------------
+         RESTORE_ALL_REGS
+         IRET
+
+
+.globl exception_handler_17
+exception_handler_17:
+         # ----------------------push all registers--------------------
+         SAVE_ALL_REGS
+         # ---------------------push the entry number------------------
+         pushl $17
+         # ---------------------call handler function------------------
+         call naive_exception_handler
+         addl $4, %esp
+         # ---------------------restore all registers------------------
+         RESTORE_ALL_REGS
+         IRET
+
+
+.globl exception_handler_18
+exception_handler_18:
+         # ----------------------push all registers--------------------
+         SAVE_ALL_REGS
+         # ---------------------push the entry number------------------
+         pushl $18
+         # ---------------------call handler function------------------
+         call naive_exception_handler
+         addl $4, %esp
+         # ---------------------restore all registers------------------
+         RESTORE_ALL_REGS
+         IRET
+
+
+.globl exception_handler_19
+exception_handler_19:
+         # ----------------------push all registers--------------------
+         SAVE_ALL_REGS
+         # ---------------------push the entry number------------------
+         pushl $19
+         # ---------------------call handler function------------------
+         call naive_exception_handler
+         addl $4, %esp
+         # ---------------------restore all registers------------------
+         RESTORE_ALL_REGS
+         IRET
+
+
+.globl interrupt_entry_1
+interrupt_entry_1:
     SAVE_ALL_REGS
-    call \func
-    pushl $\irq  # push irq number as argument
+    call keyboard_interrupt_handler
+    pushl $1  # push irq number as argument
     call send_eoi
     addl $4, %esp 
     RESTORE_ALL_REGS
     iret  # return from interrupt 
-.endm
-
-DEF_INTERRUPT_ENTRY 1, keyboard_interrupt_handler
-DEF_INTERRUPT_ENTRY 8, rtc_interrupt_handler
-
-# system call handler
-EXCEPTION_HANDLER 128, naive_system_call_handler
 
 
+.globl interrupt_entry_8
+interrupt_entry_8:
+    SAVE_ALL_REGS
+    call rtc_interrupt_handler
+    pushl $8  # push irq number as argument
+    call send_eoi
+    addl $4, %esp 
+    RESTORE_ALL_REGS
+    iret  # return from interrupt 
 
+
+.globl exception_handler_128
+exception_handler_128:
+         # ----------------------push all registers--------------------
+         SAVE_ALL_REGS
+         # ---------------------push the entry number------------------
+         pushl $128
+         # ---------------------call handler function------------------
+         call naive_system_call_handler
+         addl $4, %esp
+         # ---------------------restore all registers------------------
+         RESTORE_ALL_REGS
+         IRET
 
 
 
