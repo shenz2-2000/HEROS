@@ -287,6 +287,12 @@ void entry(unsigned long magic, unsigned long addr) {
         ltr(KERNEL_TSS);
     }
 
+    /* init paging */
+    fill_page();
+    init_page_register();
+
+
+
     /* Init the PIC */
     i8259_init();
 

@@ -400,7 +400,37 @@ exception_handler_128:
 
 
 
+/**
+ * init_page_register
+ * Description: We use this funciton to init the register related to paging
+ * Input: None.
+ * Output: None.
+ * Side effect: Enable paging
+ */
+.globl init_page_register
+init_page_register:
 
+      pushl %esp
+      movl %esp, %ebp
+
+      # we set CR0 here
+      movl %cr0, %ecx
+      orl  $0x80000001, %ecx
+      movl %ecx, %cr0
+
+      # we set CR3 here
+      movl $page_directory, %ecx
+      movl %cr3, %eax
+      orl  %ecx, %eax
+      movl %eax, %cr3
+
+      # we set CR4 here
+      movl    %cr4, %ecx
+      orl     $0x10, %ecx
+      movl    %ecx, %cr4
+
+      leave
+      ret
 
 
 

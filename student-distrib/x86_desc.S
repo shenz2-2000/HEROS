@@ -115,3 +115,24 @@ _idt:
     .endr
 
 idt_bottom:
+
+# Page region
+
+.align ALIGN_4K
+page_directory:
+      .rept PAGE_DIRECTORY_SIZE
+      .long 0
+      .endr
+page_directory_bottom
+
+.align ALIGN_4K
+page_table:
+
+page_table0:
+      .rept PAGE_TABLE_SIZE
+      .long 0
+      .endr
+page_table0_bottom:
+
+page_table_bottom:
+

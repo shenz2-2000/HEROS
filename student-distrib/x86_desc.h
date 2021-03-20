@@ -22,6 +22,14 @@
 /* Number of vectors in the interrupt descriptor table (IDT) */
 #define NUM_VEC     256
 
+#define ALIGN_4K 4096
+#define ALIGN_4M
+#define PAGE_DIRECTORY_SIZE 1024
+#define PAGE_TABLE_SIZE 1024
+#define VIDEO_MEMORY_ADDRESS 0xB8000
+#define VIDEO_MEMORY_INDEX 0xB8
+
+
 // the partition of IDT
 #define IDT_END_OF_EXCEPTION 0x20
 #define IDT_SYSTEM_CALL 0x80
@@ -35,6 +43,10 @@ extern void init_IDT();
 // two naive handlers
 //extern void naive_exception_handler(uint32_t num);
 //extern void naive_system_call_handler(uint32_t num);
+
+// declaration of the filling function
+extern void fill_page();
+extern void init_page_register();
 
 // declaration of the exception_handlers
 extern void exception_handler_0();
@@ -210,6 +222,44 @@ typedef union idt_desc_t {
         uint16_t offset_31_16;
     } __attribute__ ((packed));
 } idt_desc_t;
+
+// self-defined PDE
+typedef struct {
+    uint32_t P : 1;
+    uint32_t RW : 1;
+    uint32_t US : 1;
+    uint32_t PWT: 1;
+    uint32_t PCD: 1;
+    uint32_t A : 1;
+    uint32_t D : 1;
+    uint32_t PS : 1;
+    uint32_t G : 1;
+    uint32_t AVAIAL : 3;
+    // these three field in 4KB case is a whole part
+    uint32_t PAT : 1;
+    uint32_t reserved : 9;
+    uint32_t Base_address : 10;
+}PDE;
+
+// self-defined PTE
+typedef struct {
+    uint32_t P : 1;
+    uint32_t RW : 1;
+    uint32_t US : 1;
+    uint32_t PWT: 1;
+    uint32_t PCD: 1;
+    uint32_t A : 1;
+    uint32_t D : 1;
+    uint32_t PAT : 1;
+    uint32_t G : 1;
+    uint32_t AVAIAL : 3;
+    // these three field in 4KB case is a whole part
+    uint32_t Base_address : 20;
+}PTE;
+
+// pointers defined in x86_desc.S
+extern PDE page_directory[PAGE_DIRECTORY_SIZE];
+extern PTE page_table0[PAGE_TABLE_SIZE];
 
 /* The IDT itself (declared in x86_desc.S */
 extern idt_desc_t idt[NUM_VEC];
