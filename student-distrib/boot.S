@@ -55,3 +55,28 @@ keep_going:
 halt:
     hlt
     jmp     halt
+
+
+# Interrupt entries
+.macro DEF_INTERRUPT_ENTRY irq, func
+.globl interrupt_entry_\irq
+interrupt_entry_\irq:
+    SAVE_ALL_REGS
+    call \func
+    pushl $\irq  # push irq number as argument
+    call send_eoi
+    addl $4, %esp 
+    RESTORE_ALL_REGS
+    iret  # return from interrupt 
+.endm
+
+DEF_INTERRUPT_ENTRY 1, keyboard_interrupt_handler
+DEF_INTERRUPT_ENTRY 8, rtc_interrupt_handler
+
+# System call entry
+.globl system_call_entry
+system_call_entry:
+    SAVE_ALL_REGS
+    call print_system_call
+    RESTORE_ALL_REGS
+    iret  # return from system call

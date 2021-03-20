@@ -11,6 +11,32 @@
 
 #define RUN_TESTS
 
+/* Function Declaration */
+void idt_init();
+void keyboard_interrupt_handler();
+void rtc_interrupt_handler();
+
+/* Declaration of constant in interrupt */
+#define KEYBOARD_PORT 0x60
+#define RTC_PORT_0    0x70
+#define RTC_PORT_1    0x71
+#define KEY_BOARD_PRESSED 0x60
+#define RTC_LIMIT         300
+// Using scan code set 1 for we use "US QWERTY" keyboard
+// The table transform scan code to the echo character
+static const char scan_code_table[128] = {
+        0, 0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 0,      /* 0x00 - 0x0E */
+        0, 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',      /* 0x0F - 0x1C */
+        0, 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`',           /* 0x1D - 0x29 */
+        0, '\\', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', 0, 0,          /* 0x2A - 0x37 */
+        0, ' ', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                            /* 0x38 - 0x46 */
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                                    /* 0x47 - 0x53 */
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0                                        /* 0x54 - 0x80 */
+};
+// The rtc counter used to count the number of interrupt
+static int rtc_counter = 0;
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
 #define CHECK_FLAG(flags, bit)   ((flags) & (1 << (bit)))
@@ -157,4 +183,75 @@ void entry(unsigned long magic, unsigned long addr) {
 
     /* Spin (nicely, so we don't chew up cycles) */
     asm volatile (".1: hlt; jmp .1;");
+}
+
+/*
+ * keyboard_interrupt
+ *   DESCRIPTION: Handle the interrupt from keyboard 
+ *   INPUTS: scan code from port 0x60
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: interrupt
+ */
+
+void keyboard_interrupt_handler() {
+    cli();
+    uint8_t input = inb(KEYBOARD_PORT);
+    if (input < KEY_BOARD_PRESSED) 
+        if (scan_code_table[input]) 
+            putc(scan_code_table[input]);
+    sti();
+}
+
+/*
+ * rtc_init
+ *   DESCRIPTION: Initialize rtc 
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: having rtc Initialized 
+ */
+
+void rtc_init() {
+    cli();
+    outb(0x8B, RTC_PORT_0); // Select register B, and disable NMI
+    char prev = inb(RTC_PORT_1); // Read current value of register B
+    outb(0x8B, RTC_PORT_0); // Set the index again
+    outb(RTC_PORT_1, prev|0x40); // write the previous value ORed with 0x40. This turns on bit 6 of register B
+    sti();
+
+    //Reference: https://wiki.osdev.org/RTC
+}
+
+/*
+ * rtc_interrupt
+ *   DESCRIPTION: Handle the interrupt from rtc 
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: none
+ */
+
+void rtc_interrupt() {
+    cli();
+    ++rtc_counter;
+    if (rtc_counter>=RTC_LIMIT){
+        printf("RECEIVE %d RTC Interrupts", rtc_counter);
+        rtc_counter = 0;
+    }
+    outb(0x8C, RTC_PORT_0);
+    inb(RTC_PORT_1);
+    sti();
+}
+
+/*
+ * get_rtc_counter
+ *   DESCRIPTION: Return the rtc_counter when external request
+ *   INPUTS: none
+ *   OUTPUTS: rtc_counter
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: none
+ */
+extern int get_rtc_counter(){
+    return rtc_counter;
 }
