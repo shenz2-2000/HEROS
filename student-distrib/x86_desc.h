@@ -23,7 +23,7 @@
 #define NUM_VEC     256
 
 #define ALIGN_4K 4096
-#define ALIGN_4M
+#define ALIGN_4M 4096*1024
 #define PAGE_DIRECTORY_SIZE 1024
 #define PAGE_TABLE_SIZE 1024
 #define VIDEO_MEMORY_ADDRESS 0xB8000
@@ -72,6 +72,7 @@ extern void exception_handler_19();
 
 // system call handler
 extern void exception_handler_128();
+
 // Interrupt Handler
 extern void interrupt_entry_1();
 extern void interrupt_entry_8();
