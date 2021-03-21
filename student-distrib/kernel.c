@@ -54,10 +54,17 @@ static int rtc_counter = 0;
  * Side effect: Print message on screen
  */
 void naive_exception_handler(uint32_t num){
-    clear();
-    printf("------------------------------------------------\n");
-    printf("WARNING! EXCEPTION %u HAPPENS!\n",num);
-    printf("------------------------------------------------\n");
+    // check whether input is valid
+    if(num >= 20){
+        printf("------------------------------------------------\n");
+        printf("WARNING! The Input of Exception is invalid!!!!\n");
+        printf("------------------------------------------------\n");
+    }
+    else {
+        printf("------------------------------------------------\n");
+        printf("WARNING! EXCEPTION %u HAPPENS!\n", num);
+        printf("------------------------------------------------\n");
+    }
     while(1){}
 }
 
@@ -69,10 +76,16 @@ void naive_exception_handler(uint32_t num){
  * Side effect: Print message on screen
  */
 void naive_system_call_handler(uint32_t num){
-    clear();
-    printf("------------------------------------------------\n");
-    printf("SYSTEM CALL HAPPENS\n");
-    printf("------------------------------------------------\n");
+    if(num != IDT_SYSTEM_CALL){
+        printf("------------------------------------------------\n");
+        printf("SYSTEM CALL INVALID\n");
+        printf("------------------------------------------------\n");
+    }
+    else {
+        printf("------------------------------------------------\n");
+        printf("SYSTEM CALL HAPPENS\n");
+        printf("------------------------------------------------\n");
+    }
 }
 
 /*
@@ -291,8 +304,6 @@ void entry(unsigned long magic, unsigned long addr) {
     fill_page();
     init_page_register();
 
-
-
     /* Init the PIC */
     i8259_init();
 
@@ -337,6 +348,7 @@ void entry(unsigned long magic, unsigned long addr) {
 void keyboard_interrupt_handler() {
     cli();
     uint8_t input = inb(KEYBOARD_PORT);
+    // Get input from keyboard and check whether the scan code can be output
     if (input < KEY_BOARD_PRESSED)
         if (scan_code_table[input])
             putc(scan_code_table[input]);
@@ -375,10 +387,12 @@ void rtc_init() {
 void rtc_interrupt_handler() {
     cli();
     ++rtc_counter;
+    // Virtualize the RTC and change the frequency
     if (rtc_counter>=RTC_LIMIT){
 //        printf("RECEIVE %d RTC Interrupts\n", rtc_counter);
         rtc_counter = 0;
     }
+    // Restart so it can send interrupt again
     rtc_restart_interrupt();
     sti();
     //test_interrupts();
