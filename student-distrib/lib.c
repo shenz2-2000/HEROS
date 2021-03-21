@@ -20,14 +20,13 @@ void set_blue_screen(){
     int32_t i;
     for (i = 0; i < NUM_ROWS * NUM_COLS; i++)
         *(uint8_t *)(video_mem + (i << 1) + 1) = BULE_SCREEN;
-    }
 }
 
 void restore_blue_screen(){
     int32_t i;
     for (i = 0; i < NUM_ROWS * NUM_COLS; i++)
         *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
-}
+
 }
 
 /* void clear(void);
