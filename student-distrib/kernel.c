@@ -54,7 +54,7 @@ static int rtc_counter = 0;
  * Side effect: Print message on screen
  */
 void naive_exception_handler(uint32_t num){
-    clear();
+    //// clear();
     printf("------------------------------------------------\n");
     printf("WARNING! EXCEPTION %u HAPPENS!\n",num);
     printf("------------------------------------------------\n");

@@ -4,6 +4,7 @@
 
 #define PASS 1
 #define FAIL 0
+#define END_OF_EXCEPTION 0x20
 
 /* format these macros as you see fit */
 #define TEST_HEADER 	\
@@ -31,38 +32,72 @@ static inline void assertion_failure(){
  * Files: x86_desc.h/S
  */
 int idt_test(){
-	TEST_HEADER;
+    TEST_HEADER;
 
-	int i;
-	int result = PASS;
-	for (i = 0; i < 10; ++i){
-		if ((idt[i].offset_15_00 == NULL) && 
-			(idt[i].offset_31_16 == NULL)){
-			assertion_failure();
-			result = FAIL;
-		}
-	}
+    int i;
+    int result = PASS;
+    for (i = 0; i < NUM_VEC; ++i){
+        if ( i<20 && (idt[i].offset_15_00 == NULL) &&   // test first 20 vec we set
+            (idt[i].offset_31_16 == NULL)){
+            printf("1");
+            assertion_failure();
+            result = FAIL;
+        }
+        if(i < END_OF_EXCEPTION){
+            if(idt[i].dpl != 0 || idt[i].size != 1 || idt[i].present != 1 || idt[i].seg_selector != KERNEL_CS){
+                printf("2");
+                assertion_failure();
+                result = FAIL;
+            }
+        }
+        else{
+            if(idt[i].dpl != 0 || idt[i].size != 1 || idt[i].present != 0 || idt[i].seg_selector != KERNEL_CS){
+                printf("3");
+                assertion_failure();
+                result = FAIL;
+            }
+        }
+    }
 
-	return result;
+    return result;
 }
 
+/* Page Structure Test
+ *
+ * Check every content in paging structures
+ * Inputs: None
+ * Outputs: PASS/FAIL
+ * Side Effects: None
+ * Coverage: paging set up
+ * Files: boot.S, kernel.C, x86_desc.S
+ */
 int page_test() {
     TEST_HEADER;
 
     int result = PASS;
     int i;
     unsigned long tmp;
-    uint32_t* tmp_cnt = page_directory;
-    uint32_t* tmp_cnt0 = page_table0;
+    uint32_t* tmp_cnt = (uint32_t*) page_directory;
+    uint32_t* tmp_cnt0 = (uint32_t*) page_table0;
 
-    // CR3 content
+    // CR3
     asm volatile ("movl %%cr3, %0"
     : "=r" (tmp)
     :
     : "memory", "cc");
     if ((PDE (*) [1024]) tmp != &page_directory) {
-        printf("CR3 not correct");
         result = FAIL;
+        printf("Incorrect CR3!");
+    }
+
+    // CR4
+    asm volatile ("movl %%cr4, %0"
+    : "=r" (tmp)
+    :
+    : "memory", "cc");
+    if ((tmp & 0x10) == 0) {
+        result = FAIL;
+        printf("Incorrect CR4!");
     }
 
     // CR0
@@ -71,42 +106,33 @@ int page_test() {
     :
     : "memory", "cc");
     if ((tmp & 0x80000000) == 0) {
-        printf("Paging is not enabled");
         result = FAIL;
+        printf("Incorrect CR0!");
     }
 
-    // kernel page directory
+    // page directory
     if ((PTE (*) [1024]) ( *tmp_cnt & 0xFFFFF000) != &page_table0) {
-        printf("Paging directory entry 0 is not correct");
+        printf("Incorrect page directory: 0");
         result = FAIL;
     }
     if ((tmp_cnt[1] & 0x00400000) != 0x00400000) {
-        printf("Paging directory entry 1 is not correct");
+        printf("Incorrect page directory: 1");
         result = FAIL;
     }
 
-    // kernel page table 0
+    // page table
     for (i = 0; i < 0xB8; ++i){ // start page of video memory
+        if (i == 0xB8) {    // 0xB8 is the start of video memory
+            if ((tmp_cnt0[i] & 0x000B8003) != 0x000B8003){  // logical and physical memory should match
+                printf("Incorrect page table at %d", i);
+                result = FAIL;
+            }
+            continue;
+        }
         if ( tmp_cnt0[i] != 0){
-            printf("Paging table entry %d is not correct", i);
+            printf("Incorrect page table at %d", i);
             result = FAIL;
         }
-    }
-    if ((tmp_cnt0[0xB8] & 0x000B8003) != 0x000B8003){
-        printf("Paging table entry for video memory is not correct");
-        result = FAIL;
-    }
-    for (i = 0xB8 + 1; i < 1024; ++i){
-        if (tmp_cnt0[i] != 0){
-            printf("Paging table entry %d is not correct", i);
-            result = FAIL;
-        }
-    }
-
-    int* i_ptr = &i;
-    if (*i_ptr != i) {
-        printf("Dereference i error");
-        result = FAIL;
     }
 
     return result;
@@ -131,26 +157,39 @@ int div0_test() {
     return FAIL;
 }
 
-/* NULL Deference Test
+/* Deference Test
  *
- * Deference 0 to see if handled correctly
+ * Deference to see if handled correctly
  * Inputs: None
  * Outputs: None
  * Side Effects: Cause paging exception if paging is turning on
  * Coverage: paging exception
- * Files: boot.S, kernel.C
+ * Files: boot.S, kernel.C, x86_desc.S
  */
-int dereference_null_test() {
+int dereference_test() {
     TEST_HEADER;
-    unsigned long i = 0;
-    unsigned long j = *((unsigned long *)i);
-
+    unsigned long a = 0;
+    unsigned long b = *((unsigned long *)a);
+    // check if dereference works
+    unsigned long* test_ptr = &a;
+    if (*test_ptr != a) {
+        printf("*test_ptr (0) = %u", a);
+        return FAIL;
+    }
     // should Never get here
-    printf("*0 = %u", j);
+    printf("*0 = %u", b);
     return FAIL;
 }
 
-
+/* RTC Test
+ *
+ * receive 1024 interrupts
+ * Inputs: None
+ * Outputs: PASS/FAIL
+ * Side Effects: None
+ * Coverage: RTC interrupts
+ * Files: kernel.c
+ */
 int rtc_test() {
     TEST_HEADER;
 
@@ -158,10 +197,7 @@ int rtc_test() {
     int ctr;
     printf("Count for 1 sec...\n");
     while(1) {
-        cli(); {
-            ctr = get_rtc_counter();
-        }
-        sti();
+        ctr = get_rtc_counter();
         if (ctr - ref > 1024) {
             break;
         }
@@ -181,8 +217,8 @@ void launch_tests(){
     clear();
     reset_screen();
 	TEST_OUTPUT("idt_test", idt_test());
-    //TEST_OUTPUT("rtc_test", rtc_test());
+    TEST_OUTPUT("rtc_test", rtc_test());
     TEST_OUTPUT("page_test", page_test());
     //TEST_OUTPUT("div0_test", div0_test());
-	//TEST_OUTPUT("dereference_null_test", dereference_null_test());
+	//TEST_OUTPUT("dereference_test", dereference_test());
 }
