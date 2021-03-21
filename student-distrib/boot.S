@@ -81,7 +81,7 @@ halt:
 .endm
 
 
-# here we define the exception handler
+# here we define the exception handler with linkage
 
 /* NOTE: The following functions are in the same format so we only use one interface
  * exception_handler_num
@@ -427,8 +427,8 @@ exception_handler_128:
 .globl init_page_register
 init_page_register:
 
+      # enter the function, just a shortcut
       enter $0, $0
-
 
       # we set CR3 here
       movl $page_directory, %ecx
