@@ -14,11 +14,10 @@
 extern int get_rtc_counter();
 
 static inline void assertion_failure(){
-	/* Use exception #15 for assertions, otherwise
-	   reserved by Intel */
-	asm volatile("int $15");
+    /* Use exception #15 for assertions, otherwise
+       reserved by Intel */
+    asm volatile("int $15");
 }
-
 
 /* Checkpoint 1 tests */
 
@@ -38,7 +37,7 @@ int idt_test(){
     int result = PASS;
     for (i = 0; i < NUM_VEC; ++i){
         if ( i<20 && (idt[i].offset_15_00 == NULL) &&   // test first 20 vec we set
-            (idt[i].offset_31_16 == NULL)){
+             (idt[i].offset_31_16 == NULL)){
             printf("1\n");
             assertion_failure();
             result = FAIL;
@@ -178,13 +177,15 @@ int div0_test() {
 int dereference_test() {
     TEST_HEADER;
     unsigned long a = 0;
-    unsigned long b = *((unsigned long *)a);
-    // check if dereference works
+    unsigned long b;
+    // dereference accessible pointer
     unsigned long* test_ptr = &a;
     if (*test_ptr != a) {
         printf("*test_ptr (0) = %u", a);
         return FAIL;
     }
+    // then dereference 0
+    b = *((unsigned long *)a);
     // should Never get here
     printf("*0 = %u", b);
     return FAIL;
@@ -214,6 +215,21 @@ int rtc_test() {
     return PASS;
 }
 
+/* System Call Test
+ *
+ * int $0x80
+ * Inputs: None
+ * Outputs: None
+ * Side Effects: Execute system call handler
+ * Coverage: system call
+ * Files: x86_desc.h/S
+ */
+static inline int system_call_test() {
+    TEST_HEADER;
+    asm volatile("$0x80");  // system call handler at index 0x80
+    return FAIL;
+}
+
 /* Checkpoint 2 tests */
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
@@ -222,12 +238,15 @@ int rtc_test() {
 
 /* Test suite entry point */
 void launch_tests(){
-    // tests cp1
-    // clear();
-    // reset_screen();
-	TEST_OUTPUT("idt_test", idt_test());
+    /* following tests should not raise exception */
+    TEST_OUTPUT("idt_test", idt_test());
     TEST_OUTPUT("rtc_test", rtc_test());
     TEST_OUTPUT("page_test", page_test());
-    //TEST_OUTPUT("div0_test", div0_test());
-	TEST_OUTPUT("dereference_test", dereference_test());
+
+    /* test_interrupts() called by rtc_interrupt_handler() in kernel.c */
+
+    /* following tests would try to raise exception */
+    // TEST_OUTPUT("div0_test", div0_test());
+    // TEST_OUTPUT("dereference_test", dereference_test());
+    // TEST_OUTPUT("system_call_test", system_call_test());
 }
