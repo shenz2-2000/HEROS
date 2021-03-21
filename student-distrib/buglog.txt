@@ -1,0 +1,27 @@
+# BUGLOG
+
+## CP 3.1
+
+    * BUG1 - in i8259.c, the interrupt of master irq port 2 (the cascaded port to the slave) is not enabled whenever the slave port is enabled. Instead, this cascaded port has to be enabled individually and in the initialization this port is indeed enabled. This may cause a problem because if this cascaded port is disabled, the slave lines may have no chance to be enabled.
+    * FIX - add a enablement of this cascaded port whenever a slave interrupt line is enabled.
+
+    * BUG2 - in i8259.c, there are 3 functions with input parameters, but without exception checking. For example, if the irq_num which is larger than 16 is transferred, there is no coping mechanism and there may have problems.
+    * FIX - add a input check so that if a invalid parameter is input, the function will directly returned and do nothing.
+
+    * BUG3 - in i8259.c, a small problem arises because a single function call mismatches the function name (enable_irq). 
+    * FIX - fix the function call name.
+
+    * BUG4 - in kernal.c, we found that rtc do not work. After checking the code, we found that outb argument format shold be (data, port) rather than (port, data)
+    * FIX - switch the order of arguments and solve this problem
+
+    * BUG5 - in boot.S, in function init_page_register, we need to set the initial value of CR0,CR3,CR4. We set CR0 firstly, then the other two, which will lead to crash of kernel. Since we fill the directory firstly, and the first entry of directory is indicating a 4MB page.
+    * FIX - switch the initialization order of the three registers and set CR0 in the end.
+
+    * BUG6 - in kernel.c, in function init_IDT, after we fill the whole IDT table, we forget to load IDTR. That will also leads to crash of the kernel.
+    * FIX - call the lidt function at the end of init_IDT
+
+
+
+
+
+
