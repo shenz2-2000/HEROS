@@ -223,8 +223,8 @@ int rtc_test() {
 /* Test suite entry point */
 void launch_tests(){
     // tests cp1
-    clear();
-    reset_screen();
+    // clear();
+    // reset_screen();
 	TEST_OUTPUT("idt_test", idt_test());
     TEST_OUTPUT("rtc_test", rtc_test());
     TEST_OUTPUT("page_test", page_test());

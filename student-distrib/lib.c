@@ -177,13 +177,32 @@ int32_t puts(int8_t* s) {
  * Return Value: void
  *  Function: Output a character to the console */
 void putc(uint8_t c) {
+    int i,j;
     if(c == '\n' || c == '\r') {
         screen_y++;
         screen_x = 0;
+        // FIX the bug when the screen is full, it starts from the beginning of the screen
+        if (screen_y == NUM_ROWS) {
+            for (i=0; i<NUM_ROWS;++i)
+                for (j=0;j<NUM_COLS;++j) {
+                    *(uint8_t *)(video_mem+((NUM_COLS*i+j)<<1)) = (i!=NUM_ROWS-1)?(*(uint8_t *)(video_mem+((NUM_COLS*(i+1)+j)<<1))):' ';
+                    *(uint8_t *)(video_mem+((NUM_COLS*i+j)<<1)+1) = ATTRIB;
+                }
+            screen_y--;
+        }
     } else {
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1) + 1) = ATTRIB;
         screen_x++;
+        // FIX the bug when the screen is full, it starts from the beginning of the screen
+        if (screen_x==NUM_COLS&&screen_y+1==NUM_ROWS) {
+            for (i=0; i<NUM_ROWS;++i)
+                for (j=0;j<NUM_COLS;++j) {
+                    *(uint8_t *)(video_mem+((NUM_COLS*i+j)<<1)) = (i!=NUM_ROWS-1)?(*(uint8_t *)(video_mem+((NUM_COLS*(i+1)+j)<<1))):' ';
+                    *(uint8_t *)(video_mem+((NUM_COLS*i+j)<<1)+1) = ATTRIB;
+                }
+            screen_y--;
+        }
         screen_x %= NUM_COLS;
         screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
     }
