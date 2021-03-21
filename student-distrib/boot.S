@@ -83,6 +83,14 @@ halt:
 
 # here we define the exception handler
 
+/* NOTE: The following functions are in the same format so we only use one interface
+ * exception_handler_num
+ *   DESCRIPTION: call the corresponding exception handler
+ *   INPUTS: num -- the exception number
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: jump to the corresponding exception handler
+ */
 .globl exception_handler_0
 exception_handler_0:
          # ----------------------push all registers--------------------
@@ -363,7 +371,15 @@ exception_handler_19:
          IRET
 
 
-.globl interrupt_entry_1
+/* NOTE: The following functions are in the same format so we only use one interface
+ * interrupt_entry_num
+ *   DESCRIPTION: call the corresponding interrupt handler
+ *   INPUTS: irq -- the irq number
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: jump to the corresponding interrupt handler
+ */
+ .globl interrupt_entry_1
 interrupt_entry_1:
     SAVE_ALL_REGS
     call keyboard_interrupt_handler
@@ -384,6 +400,7 @@ interrupt_entry_8:
     RESTORE_ALL_REGS
     iret  # return from interrupt 
 
+# System call handler is in the same format as exception handler
 
 .globl exception_handler_128
 exception_handler_128:

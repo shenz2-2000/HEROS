@@ -337,6 +337,7 @@ void entry(unsigned long magic, unsigned long addr) {
 void keyboard_interrupt_handler() {
     cli();
     uint8_t input = inb(KEYBOARD_PORT);
+    // Get input from keyboard and check whether the scan code can be output
     if (input < KEY_BOARD_PRESSED)
         if (scan_code_table[input])
             putc(scan_code_table[input]);
@@ -375,10 +376,12 @@ void rtc_init() {
 void rtc_interrupt_handler() {
     cli();
     ++rtc_counter;
+    // Virtualize the RTC and change the frequency
     if (rtc_counter>=RTC_LIMIT){
 //        printf("RECEIVE %d RTC Interrupts\n", rtc_counter);
         rtc_counter = 0;
     }
+    // Restart so it can send interrupt again
     rtc_restart_interrupt();
     sti();
     //test_interrupts();
