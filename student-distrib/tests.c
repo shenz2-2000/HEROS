@@ -39,20 +39,29 @@ int idt_test(){
     for (i = 0; i < NUM_VEC; ++i){
         if ( i<20 && (idt[i].offset_15_00 == NULL) &&   // test first 20 vec we set
             (idt[i].offset_31_16 == NULL)){
-            printf("1");
+            printf("1\n");
             assertion_failure();
             result = FAIL;
         }
+
         if(i < END_OF_EXCEPTION){
             if(idt[i].dpl != 0 || idt[i].size != 1 || idt[i].present != 1 || idt[i].seg_selector != KERNEL_CS){
-                printf("2");
+                printf("2\n");
                 assertion_failure();
                 result = FAIL;
             }
         }
         else{
-            if(idt[i].dpl != 0 || idt[i].size != 1 || idt[i].present != 0 || idt[i].seg_selector != KERNEL_CS){
-                printf("3");
+            if (i == 0x80) {
+                if(idt[i].dpl != 3 || idt[i].size != 1 || idt[i].seg_selector != KERNEL_CS){
+                    printf("3.1\n");
+                    assertion_failure();
+                    result = FAIL;
+                }
+                continue;
+            }
+            if(idt[i].dpl != 0 || idt[i].size != 1 || idt[i].seg_selector != KERNEL_CS){
+                printf("3.2\n");
                 assertion_failure();
                 result = FAIL;
             }
@@ -220,5 +229,5 @@ void launch_tests(){
     TEST_OUTPUT("rtc_test", rtc_test());
     TEST_OUTPUT("page_test", page_test());
     //TEST_OUTPUT("div0_test", div0_test());
-	//TEST_OUTPUT("dereference_test", dereference_test());
+	TEST_OUTPUT("dereference_test", dereference_test());
 }
