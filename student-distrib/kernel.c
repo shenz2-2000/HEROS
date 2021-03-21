@@ -59,11 +59,15 @@ void naive_exception_handler(uint32_t num){
         printf("------------------------------------------------\n");
         printf("WARNING! The Input of Exception is invalid!!!!\n");
         printf("------------------------------------------------\n");
+        // shut the screen into blue
+        set_blue_screen();
     }
     else {
         printf("------------------------------------------------\n");
         printf("WARNING! EXCEPTION %u HAPPENS!\n", num);
         printf("------------------------------------------------\n");
+        // shut the screen into blue
+        set_blue_screen();
     }
     while(1){}
 }

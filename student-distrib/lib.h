@@ -17,6 +17,11 @@ void clear(void);
 void reset_screen(void);
 void test_interrupts(void);
 
+// Set blue screen
+void set_blue_screen();
+// Restore blue screen
+void restore_blue_screen();
+
 void* memset(void* s, int32_t c, uint32_t n);
 void* memset_word(void* s, int32_t c, uint32_t n);
 void* memset_dword(void* s, int32_t c, uint32_t n);
