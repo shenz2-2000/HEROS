@@ -258,8 +258,8 @@ typedef struct {
 }PTE;
 
 // pointers defined in x86_desc.S
-extern PDE page_directory[PAGE_DIRECTORY_SIZE];
-extern PTE page_table0[PAGE_TABLE_SIZE];
+extern PDE page_directory[PAGE_DIRECTORY_SIZE] __attribute__ ((aligned (ALIGN_4K)));
+extern PTE page_table0[PAGE_TABLE_SIZE]__attribute__ ((aligned (ALIGN_4K)));
 
 /* The IDT itself (declared in x86_desc.S */
 extern idt_desc_t idt[NUM_VEC];

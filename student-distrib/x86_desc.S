@@ -119,13 +119,15 @@ idt_bottom:
 # Page region
 
 .align ALIGN_4K
+.globl page_directory
 page_directory:
       .rept PAGE_DIRECTORY_SIZE
       .long 0
       .endr
-page_directory_bottom
+page_directory_bottom:
 
 .align ALIGN_4K
+.globl page_table0
 page_table:
 
 page_table0:

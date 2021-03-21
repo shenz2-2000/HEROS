@@ -11,6 +11,7 @@
 #define TEST_OUTPUT(name, result)	\
 	printf("[TEST %s] Result = %s\n", name, (result) ? "PASS" : "FAIL");
 extern int get_rtc_counter();
+
 static inline void assertion_failure(){
 	/* Use exception #15 for assertions, otherwise
 	   reserved by Intel */
@@ -46,7 +47,67 @@ int idt_test(){
 }
 
 int page_test() {
-    printf("No paging test.");
+    TEST_HEADER;
+
+    int result = PASS;
+    int i;
+    unsigned long tmp;
+
+    // Check CR3 content
+    asm volatile ("movl %%cr3, %0"
+    : "=r" (tmp)
+    :
+    : "memory", "cc");
+    if ((PDE (*) [1024]) tmp != &page_directory) {
+        printf("CR3 not correct");
+        result = FAIL;
+    }
+
+//    // Check CR0
+//    asm volatile ("movl %%cr0, %0"
+//    : "=r" (tmp)
+//    :
+//    : "memory", "cc");
+//    if ((tmp & 0x80000000) == 0) {
+//        printf("Paging is not enabled");
+//        result = FAIL;
+//    }
+//
+//    // Check kernel page directory
+//    if ((PTE (*) [1024]) (page_directory[0] & 0xFFFFF000) != &page_table0) {
+//        printf("Paging directory entry 0 is not correct");
+//        result = FAIL;
+//    }
+//    if ((page_directory[1] & 0x00400000) != 0x00400000) {
+//        printf("Paging directory entry 1 is not correct");
+//        result = FAIL;
+//    }
+//
+//    // Check kernel page table 0
+//    for (i = 0; i < VIDEO_MEMORY_START_PAGE; ++i){
+//        if (kernel_page_table_0.entry[i] != 0){
+//            printf("Paging table entry %d is not correct", i);
+//            result = FAIL;
+//        }
+//    }
+//    if ((kernel_page_table_0.entry[VIDEO_MEMORY_START_PAGE] & 0x000B8003) != 0x000B8003){
+//        printf("Paging table entry for video memory is not correct");
+//        result = FAIL;
+//    }
+//    for (i = VIDEO_MEMORY_START_PAGE + 1; i < KERNEL_PAGE_TABLE_SIZE; ++i){
+//        if (kernel_page_table_0.entry[i] != 0){
+//            printf("Paging table entry %d is not correct", i);
+//            result = FAIL;
+//        }
+//    }
+//
+//    int* i_ptr = &i;
+//    if (*i_ptr != i) {
+//        printf("Dereference i error");
+//        result = FAIL;
+//    }
+
+    return result;
 }
 
 /* Zero division Test
@@ -118,8 +179,8 @@ void launch_tests(){
     clear();
     reset_screen();
 	TEST_OUTPUT("idt_test", idt_test());
-    TEST_OUTPUT("rtc_test", rtc_test());
-
+    //TEST_OUTPUT("rtc_test", rtc_test());
+    TEST_OUTPUT("page_test", page_test());
     //TEST_OUTPUT("div0_test", div0_test());
 	TEST_OUTPUT("dereference_null_test", dereference_null_test());
 }
