@@ -410,13 +410,8 @@ exception_handler_128:
 .globl init_page_register
 init_page_register:
 
-      pushl %esp
-      movl %esp, %ebp
+      enter $0, $0
 
-      # we set CR0 here
-      movl %cr0, %ecx
-      orl  $0x80000001, %ecx
-      movl %ecx, %cr0
 
       # we set CR3 here
       movl $page_directory, %ecx
@@ -428,6 +423,11 @@ init_page_register:
       movl    %cr4, %ecx
       orl     $0x10, %ecx
       movl    %ecx, %cr4
+
+      # we set CR0 here
+      movl %cr0, %ecx
+      orl  $0x80000001, %ecx
+      movl %ecx, %cr0
 
       leave
       ret

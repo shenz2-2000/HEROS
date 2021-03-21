@@ -52,8 +52,10 @@ int page_test() {
     int result = PASS;
     int i;
     unsigned long tmp;
+    uint32_t* tmp_cnt = page_directory;
+    uint32_t* tmp_cnt0 = page_table0;
 
-    // Check CR3 content
+    // CR3 content
     asm volatile ("movl %%cr3, %0"
     : "=r" (tmp)
     :
@@ -63,49 +65,49 @@ int page_test() {
         result = FAIL;
     }
 
-//    // Check CR0
-//    asm volatile ("movl %%cr0, %0"
-//    : "=r" (tmp)
-//    :
-//    : "memory", "cc");
-//    if ((tmp & 0x80000000) == 0) {
-//        printf("Paging is not enabled");
-//        result = FAIL;
-//    }
-//
-//    // Check kernel page directory
-//    if ((PTE (*) [1024]) (page_directory[0] & 0xFFFFF000) != &page_table0) {
-//        printf("Paging directory entry 0 is not correct");
-//        result = FAIL;
-//    }
-//    if ((page_directory[1] & 0x00400000) != 0x00400000) {
-//        printf("Paging directory entry 1 is not correct");
-//        result = FAIL;
-//    }
-//
-//    // Check kernel page table 0
-//    for (i = 0; i < VIDEO_MEMORY_START_PAGE; ++i){
-//        if (kernel_page_table_0.entry[i] != 0){
-//            printf("Paging table entry %d is not correct", i);
-//            result = FAIL;
-//        }
-//    }
-//    if ((kernel_page_table_0.entry[VIDEO_MEMORY_START_PAGE] & 0x000B8003) != 0x000B8003){
-//        printf("Paging table entry for video memory is not correct");
-//        result = FAIL;
-//    }
-//    for (i = VIDEO_MEMORY_START_PAGE + 1; i < KERNEL_PAGE_TABLE_SIZE; ++i){
-//        if (kernel_page_table_0.entry[i] != 0){
-//            printf("Paging table entry %d is not correct", i);
-//            result = FAIL;
-//        }
-//    }
-//
-//    int* i_ptr = &i;
-//    if (*i_ptr != i) {
-//        printf("Dereference i error");
-//        result = FAIL;
-//    }
+    // CR0
+    asm volatile ("movl %%cr0, %0"
+    : "=r" (tmp)
+    :
+    : "memory", "cc");
+    if ((tmp & 0x80000000) == 0) {
+        printf("Paging is not enabled");
+        result = FAIL;
+    }
+
+    // kernel page directory
+    if ((PTE (*) [1024]) ( *tmp_cnt & 0xFFFFF000) != &page_table0) {
+        printf("Paging directory entry 0 is not correct");
+        result = FAIL;
+    }
+    if ((tmp_cnt[1] & 0x00400000) != 0x00400000) {
+        printf("Paging directory entry 1 is not correct");
+        result = FAIL;
+    }
+
+    // kernel page table 0
+    for (i = 0; i < 0xB8; ++i){ // start page of video memory
+        if ( tmp_cnt0[i] != 0){
+            printf("Paging table entry %d is not correct", i);
+            result = FAIL;
+        }
+    }
+    if ((tmp_cnt0[0xB8] & 0x000B8003) != 0x000B8003){
+        printf("Paging table entry for video memory is not correct");
+        result = FAIL;
+    }
+    for (i = 0xB8 + 1; i < 1024; ++i){
+        if (tmp_cnt0[i] != 0){
+            printf("Paging table entry %d is not correct", i);
+            result = FAIL;
+        }
+    }
+
+    int* i_ptr = &i;
+    if (*i_ptr != i) {
+        printf("Dereference i error");
+        result = FAIL;
+    }
 
     return result;
 }
@@ -182,5 +184,5 @@ void launch_tests(){
     //TEST_OUTPUT("rtc_test", rtc_test());
     TEST_OUTPUT("page_test", page_test());
     //TEST_OUTPUT("div0_test", div0_test());
-	TEST_OUTPUT("dereference_null_test", dereference_null_test());
+	//TEST_OUTPUT("dereference_null_test", dereference_null_test());
 }
