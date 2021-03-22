@@ -103,7 +103,7 @@ int page_test() {
     : "=r" (tmp)
     :
     : "memory", "cc");
-    if ((tmp & 0x10) == 0) {
+    if ((tmp & 0x10) == 0) {    // bit mask
         result = FAIL;
         printf("Incorrect CR4!");
     }
@@ -113,7 +113,7 @@ int page_test() {
     : "=r" (tmp)
     :
     : "memory", "cc");
-    if ((tmp & 0x80000000) == 0) {
+    if ((tmp & 0x80000000) == 0) {  // bit mask
         result = FAIL;
         printf("Incorrect CR0!");
     }
@@ -129,8 +129,8 @@ int page_test() {
     }
 
     // page table
-    for (i = 0; i < 0xB8; ++i){ // start page of video memory
-        if (i == 0xB8) {    // 0xB8 is the start of video memory
+    for (i = 0; i < PAGE_TABLE_SIZE; ++i){
+        if (i == VIDEO_MEMORY_INDEX) {
             if ((tmp_cnt0[i] & 0x000B8003) != 0x000B8003){  // logical and physical memory should match
                 printf("Incorrect page table at %d", i);
                 result = FAIL;
@@ -161,7 +161,7 @@ int div0_test() {
     unsigned long b = 1 / a;
 
     // should never get here
-    printf("1 / 0 = %u", b);
+    printf("1 / 0 = %u\n", b);
     return FAIL;
 }
 
@@ -181,13 +181,35 @@ int dereference_test() {
     // dereference accessible pointer
     unsigned long* test_ptr = &a;
     if (*test_ptr != a) {
-        printf("*test_ptr (0) = %u", a);
+        printf("*test_ptr (0) = %u\n", a);
         return FAIL;
     }
     // then dereference 0
     b = *((unsigned long *)a);
     // should Never get here
-    printf("*0 = %u", b);
+    printf("*0 = %u\n", b);
+    return FAIL;
+}
+
+/* Deference Test 2
+ *
+ * Deference pointers with given accessible and inaccessible addresses
+ * Inputs: None
+ * Outputs: None
+ * Side Effects: Cause paging exception
+ * Coverage: paging exception
+ * Files: boot.S, kernel.C, x86_desc.S
+ */
+int deref_test2() {
+    TEST_HEADER;
+    unsigned long* a = (unsigned long*) 0x000B8010;
+    unsigned long* b = (unsigned long*) 0x000C8000;
+    // dereference accessible pointer
+    printf("deref 0x000B8010\n");
+    unsigned long tmp = *a;
+    // dereference inaccessible pointer
+    printf("deref 0x000C8000\n");
+    tmp = *b;
     return FAIL;
 }
 
@@ -226,7 +248,7 @@ int rtc_test() {
  */
 static inline int system_call_test() {
     TEST_HEADER;
-    asm volatile("$0x80");  // system call handler at index 0x80
+    asm volatile("int $0x80");  // system call handler at index 0x80
     return FAIL;
 }
 
@@ -246,7 +268,8 @@ void launch_tests(){
     /* test_interrupts() called by rtc_interrupt_handler() in kernel.c */
 
     /* following tests would try to raise exception */
-    // TEST_OUTPUT("div0_test", div0_test());
-    // TEST_OUTPUT("dereference_test", dereference_test());
-    // TEST_OUTPUT("system_call_test", system_call_test());
+    TEST_OUTPUT("div0_test", div0_test());
+    TEST_OUTPUT("dereference_test", dereference_test());
+    TEST_OUTPUT("system_call_test", system_call_test());
+    TEST_OUTPUT("dereference_test2", deref_test2());
 }
