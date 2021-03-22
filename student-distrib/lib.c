@@ -16,12 +16,22 @@ static int screen_y;
 static char* video_mem = (char *)VIDEO;
 
 
+/* void set_blue_screen(void);
+ * Description: Set the whole screen into blue
+ * Inputs: void
+ * Return Value: none
+ * Function: write to  video memory */
 void set_blue_screen(){
     int32_t i;
     for (i = 0; i < NUM_ROWS * NUM_COLS; i++)
         *(uint8_t *)(video_mem + (i << 1) + 1) = BULE_SCREEN;
 }
 
+/* void restore_blue_screen(void);
+ * Description: Set the whole screen into black
+ * Inputs: void
+ * Return Value: none
+ * Function: write to  video memory */
 void restore_blue_screen(){
     int32_t i;
     for (i = 0; i < NUM_ROWS * NUM_COLS; i++)

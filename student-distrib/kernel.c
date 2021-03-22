@@ -182,7 +182,13 @@ void init_IDT(){
 }
 
 
-
+/*
+ * entry
+ * This function will be called after boot.s
+ * Input: None
+ * Output: None.
+ * Side effect: Initialize the system and do the tests
+ */
 /* Check if MAGIC is valid and print the Multiboot information structure
    pointed by ADDR. */
 void entry(unsigned long magic, unsigned long addr) {
@@ -311,17 +317,18 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Init the PIC */
     i8259_init();
 
-    /* Init the IDT */
-
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
     enable_irq(1);   // Keyboard is IRQ1
+
     /*Init RTC*/
     rtc_init();
     enable_irq(8); // RTC is IRQ8
     rtc_restart_interrupt();
 
+    /*Init IDT*/
     init_IDT();
+
     /* Enable interrupts */
 
     /* Do not enable the following until after you have set up your

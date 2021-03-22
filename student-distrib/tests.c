@@ -258,6 +258,12 @@ static inline int system_call_test() {
 /* Checkpoint 5 tests */
 
 
+/* launch_tests
+ *
+ * Inputs: None
+ * Outputs: None
+ * Side Effects: Execute tests
+ */
 /* Test suite entry point */
 void launch_tests(){
     /* following tests should not raise exception */
