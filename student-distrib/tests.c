@@ -274,8 +274,8 @@ void launch_tests(){
     /* test_interrupts() called by rtc_interrupt_handler() in kernel.c */
 
     /* following tests would try to raise exception */
-    TEST_OUTPUT("div0_test", div0_test());
-    TEST_OUTPUT("dereference_test", dereference_test());
-    TEST_OUTPUT("system_call_test", system_call_test());
-    TEST_OUTPUT("dereference_test2", deref_test2());
+//    TEST_OUTPUT("div0_test", div0_test());
+//    TEST_OUTPUT("dereference_test", dereference_test());
+//    TEST_OUTPUT("system_call_test", system_call_test());
+//    TEST_OUTPUT("dereference_test2", deref_test2());
 }
