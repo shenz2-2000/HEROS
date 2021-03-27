@@ -15,6 +15,13 @@ static pcb_t pcb_arr[N_PCB_LIMIT];
 // op table
 static file_operations_t file_op;
 
+/**
+ * file_sys_init
+ * Description: Initialize the file system
+ * Input: f_sys_mod - multiboot module of file system image.
+ * Output: 0 if success.
+ * Side effect: Initialize the file system
+ */
 int32_t file_sys_init(module_t *f_sys_mod) {
     // local var
     // module_t f_sys_mod;
@@ -38,6 +45,14 @@ int32_t file_sys_init(module_t *f_sys_mod) {
     return 0;
 }
 
+/**
+ * read_dentry_by_name
+ * Description: read the dentry by the file name
+ * Input: fname - the file name
+          dentry - the dentry struct
+ * Output: 0 if success, -1 if not.
+ * Side effect: the dentry pointer will be filled with output
+ */
 int32_t read_dentry_by_name (const uint8_t *fname, dentry_t *dentry) {
     int i;
     int fname_len;
@@ -59,6 +74,14 @@ int32_t read_dentry_by_name (const uint8_t *fname, dentry_t *dentry) {
     return -1;
 }
 
+/**
+ * read_dentry_by_index
+ * Description: read the dentry by the index
+ * Input: fname - the dentry index
+          dentry - the dentry struct
+ * Output: 0 if success, -1 if not.
+ * Side effect: the dentry pointer will be filled with output
+ */
 int32_t read_dentry_by_index(uint32_t index, dentry_t *dentry) {
     int i;
 
@@ -69,6 +92,16 @@ int32_t read_dentry_by_index(uint32_t index, dentry_t *dentry) {
     return 0;
 }
 
+/**
+ * read_data
+ * Description: read content of a file
+ * Input: inode - the inode struct
+          offset - the offset of reading position
+          buf - the read buffer
+          bufsize - the size of the buffer
+ * Output: the number of bytes read
+ * Side effect: the buffer will be filled with content
+ */
 int32_t read_data(uint32_t inode, uint32_t offset, uint8_t *buf, uint32_t bufsize) {
     uint32_t dblock_vir_idx;
     uint32_t dblock_phy_idx;
@@ -109,8 +142,14 @@ int32_t read_data(uint32_t inode, uint32_t offset, uint8_t *buf, uint32_t bufsiz
     return bytes_cnt;
 }
 
-// generate a available fd
-int32_t generate_fd() {
+/**
+ * allocate_fd
+ * Description: generate a available fd
+ * Input: None
+ * Output: the allocated fd
+ * Side effect: None
+ */
+int32_t allocate_fd() {
     int i;
     if (n_opend_files >= N_PCB_LIMIT) return -1;
     for (i = 2; i < N_PCB_LIMIT; i++) {
@@ -122,6 +161,13 @@ int32_t generate_fd() {
     return i;
 }
 
+/**
+ * file_open
+ * Description: open a file
+ * Input: f_name - file name
+ * Output: the allocated fd
+ * Side effect: the file is in use
+ */
 int32_t file_open(const uint8_t *f_name) {
     // target dentry
     dentry_t dentry;
@@ -132,7 +178,7 @@ int32_t file_open(const uint8_t *f_name) {
     }
 
     // obtain an available fd number
-    fd = generate_fd();
+    fd = allocate_fd();
 
     // populate the block
     pcb_arr[fd].f_op = &file_op;
@@ -143,6 +189,13 @@ int32_t file_open(const uint8_t *f_name) {
     return fd;
 }
 
+/**
+ * file_close
+ * Description: close a file
+ * Input: fd - the file descriptor
+ * Output: 0 if success
+ * Side effect: the file is not in use
+ */
 int32_t file_close(int32_t fd) {
     
     if (fd == 0) {printf("ERROR [FILE]: cannot CLOSE stdin\n"); return -1;}
@@ -162,6 +215,15 @@ int32_t file_close(int32_t fd) {
     return 0;
 }
 
+/**
+ * file_read
+ * Description: get the content of a file
+ * Input: fd - the file descriptor
+          buf - the buffer
+          bufsize - the number of bytes of a buffer
+ * Output: 0 if success
+ * Side effect: the buffer will be filled
+ */
 int32_t file_read(int32_t fd, void *buf, int32_t bufsize) {
     int32_t bytes_cnt;
     uint32_t offset = pcb_arr[fd].f_pos;
@@ -176,6 +238,15 @@ int32_t file_read(int32_t fd, void *buf, int32_t bufsize) {
     return bytes_cnt;
 }
 
+/**
+ * file_write
+ * Description: write to a file (NOTE: read-only file system!)
+ * Input: fd - the file descriptor
+          buf - the buffer
+          bufsize - the number of bytes of a buffer
+ * Output: -1: fail
+ * Side effect: an error will be promped
+ */
 int32_t file_write(int32_t fd, const void *buf, int32_t bufsize) {
     int32_t temp;
     temp = fd + bufsize;    // avoid warning

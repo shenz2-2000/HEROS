@@ -58,4 +58,15 @@ typedef struct data_block {
     uint8_t content[BLOCK_SIZE_IN_B];
 } data_block_t;
 
+/* function headers */
+int32_t file_sys_init(module_t *f_sys_mod);
+int32_t read_dentry_by_name (const uint8_t *fname, dentry_t *dentry);
+int32_t read_dentry_by_index(uint32_t index, dentry_t *dentry);
+int32_t read_data(uint32_t inode, uint32_t offset, uint8_t *buf, uint32_t bufsize);
+int32_t allocate_fd();
+int32_t file_open(const uint8_t *f_name);
+int32_t file_close(int32_t fd);
+int32_t file_read(int32_t fd, void *buf, int32_t bufsize);
+int32_t file_write(int32_t fd, const void *buf, int32_t bufsize);
+
 #endif      // FILE_SYS_H
