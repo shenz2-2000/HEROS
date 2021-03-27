@@ -251,7 +251,7 @@ int terminal_test(){
     TEST_HEADER;
     char user_buffer[KEYBOARD_BUF_SIZE];
     uint8_t test_filename;
-    int i,j,k;
+    int i;
 
     printf("-----------Terminal initialization test starts-------------\n");
     i = terminal_open(&test_filename);
@@ -266,7 +266,7 @@ int terminal_test(){
     printf("please input at most 10 characters before pressing enter\n");
     printf("\n");
     terminal_read(0,user_buffer,10);
-    for(i = 0; i < 10; i++){
+    for(i = 0; i < 11; i++){
         printf("%d th char in user buffer is: %d ",i,user_buffer[i]);
     }
 

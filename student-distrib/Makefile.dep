@@ -1,6 +1,6 @@
 boot.o: boot.S multiboot.h x86_desc.h types.h
 x86_desc.o: x86_desc.S x86_desc.h types.h
-file_sys.o: file_sys.c file_sys.h types.h
+file_sys.o: file_sys.c file_sys.h types.h multiboot.h lib.h
 i8259.o: i8259.c i8259.h types.h lib.h
 IDT_initialization.o: IDT_initialization.c multiboot.h types.h x86_desc.h \
   lib.h
