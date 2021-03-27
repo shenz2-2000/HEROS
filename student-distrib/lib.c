@@ -46,8 +46,23 @@ void restore_blue_screen(){
 void clear(void) {
     int32_t i;
     for (i = 0; i < NUM_ROWS * NUM_COLS; i++) {
-        *(uint8_t *)(video_mem + (i << 1)) = ' ';
+        *(uint8_t *)(video_mem + (i << 1)) = 0;
         *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
+    }
+}
+
+/* void delete_last(void);
+ * Inputs: void
+ * Return Value: none
+ * Function: delete the last character */
+void delete_last(void) {
+    if (screen_x>0) screen_x--,
+                    *(uint8_t *)(video_mem+((screen_x+screen_y*NUM_COLS)<<1))=0,
+                    *(uint8_t *)(video_mem+((screen_x+screen_y*NUM_COLS)<<1)+1)=ATTRIB;
+    else if (screen_y>0) {
+        screen_y--;
+        screen_x = NUM_COLS;
+        while(*(uint8_t *)(video_mem+((screen_x-1+screen_y*NUM_COLS)<<1))==0) --screen_x;
     }
 }
 
@@ -212,7 +227,7 @@ void putc(uint8_t c) {
         if (screen_y == NUM_ROWS) {
             for (i=0; i<NUM_ROWS;++i)
                 for (j=0;j<NUM_COLS;++j) {
-                    *(uint8_t *)(video_mem+((NUM_COLS*i+j)<<1)) = (i!=NUM_ROWS-1)?(*(uint8_t *)(video_mem+((NUM_COLS*(i+1)+j)<<1))):' ';
+                    *(uint8_t *)(video_mem+((NUM_COLS*i+j)<<1)) = (i!=NUM_ROWS-1)?(*(uint8_t *)(video_mem+((NUM_COLS*(i+1)+j)<<1))):0;
                     *(uint8_t *)(video_mem+((NUM_COLS*i+j)<<1)+1) = ATTRIB;
                 }
             screen_y--;
@@ -225,7 +240,7 @@ void putc(uint8_t c) {
         if (screen_x==NUM_COLS&&screen_y+1==NUM_ROWS) {
             for (i=0; i<NUM_ROWS;++i)
                 for (j=0;j<NUM_COLS;++j) {
-                    *(uint8_t *)(video_mem+((NUM_COLS*i+j)<<1)) = (i!=NUM_ROWS-1)?(*(uint8_t *)(video_mem+((NUM_COLS*(i+1)+j)<<1))):' ';
+                    *(uint8_t *)(video_mem+((NUM_COLS*i+j)<<1)) = (i!=NUM_ROWS-1)?(*(uint8_t *)(video_mem+((NUM_COLS*(i+1)+j)<<1))):0;
                     *(uint8_t *)(video_mem+((NUM_COLS*i+j)<<1)+1) = ATTRIB;
                 }
             screen_y--;
@@ -539,4 +554,12 @@ void test_interrupts(void) {
     for (i = 0; i < NUM_ROWS * NUM_COLS; i++) {
         video_mem[i << 1]++;
     }
+}
+
+/* int max(a, b)
+ * Inputs: a, b be the two number
+ * Return Value: the larger one of the two
+ * Function: Calculate the larger one of the two number */
+int max(int a, int b){
+    return a>b?a:b;
 }
