@@ -104,6 +104,7 @@ void keyboard_interrupt_handler() {
  */
 void terminal_initialization(){
     int i;
+    key_buf_cnt = 0;
     for(i = 0; i < KEYBOARD_BUF_SIZE; i++){
         flag[i] = 0;
         keyboard_buf[i] = 0;
@@ -199,7 +200,7 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     }
 
     // update key_buf_cnt
-    key_buf_cnt -= j;
+    key_buf_cnt -= delete_length;
     if(key_buf_cnt < 0) key_buf_cnt = 0;
 
     sti();
