@@ -7,7 +7,7 @@
 #define RTC_PORT_1    0x71
 #define RTC_LIMIT     10000
 /* freq = 32768 >> (rate-1) */
-#define RTC_MIN_RATE  3     // 8khz
+#define RTC_MIN_RATE  6     // 1khz
 #define RTC_MAX_RATE  15    // 2hz
 
 void rtc_interrupt_handler();

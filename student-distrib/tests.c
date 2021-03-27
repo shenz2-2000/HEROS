@@ -324,6 +324,61 @@ static inline int system_call_test() {
 }
 
 /* Checkpoint 2 tests */
+
+/* RTC Test2
+ *
+ * set and read rtc in different interrupts
+ * Inputs: None
+ * Outputs: PASS/FAIL
+ * Side Effects: None
+ * Coverage: RTC interrupts
+ * Files: rtc.c, rtc.h
+ */
+int rtc_test2() {
+    TEST_HEADER;
+    int result = PASS;
+    int freq;
+    int i,j;
+    int frequencies[] = {4, 8, 16, 32, 64, 128, 256, 512, 1024};
+    int fd;
+    fd = rtc_open((uint8_t *) "fn");
+
+    // default frequency
+    printf("Waiting 2 interrupts with RTC at 2 hz...\n");
+    rtc_read(fd, NULL, 0);
+    rtc_read(fd, NULL, 0);
+
+    // test under valid frequencies
+    for (i = 0; i < 9; i++) {   // 9: the number of valid frequency in our test
+        freq = frequencies[i];
+        if (rtc_write(fd, &freq, 4) != 0) {
+            printf("fail setting rtc to %u hz\n", freq);
+            result = FAIL;
+        }
+        printf("Waiting %u interrupts with RTC at %u hz...\n", freq, freq);
+        for (j = 0; j < frequencies[i]; j++) rtc_read(fd, NULL, 0);
+    }
+
+    // test under invalid frequencies
+    freq = 1;
+    if (rtc_write(fd, &freq, 4) == 0) {
+        result = FAIL;
+        printf("Illegal frequency value %u!", freq);
+    }
+    freq = 18;
+    if (rtc_write(fd, &freq, 4) == 0) {
+        result = FAIL;
+        printf("Illegal frequency value %u!", freq);
+    }
+    freq = 2048;
+    if (rtc_write(fd, &freq, 4) == 0) {
+        result = FAIL;
+        printf("Illegal frequency value %u!", freq);
+    }
+
+    rtc_close(fd);
+    return result;
+}
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
@@ -339,7 +394,6 @@ static inline int system_call_test() {
 void launch_tests(){
     /* following tests should not raise exception */
 //    TEST_OUTPUT("terminal_test", terminal_test());
-//    TEST_OUTPUT("rtc_test2", rtc_test2());
 //    TEST_OUTPUT("page_test", page_test());
 
     /* test_interrupts() called by rtc_interrupt_handler() in kernel.c */
@@ -349,4 +403,6 @@ void launch_tests(){
 //    TEST_OUTPUT("dereference_test", dereference_test());
 //    TEST_OUTPUT("system_call_test", system_call_test());
 //    TEST_OUTPUT("dereference_test2", deref_test2());
+
+    TEST_OUTPUT("rtc_test2", rtc_test2());
 }
