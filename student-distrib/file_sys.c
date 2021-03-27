@@ -74,6 +74,8 @@ int32_t file_sys_init(module_t *f_sys_mod) {
     return 0;
 }
 
+//-------------------------------------READ ROUTINE-----------------------------------
+
 /**
  * read_dentry_by_name
  * Description: read the dentry by the file name
@@ -137,7 +139,7 @@ int32_t read_data(uint32_t inode, uint32_t offset, uint8_t *buf, uint32_t bufsiz
     uint32_t cursor;    // the relative position in one block
     uint32_t pos;       // the global position within the file
 
-    uint32_t bytes_cnt;
+    uint32_t bytes_cnt = 0;
     uint32_t f_length = inodes_arr[inode].length_in_B;
     
     // bad input check
@@ -190,6 +192,8 @@ int32_t allocate_fd() {
     return i;
 }
 
+//-------------------------------------FILE OPERATIONS-----------------------------------
+
 /**
  * file_open
  * Description: open a file
@@ -202,7 +206,7 @@ int32_t file_open(const uint8_t *f_name) {
     dentry_t dentry;
     int32_t fd;
     if (read_dentry_by_name(f_name, &dentry) == -1) {
-        printf("WARNING [FILE]: cannot OPEN file with name: %s\n", f_name);
+        printf("WARNING [FILE]: cannot OPEN file with name: [%s]\n", f_name);
         return -1;
     }
 
@@ -434,4 +438,100 @@ int32_t file_rtc_read(int32_t fd, void *buf, int32_t bufsize) {
  */
 int32_t file_rtc_write(int32_t fd, void *buf, int32_t bufsize) {
     return rtc_write(fd, buf, bufsize);
+}
+
+//-------------------------------------SYSTEM CALL-----------------------------------
+
+/**
+ * sys_open
+ * Description: system call: open a file
+ * Input: f_name - file name
+ * Output: the allocated fd
+ * Side effect: the file is in use
+ */
+int32_t sys_open(const uint8_t *f_name) {
+    dentry_t dentry;
+    int32_t fd = -1;
+
+    if (n_opend_files >= N_PCB_LIMIT) {
+        printf("ERROR [SYS FILE] in sys_open: cannot OPEN file [%s] because the max number of files is reached", f_name);
+        return -1;
+    }
+
+    if (read_dentry_by_name(f_name, &dentry) == -1) {
+        printf("WARNING [SYS FILE] in sys_open: cannot OPEN file with name: [%s]\n", f_name);
+        return -1;
+    }
+
+    switch (dentry.f_type) {
+        case 0: {   // RTC file
+            fd = file_rtc_open(f_name);
+            break;
+        }
+        case 1: {   // directory file
+            fd = dir_open(f_name);
+            break;
+        }
+        case 2: {   // regulary file
+            fd = file_open(f_name);
+            break;
+        }
+    }
+
+    n_opend_files++;
+
+    return fd;
+}
+
+/**
+ * sys_close
+ * Description: system call: close a file
+ * Input: fd - the file descriptor
+ * Output: 0 if success
+ * Side effect: the file is not in use
+ */
+int32_t sys_close(int32_t fd) {
+    return pcb_arr[fd].f_op->close(fd);
+}
+
+/**
+ * sys_read
+ * Description: system call: get the content of a file
+ * Input: fd - the file descriptor
+          buf - the buffer
+          bufsize - the number of bytes of a buffer
+ * Output: 0 if success
+ * Side effect: the buffer will be filled
+ */
+int32_t sys_read(int32_t fd, void *buf, int32_t bufsize) {
+    if (fd < 0 || fd > N_PCB_LIMIT) {
+        printf("ERROR [SYS FILE] in sys_read: fd overflow\n");
+        return -1;
+    }
+    if (pcb_arr[fd].flags == 0) {
+        printf("WARNING [SYS FILE] in sys_read: cannot READ a file that is not opened. fd: %d\n", fd);
+        return 0;   // not a serious error
+    }
+    return pcb_arr[fd].f_op->read(fd, buf, bufsize);
+}
+
+/**
+ * sys_write
+ * Description: system call: write to a file (NOTE: read-only file system!)
+ * Input: fd - the file descriptor
+          buf - the buffer
+          bufsize - the number of bytes of a buffer
+ * Output: -1: fail
+ * Side effect: an error will be promped
+ */
+int32_t sys_write(int32_t fd, const void *buf, int32_t bufsize) {
+    if (fd < 0 || fd > N_PCB_LIMIT) {
+        printf("ERROR [SYS FILE] in sys_write: fd overflow\n");
+        return -1;
+    }
+    if (pcb_arr[fd].flags == 0) {
+        printf("WARNING [SYS FILE] in sys_write: the file is not opened. fd: %d\n", fd);
+        return 0;   // not a serious error
+    }
+    return pcb_arr[fd].f_op->write(fd, buf, bufsize);
 }
