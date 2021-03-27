@@ -2,6 +2,7 @@
 #define     _FILE_SYS_H
 
 #include "types.h"
+#include "multiboot.h"
 
 // consts
 #define F_NAME_LIMIT    32
@@ -82,7 +83,7 @@ int32_t dir_read(int32_t fd, void *buf, int32_t nbytes);
 int32_t file_rtc_open(const uint8_t *f_name);
 int32_t file_rtc_close(int32_t fd);
 int32_t file_rtc_read(int32_t fd, void *buf, int32_t bufsize);
-int32_t file_rtc_write(int32_t fd, void *buf, int32_t bufsize);
+int32_t file_rtc_write(int32_t fd, const void *buf, int32_t bufsize);
 
 int32_t sys_open(const uint8_t *f_name);
 int32_t sys_close(int32_t fd);

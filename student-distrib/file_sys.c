@@ -35,7 +35,7 @@ int32_t file_sys_init(module_t *f_sys_mod) {
     // init the block pointers
     bblock_ptr = (boot_block_t*)(f_sys_mod->mod_start);
     inodes_arr = ((inode_block_t*)(f_sys_mod->mod_start)) + 1;
-    dblocks_arr = ((boot_block_t*)(f_sys_mod->mod_start)) + bblock_ptr->n_inodes + 1;
+    dblocks_arr = ((data_block_t*)(f_sys_mod->mod_start)) + bblock_ptr->n_inodes + 1;
 
     // init the file operations
     file_op.open = file_open;
@@ -114,8 +114,6 @@ int32_t read_dentry_by_name (const uint8_t *fname, dentry_t *dentry) {
  * Side effect: the dentry pointer will be filled with output
  */
 int32_t read_dentry_by_index(uint32_t index, dentry_t *dentry) {
-    int i;
-
     // bad input check
     if ((index >= N_DENTRY_LIMIT) || (index >= bblock_ptr->n_dentries)) return -1;
 
@@ -305,7 +303,7 @@ int32_t dir_write(int32_t fd, const void* buf, int32_t nbytes){
     // just to avoid warning
     fd++;
     nbytes++;
-    (uint8_t*) buf;
+    (void) buf;
     // do not need to do anything meaningful
     return -1;
 
@@ -436,7 +434,7 @@ int32_t file_rtc_read(int32_t fd, void *buf, int32_t bufsize) {
           bufsize - the number of bytes of a buffer
  * Output: 0 if success
  */
-int32_t file_rtc_write(int32_t fd, void *buf, int32_t bufsize) {
+int32_t file_rtc_write(int32_t fd, const void *buf, int32_t bufsize) {
     return rtc_write(fd, buf, bufsize);
 }
 

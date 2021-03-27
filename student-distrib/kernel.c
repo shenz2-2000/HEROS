@@ -10,6 +10,7 @@
 #include "tests.h"
 #include "rtc.h"
 #include "terminal.h"
+#include "file_sys.h"
 #define RUN_TESTS
 
 /* Function Declaration */
@@ -223,6 +224,8 @@ void entry(unsigned long magic, unsigned long addr) {
 
     /*Init IDT*/
     init_IDT();
+
+    file_sys_init((module_t *)mbi->mods_addr);
 
     /* Enable interrupts */
 

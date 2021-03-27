@@ -305,11 +305,11 @@ int file_system_test() {
     // Print the root directory
     int32_t fd, ret_val, buf_size = 32;
     char buf[32+1]; // Maximum byte is 32 with a extra end character
-    if ((fd = dir_open((uint8_t *) "." ) == -1) {
+    if ((fd = dir_open((uint8_t *) "." ) == -1)) {
         printf("FAIL TO OPEN ROOT DIRECTORY\n");
         return FAIL;
     }
-    while (ret_val=dir_read(fd, buf, buf_size)) {
+    while ((ret_val=dir_read(fd, buf, buf_size))!=0) {
         if (ret_val == -1) {
             printf("FAILED TO READ\n");
             return FAIL;
@@ -424,5 +424,5 @@ void launch_tests(){
 //    TEST_OUTPUT("system_call_test", system_call_test());
 //    TEST_OUTPUT("dereference_test2", deref_test2());
 
-    TEST_OUTPUT("rtc_test2", rtc_test2());
+    TEST_OUTPUT("rtc_test2", file_system_test());
 }
