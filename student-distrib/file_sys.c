@@ -1,14 +1,15 @@
 #include "file_sys.h"
 #include "multiboot.h"
 #include "lib.h"
-
+#include "terminal.h"
+#include "rtc.h"
 /* global var */
 // block discription
 static boot_block_t *bblock_ptr;
 static inode_block_t *inodes_arr;
 static data_block_t *dblocks_arr;
 
-// file array
+// file array (pcb)
 static int32_t n_opend_files = 2;   // the first and second pcb are for stdin and stdout
 static pcb_t pcb_arr[N_PCB_LIMIT];
 
@@ -41,6 +42,22 @@ int32_t file_sys_init(module_t *f_sys_mod) {
     file_op.close = file_close;
     file_op.read = file_read;
     file_op.write = file_write;
+
+    terminal_op.open =  terminal_open;
+    terminal_op.read =  terminal_read;
+    terminal_op.write =  terminal_write;
+    terminal_op.close =  terminal_close;
+
+    dir_op.open =  dir_open;
+    dir_op.read =  dir_read;
+    dir_op.write =  dir_write;
+    dir_op.close =  dir_close;
+
+    rtc_op.open =  file_rtc_open;
+    rtc_op.read =  file_rtc_read;
+    rtc_op.write =  file_rtc_write;
+    rtc_op.close =  file_rtc_close;
+
 
     pcb_arr[0].f_op = &terminal_op;
     pcb_arr[0].flags = 1;
@@ -266,4 +283,69 @@ int32_t file_write(int32_t fd, const void *buf, int32_t bufsize) {
 
     printf("ERROR [FILE]: cannot WRITE the read-only file\n");
     return -1;
+}
+
+
+/*************************Linkage Between RTC and RTC in file system***************/
+
+
+/**
+ * file_rtc_open
+ * Description: Just get a file descriptor in PCB for RTC
+ * Input: f_name - file name
+ * Output: the allocated fd
+ * Side effect: One posistion in the PCB is occupied
+ */
+int32_t file_rtc_open(const uint8_t *f_name) {
+    int32_t fd;
+    
+    if (rtc_open(NULL)!=0) return -1;
+    // obtain an available fd number
+    fd = allocate_fd();
+
+    // populate the block
+    pcb_arr[fd].f_op = &rtc_op;
+    pcb_arr[fd].inode_idx = 0;
+    pcb_arr[fd].f_pos = 0;  // the global cursor is at the beginning
+    // no need to fill flags
+
+    return fd;
+}
+
+
+/**
+ * file_rtc_close
+ * Description: close the RTC driver
+ * Input: fd - the file descriptor
+ * Output: 0 if success -1 if unccessful
+ * Side effect: release the place in pcb
+ */
+int32_t file_rtc_close(int32_t fd) {
+    if (file_close(fd)!=0 || rtc_close(fd)!=0) return -1;
+    return 0;
+}
+
+
+/**
+ * file_rtc_read
+ * Description: call rtc_read
+ * Input: fd - the file descriptor
+          buf - the buffer
+          bufsize - the number of bytes of a buffer
+ * Output: 0 if success
+ */
+int32_t file_rtc_read(int32_t fd, void *buf, int32_t bufsize) {
+    return rtc_read(fd, buf, bufsize);
+}
+
+/**
+ * file_rtc_write
+ * Description: call rtc_write
+ * Input: fd - the file descriptor
+          buf - the buffer
+          bufsize - the number of bytes of a buffer
+ * Output: 0 if success
+ */
+int32_t file_rtc_read(int32_t fd, void *buf, int32_t bufsize) {
+    return rtc_write(fd, buf, bufsize);
 }
