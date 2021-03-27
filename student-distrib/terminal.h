@@ -16,6 +16,7 @@
 // function declarations
 void keyboard_interrupt_handler();
 void terminal_initialization();
+void print_terminal_info();
 
 int32_t terminal_open(const uint8_t* filename);
 int32_t terminal_close(int32_t fd);

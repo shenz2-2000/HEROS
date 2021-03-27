@@ -111,6 +111,33 @@ void terminal_initialization(){
     }
 }
 
+void print_terminal_info(){
+    int i;
+    int fail_flag = 0;
+    printf("current key_buf_cnt is: %d\n",key_buf_cnt);
+    for(i = 0; i < KEYBOARD_BUF_SIZE; i++){
+        if(flag[i] != 0) {
+            fail_flag = 1;
+            break;
+        }
+    }
+
+    if(fail_flag == 1) printf("The flag array is wrong!!\n");
+    else printf("The flag array is correct!!\n");
+
+    fail_flag = 0;
+
+    for(i = 0; i < KEYBOARD_BUF_SIZE; i++){
+        if(keyboard_buf[i] != 0) {
+            fail_flag = 1;
+            break;
+        }
+    }
+
+    if(fail_flag == 1) printf("The keyboard buffer is wrong!!\n");
+    else printf("The keyboard buffer is correct!!\n");
+
+}
 
 /*
  * terminal_open
@@ -169,7 +196,7 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
         // prevent interrupt from modifying the line buffer
         cli();
         // detect enter
-        for(i = 0; i <= nbytes && (i <= key_buf_cnt - 1); i++){
+        for(i = 0; i <= nbytes && (i <= (key_buf_cnt - 1) ); i++){
             if(keyboard_buf[i] == '\n'){
                 j = i;
                 end_flag = 1;
@@ -178,7 +205,7 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
         }
 
         // no enter but nbytes have been written
-        if(end_flag != 1 && (i >= nbytes - 1)) {
+        if(end_flag != 1 && (i >= nbytes)) {
             j = nbytes;
             end_flag = 1;
         }

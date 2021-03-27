@@ -1,6 +1,7 @@
 #include "tests.h"
 #include "x86_desc.h"
 #include "lib.h"
+#include "terminal.h"
 
 #define PASS 1
 #define FAIL 0
@@ -237,6 +238,60 @@ int rtc_test() {
     return PASS;
 }
 
+/* terminal Test
+ *
+ * receive 1024 interrupts
+ * Inputs: None
+ * Outputs: PASS/FAIL
+ * Side Effects: None
+ * Coverage: terminal
+ * Files: kernel.c
+ */
+int terminal_test(){
+    TEST_HEADER;
+    char user_buffer[KEYBOARD_BUF_SIZE];
+    uint8_t test_filename;
+    int i,j,k;
+
+    printf("-----------Terminal initialization test starts-------------\n");
+    i = terminal_open(&test_filename);
+    printf("the return value of open is: %d\n",i);
+    print_terminal_info();
+
+    printf("---------------Terminal read test starts-----------------\n");
+    i = terminal_read(0,user_buffer,-2);
+    if(i < 0)  printf("the invalid input could be rejected!\n");
+    else  printf("the invalid input could not be rejected!\n");
+
+    printf("please input at most 10 characters before pressing enter\n");
+    printf("\n");
+    terminal_read(0,user_buffer,10);
+    for(i = 0; i < 10; i++){
+        printf("%d th char in user buffer is: %d ",i,user_buffer[i]);
+    }
+
+    printf("please input 9 characters then pressing enter\n");
+    terminal_read(0,user_buffer,250);
+    for(i = 0; i < 8; i++){
+        printf("%d c is: %d ",i,user_buffer[i]);
+    }
+
+    printf("---------------Terminal write test starts-----------------\n");
+    for(i = 0; i < KEYBOARD_BUF_SIZE; i++){
+        user_buffer[i] = 48 + (i % 15);
+    }
+
+//    terminal_write(0,user_buffer,KEYBOARD_BUF_SIZE);
+    terminal_write(0,user_buffer,10);
+
+
+    return PASS;
+
+}
+
+
+
+
 /* System Call Test
  *
  * int $0x80
@@ -267,9 +322,9 @@ static inline int system_call_test() {
 /* Test suite entry point */
 void launch_tests(){
     /* following tests should not raise exception */
-    TEST_OUTPUT("idt_test", idt_test());
-    TEST_OUTPUT("rtc_test", rtc_test());
-    TEST_OUTPUT("page_test", page_test());
+    TEST_OUTPUT("terminal_test", terminal_test());
+//    TEST_OUTPUT("rtc_test", rtc_test());
+//    TEST_OUTPUT("page_test", page_test());
 
     /* test_interrupts() called by rtc_interrupt_handler() in kernel.c */
 
