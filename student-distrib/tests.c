@@ -2,6 +2,7 @@
 #include "x86_desc.h"
 #include "lib.h"
 #include "terminal.h"
+#include "rtc.h"
 
 #define PASS 1
 #define FAIL 0
@@ -289,9 +290,6 @@ int terminal_test(){
 
 }
 
-
-
-
 /* System Call Test
  *
  * int $0x80
@@ -322,8 +320,8 @@ static inline int system_call_test() {
 /* Test suite entry point */
 void launch_tests(){
     /* following tests should not raise exception */
-    TEST_OUTPUT("terminal_test", terminal_test());
-//    TEST_OUTPUT("rtc_test", rtc_test());
+//    TEST_OUTPUT("terminal_test", terminal_test());
+//    TEST_OUTPUT("rtc_test2", rtc_test2());
 //    TEST_OUTPUT("page_test", page_test());
 
     /* test_interrupts() called by rtc_interrupt_handler() in kernel.c */
