@@ -111,6 +111,14 @@ void terminal_initialization(){
     }
 }
 
+/*
+ * print_terminal_info
+ *   DESCRIPTION: For test, print some sentences
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: none
+ */
 void print_terminal_info(){
     int i;
     int fail_flag = 0;
