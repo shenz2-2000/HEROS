@@ -9,32 +9,19 @@
 #include "debug.h"
 #include "tests.h"
 #include "rtc.h"
-
+#include "terminal.h"
 #define RUN_TESTS
 
 /* Function Declaration */
 void idt_init();
-void keyboard_interrupt_handler();
 
 /* Declaration of constant in interrupt */
-#define KEYBOARD_PORT 0x60
-#define KEY_BOARD_PRESSED 0x60
+#define RTC_PORT_0    0x70
+#define RTC_PORT_1    0x71
+#define RTC_LIMIT         10000 
 #define IDT_ENTRY_KEYBOARD 0x21
 #define IDT_ENTRY_RTC 0x28
 #define IDT_SYSTEM_CALL 0x80
-// Using scan code set 1 for we use "US QWERTY" keyboard
-// The table transform scan code to the echo character
-static const char scan_code_table[128] = {
-        0, 0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 0,      /* 0x00 - 0x0E */
-        0, 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',      /* 0x0F - 0x1C */
-        0, 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`',           /* 0x1D - 0x29 */
-        0, '\\', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', 0, 0,          /* 0x2A - 0x37 */
-        0, ' ', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                            /* 0x38 - 0x46 */
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,                                    /* 0x47 - 0x53 */
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0                                        /* 0x54 - 0x80 */
-};
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -255,22 +242,4 @@ void entry(unsigned long magic, unsigned long addr) {
     asm volatile (".1: hlt; jmp .1;");
 }
 
-/*
- * keyboard_interrupt
- *   DESCRIPTION: Handle the interrupt from keyboard
- *   INPUTS: scan code from port 0x60
- *   OUTPUTS: none
- *   RETURN VALUE: none
- *   SIDE EFFECTS: interrupt
- */
-
-void keyboard_interrupt_handler() {
-    cli();
-    uint8_t input = inb(KEYBOARD_PORT);
-    // Get input from keyboard and check whether the scan code can be output
-    if (input < KEY_BOARD_PRESSED)
-        if (scan_code_table[input])
-            putc(scan_code_table[input]);
-    sti();
-}
 
