@@ -14,6 +14,9 @@ static pcb_t pcb_arr[N_PCB_LIMIT];
 
 // op table
 static file_operations_t file_op;
+static file_operations_t terminal_op;
+static file_operations_t rtc_op;
+static file_operations_t dir_op;
 
 /**
  * file_sys_init
@@ -33,14 +36,23 @@ int32_t file_sys_init(module_t *f_sys_mod) {
     inodes_arr = ((inode_block_t*)(f_sys_mod->mod_start)) + 1;
     dblocks_arr = ((boot_block_t*)(f_sys_mod->mod_start)) + bblock_ptr->n_inodes + 1;
 
-    // init the pcb_arr
-    for (i = 2; i < N_PCB_LIMIT; i++) pcb_arr[i].flags = 0;
-
     // init the file operations
     file_op.open = file_open;
     file_op.close = file_close;
     file_op.read = file_read;
     file_op.write = file_write;
+
+    pcb_arr[0].f_op = &terminal_op;
+    pcb_arr[0].flags = 1;
+    pcb_arr[0].f_pos = 0;
+    pcb_arr[0].inode_idx = 0;
+    pcb_arr[1].f_op = &terminal_op;
+    pcb_arr[1].flags = 1;
+    pcb_arr[1].f_pos = 0;   // FIXME: what should be the position???
+    pcb_arr[1].inode_idx = 1;
+
+    // init the pcb_arr
+    for (i = 2; i < N_PCB_LIMIT; i++) pcb_arr[i].flags = 0;
 
     return 0;
 }

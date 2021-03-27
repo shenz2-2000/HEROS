@@ -25,7 +25,7 @@ typedef struct file_operations {
 
 // process control block (PCB), entries in the file array
 typedef struct pcb {
-    file_operations_t *f_op;
+    file_operations_t *f_op;    // the file operation table
     uint32_t inode_idx;
     uint32_t f_pos;
     uint32_t flags;     // 1 if in use, 0 not in use
