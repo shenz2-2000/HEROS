@@ -3,6 +3,7 @@
 #include "lib.h"
 #include "terminal.h"
 #include "rtc.h"
+#include "file_sys.h"
 
 #define PASS 1
 #define FAIL 0
@@ -288,6 +289,23 @@ int terminal_test(){
 
     return PASS;
 
+}
+
+/* file_system_test
+ *
+ * Test our file system
+ * Inputs: None
+ * Outputs: PASS/FAIL
+ * Side Effects: None
+ * Coverage: File System
+ * Files: file_sys.c
+ */
+int file_system_test() {
+    TEST_HEADER;
+    // Print the root directory
+    int32_t fd;
+    char buf[32+1]; // Maximum byte is 32 with a extra end character
+    return PASS;
 }
 
 /* System Call Test
