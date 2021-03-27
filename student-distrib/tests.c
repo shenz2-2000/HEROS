@@ -303,8 +303,28 @@ int terminal_test(){
 int file_system_test() {
     TEST_HEADER;
     // Print the root directory
-    int32_t fd;
+    int32_t fd, ret_val, buf_size = 32;
     char buf[32+1]; // Maximum byte is 32 with a extra end character
+    if ((fd = dir_open((uint8_t *) "." ) == -1) {
+        printf("FAIL TO OPEN ROOT DIRECTORY\n");
+        return FAIL;
+    }
+    while (ret_val=dir_read(fd, buf, buf_size)) {
+        if (ret_val == -1) {
+            printf("FAILED TO READ\n");
+            return FAIL;
+        }
+        if (terminal_write(1, buf, ret_val) == -1) {
+            printf("FAILED TO WRITE TO STDOUT\n");
+            return FAIL;
+        }
+        dentry_t my_file;
+        if (read_dentry_by_name((uint8_t*)buf, &my_file) == -1) {
+            printf("File not found\n");
+            return FAIL;
+        }   
+        // printf("File type: %d and file size :%dB\n", file.file_type)
+    }
     return PASS;
 }
 
