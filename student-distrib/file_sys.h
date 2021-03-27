@@ -15,6 +15,9 @@
 
 #define N_PCB_LIMIT     8
 
+#define OCCUPIED  1
+#define AVAILABLE 0
+
 // file operation table
 typedef struct file_operations {
     int32_t (*open) (const uint8_t *f_name);
@@ -68,5 +71,12 @@ int32_t file_open(const uint8_t *f_name);
 int32_t file_close(int32_t fd);
 int32_t file_read(int32_t fd, void *buf, int32_t bufsize);
 int32_t file_write(int32_t fd, const void *buf, int32_t bufsize);
-
+int32_t dir_write(int32_t fd, const void* buf, int32_t nbytes);
+int32_t dir_close(int32_t fd);
+int32_t dir_open(const uint8_t *filename);
+int32_t dir_read(int32_t fd, void *buf, int32_t nbytes);
+int32_t file_rtc_open(const uint8_t *f_name);
+int32_t file_rtc_close(int32_t fd);
+int32_t file_rtc_read(int32_t fd, void *buf, int32_t bufsize);
+int32_t file_rtc_write(int32_t fd, void *buf, int32_t bufsize);
 #endif      // FILE_SYS_H

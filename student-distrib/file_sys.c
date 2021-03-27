@@ -286,6 +286,92 @@ int32_t file_write(int32_t fd, const void *buf, int32_t bufsize) {
 }
 
 
+//-------------------------------------DIRECTORY OPERATIONS-----------------------------------
+
+/**
+ * dir_write
+ * Description: no need to do anything
+ * Input: fd - the file descriptor
+          buf - the buffer
+          nbytes - the number of bytes of a buffer
+ * Output: -1 fail
+ * Side effect: none
+ */
+int32_t dir_write(int32_t fd, const void* buf, int32_t nbytes){
+    // just to avoid warning
+    fd++;
+    nbytes++;
+    (uint8_t*) buf;
+    // do not need to do anything meaningful
+    return -1;
+
+}
+
+/**
+ * dir_close
+ * Description: call file_close
+ * Input: fd - the file descriptor
+ * Output: 0 : success
+ * Side effect: none
+ */
+int32_t dir_close(int32_t fd){
+    // call file_close to reset flag
+    file_close(fd);
+    return 0;
+}
+
+/**
+ * dir_open
+ * Description: call file_close
+ * Input: filename -- no need to use
+ * Output: cur_fd -- the newly opened fd
+ * Side effect: none
+ */
+int32_t dir_open(const uint8_t *filename){
+    // we do not need to use filename, since this is a single level file system
+    int32_t cur_fd = allocate_fd();
+
+    // initialize the pcb array entry
+    pcb_arr[cur_fd].inode_idx = 0;
+    pcb_arr[cur_fd].f_pos = 0;
+    pcb_arr[cur_fd].flags = OCCUPIED;
+    pcb_arr[cur_fd].f_op = &dir_op;
+
+    // we could use this to read file names under the '.' directory
+    return cur_fd;
+
+}
+
+/**
+ * dir_read
+ * Description: call file_close
+ * Input: fd -- file descriptor
+ *        buf -- the user buffer
+ *        nbytes -- number of bytes user wants
+ * Output: number of bytes actually copy
+ * Side effect: none
+ */
+int32_t dir_read(int32_t fd, void *buf, int32_t nbytes){
+
+    // cur file position to read
+    int cur_pos = pcb_arr[fd].f_pos;
+    cur_pos++;
+
+    // check the #bytes to read
+    nbytes = (nbytes > F_NAME_LIMIT) ? F_NAME_LIMIT : nbytes;
+
+    // sanity check
+    if( cur_pos >= ( bblock_ptr->n_dentries - 1 ) ) return 0;
+
+    // copy to buffer
+    strncpy(buf, (int8_t *) (bblock_ptr->dentries[cur_pos].f_name), nbytes);
+    pcb_arr[fd].f_pos = cur_pos;
+
+    return nbytes;
+
+}
+
+
 /*************************Linkage Between RTC and RTC in file system***************/
 
 
@@ -346,6 +432,6 @@ int32_t file_rtc_read(int32_t fd, void *buf, int32_t bufsize) {
           bufsize - the number of bytes of a buffer
  * Output: 0 if success
  */
-int32_t file_rtc_read(int32_t fd, void *buf, int32_t bufsize) {
+int32_t file_rtc_write(int32_t fd, void *buf, int32_t bufsize) {
     return rtc_write(fd, buf, bufsize);
 }
