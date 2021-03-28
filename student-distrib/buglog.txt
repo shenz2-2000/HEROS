@@ -2,44 +2,61 @@
 
 ## CP 3.1
 
-    * BUG1 - in i8259.c, the interrupt of master irq port 2 (the cascaded port to the slave) is not enabled whenever the slave port is enabled. Instead, this cascaded port has to be enabled individually and in the initialization this port is indeed enabled. This may cause a problem because if this cascaded port is disabled, the slave lines may have no chance to be enabled.
-    * FIX - add a enablement of this cascaded port whenever a slave interrupt line is enabled.
+    * BUG1 - in i8259.c, the interrupt of master irq port 2 (the cascaded port to the slave) is not enabled whenever 
+             the slave port is enabled. Instead, this cascaded port has to be enabled individually and in the 
+             initialization this port is indeed enabled. This may cause a problem because if this cascaded port is 
+             disabled, the slave lines may have no chance to be enabled.
+    * FIX  - add a enablement of this cascaded port whenever a slave interrupt line is enabled.
 
-    * BUG2 - in i8259.c, there are 3 functions with input parameters, but without exception checking. For example, if the irq_num which is larger than 16 is transferred, there is no coping mechanism and there may have problems.
-    * FIX - add a input check so that if a invalid parameter is input, the function will directly returned and do nothing.
+    * BUG2 - in i8259.c, there are 3 functions with input parameters, but without exception checking. For example, 
+             if the irq_num which is larger than 16 is transferred, there is no coping mechanism and there may have problems.
+    * FIX  - add a input check so that if a invalid parameter is input, the function will directly returned and do nothing.
 
     * BUG3 - in i8259.c, a small problem arises because a single function call mismatches the function name (enable_irq). 
-    * FIX - fix the function call name.
+    * FIX  - fix the function call name.
 
-    * BUG4 - in kernal.c, we found that rtc do not work. After checking the code, we found that outb argument format shold be (data, port) rather than (port, data)
-    * FIX - switch the order of arguments and solve this problem
+    * BUG4 - in kernal.c, we found that rtc do not work. After checking the code, we found that outb argument format shold 
+             be (data, port) rather than (port, data)
+    * FIX  - switch the order of arguments and solve this problem
 
-    * BUG5 - in boot.S, in function init_page_register, we need to set the initial value of CR0,CR3,CR4. We set CR0 firstly, then the other two, which will lead to crash of kernel. Since we fill the directory firstly, and the first entry of directory is indicating a 4MB page.
-    * FIX - switch the initialization order of the three registers and set CR0 in the end.
+    * BUG5 - in boot.S, in function init_page_register, we need to set the initial value of CR0,CR3,CR4. We set CR0 firstly, 
+             then the other two, which will lead to crash of kernel. Since we fill the directory firstly, and the first 
+             entry of directory is indicating a 4MB page.
+    * FIX  - switch the initialization order of the three registers and set CR0 in the end.
 
-    * BUG6 - in kernel.c, in function init_IDT, after we fill the whole IDT table, we forget to load IDTR. That will also leads to crash of the kernel.
-    * FIX - call the lidt function at the end of init_IDT
+    * BUG6 - in kernel.c, in function init_IDT, after we fill the whole IDT table, we forget to load IDTR. That will also 
+             leads to crash of the kernel.
+    * FIX  - call the lidt function at the end of init_IDT
 
 ## CP 3.2
 
     * BUG1 - in terminal.c, we use a variable "capital" to indicate the current situation whether the letter should be capital.
-    And we ignore that if we only press caplock, we will not print out the shifted character of the nums.
-    * FIX - Use a new variable "shift_on" to indicate that only shift is pressed.
+             And we ignore that if we only press caplock, we will not print out the shifted character of the nums.
+    * FIX  - Use a new variable "shift_on" to indicate that only shift is pressed.
 
     * BUG2 - in the rtc.c, writ() fails to prevent some illegal frequencies.
-    * FIX - There are two causes. One is that I made a mistake in calculating the min_rate (highest frequency). The
-    * is that I previously clipped illegal value instead of returning -1.
+    * FIX  - There are two causes. One is that I made a mistake in calculating the min_rate (highest frequency). The
+             is that I previously clipped illegal value instead of returning -1.
 
     * BUG3 - in terminal.c, firstly we ignore the exit number of for loop. That is, we set for(i=0;i<= nbytes;i++), but
-    * we forget, after the loop, i is nbytes+1. The result is, if we want to read 10 characters, only 9 will be read.
-    * FIX - We subtract 1 from i after the loop if it reaches the end of the loop.s
+             we forget, after the loop, i is nbytes+1. The result is, if we want to read 10 characters, only 9 will be read.
+    * FIX  - We subtract 1 from i after the loop if it reaches the end of the loop.s
 
-    * BUG4 - in lib.c, when we update the position of cursor, firstly the system will return with noting printed on
-    * screen.
-    * FIX - we forget the order of port and data in OUTB. So we just change the order and then the cursor behaves normally.s
+    * BUG4 - in lib.c, when we update the position of cursor, firstly the system will return with noting printed on screen.
+    * FIX  - we forget the order of port and data in OUTB. So we just change the order and then the cursor behaves normally.s
 
+    * BUG5 - in test, when we open a file, the file descriptor is always 0, though in the file_open function it's not.
+             therefore, when we want to close this file, it will say that we cannot close stdin.
+    * FIX  - in the test function, the expression fd = sys_open((uint8_t *) valid_test_file[i] ) == -1 will firstly compute
+             the result of bool operation, then assign it to fd. So fd is always 0. It's fixed by simply add a pair of parentheses.
 
+    * BUG6 - Whenever initialize the file system, a exception with number 14 will occur. This exception corresponds to page fault, 
+             So maybe some memory position is accessed wrongly.
+    * FIX  - we have to first initialize the file system then the paging in the entry function. Or the file system may be changed
+             by the paging system and cause the paging fault.
 
+    * BUG7 - in some wrappers like dir_write, the arguments are not used, causing some warnings while compiling.
+    * FIX  - we found a magic expression like "(void) fd" to use the arguments nominally to avoid warnings.
 
-
-
+    * BUG8 - a collection of bugs of small typos and missing of headers.
+    * FIX  - using printf() and gdb to locate these bugs and correct them correspondingly.

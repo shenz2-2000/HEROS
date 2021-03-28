@@ -58,7 +58,7 @@ int32_t file_sys_init(module_t *f_sys_mod) {
     rtc_op.write =  file_rtc_write;
     rtc_op.close =  file_rtc_close;
 
-
+    // init the pcb_arr
     pcb_arr[0].f_op = &terminal_op;
     pcb_arr[0].flags = 1;
     pcb_arr[0].f_pos = 0;
@@ -68,7 +68,6 @@ int32_t file_sys_init(module_t *f_sys_mod) {
     pcb_arr[1].f_pos = 1;   // FIXME: what should be the position???
     pcb_arr[1].inode_idx = 1;
 
-    // init the pcb_arr
     for (i = 2; i < N_PCB_LIMIT; i++) pcb_arr[i].flags = 0;
 
     return 0;
@@ -300,8 +299,9 @@ int32_t file_read(int32_t fd, void *buf, int32_t bufsize) {
  * Side effect: an error will be promped
  */
 int32_t file_write(int32_t fd, const void *buf, int32_t bufsize) {
+    // avoid warning
     int32_t temp;
-    temp = fd + bufsize;    // avoid warning
+    temp = fd + bufsize;    
     (void) fd;
 
     printf("ERROR [FILE]: cannot WRITE the read-only file\n");
@@ -316,14 +316,14 @@ int32_t file_write(int32_t fd, const void *buf, int32_t bufsize) {
  * Description: no need to do anything
  * Input: fd - the file descriptor
           buf - the buffer
-          nbytes - the number of bytes of a buffer
+          bufsize - the number of bytes of a buffer
  * Output: -1 fail
  * Side effect: none
  */
-int32_t dir_write(int32_t fd, const void* buf, int32_t nbytes){
+int32_t dir_write(int32_t fd, const void* buf, int32_t bufsize){
     // just to avoid warning
     fd++;
-    nbytes++;
+    bufsize++;
     (void) buf;
     // do not need to do anything meaningful
     return -1;
@@ -346,11 +346,11 @@ int32_t dir_close(int32_t fd){
 /**
  * dir_open
  * Description: call file_close
- * Input: filename -- no need to use
+ * Input: f_name -- no need to use
  * Output: cur_fd -- the newly opened fd
  * Side effect: none
  */
-int32_t dir_open(const uint8_t *filename){
+int32_t dir_open(const uint8_t *f_name){
     // we do not need to use filename, since this is a single level file system
     int32_t cur_fd = allocate_fd();
 
@@ -370,27 +370,27 @@ int32_t dir_open(const uint8_t *filename){
  * Description: call file_close
  * Input: fd -- file descriptor
  *        buf -- the user buffer
- *        nbytes -- number of bytes user wants
+ *        bufsize -- number of bytes user wants
  * Output: number of bytes actually copy
  * Side effect: none
  */
-int32_t dir_read(int32_t fd, void *buf, int32_t nbytes){
+int32_t dir_read(int32_t fd, void *buf, int32_t bufsize){
 
     // cur file position to read
     int cur_pos = pcb_arr[fd].f_pos;
     cur_pos++;
 
     // check the #bytes to read
-    nbytes = (nbytes > F_NAME_LIMIT) ? F_NAME_LIMIT : nbytes;
+    bufsize = (bufsize > F_NAME_LIMIT) ? F_NAME_LIMIT : bufsize;
 
     // sanity check
     if( cur_pos > ( bblock_ptr->n_dentries - 1 ) ) return 0;
 
     // copy to buffer
-    strncpy(buf, (int8_t *) (bblock_ptr->dentries[cur_pos].f_name), nbytes);
+    strncpy(buf, (int8_t *) (bblock_ptr->dentries[cur_pos].f_name), bufsize);
     pcb_arr[fd].f_pos = cur_pos;
 
-    return nbytes;
+    return bufsize;
 
 }
 
