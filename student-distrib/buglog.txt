@@ -20,6 +20,24 @@
     * BUG6 - in kernel.c, in function init_IDT, after we fill the whole IDT table, we forget to load IDTR. That will also leads to crash of the kernel.
     * FIX - call the lidt function at the end of init_IDT
 
+## CP 3.2
+
+    * BUG1 - in terminal.c, we use a variable "capital" to indicate the current situation whether the letter should be capital.
+    And we ignore that if we only press caplock, we will not print out the shifted character of the nums.
+    * FIX - Use a new variable "shift_on" to indicate that only shift is pressed.
+
+    * BUG2 - in the rtc.c, writ() fails to prevent some illegal frequencies.
+    * FIX - There are two causes. One is that I made a mistake in calculating the min_rate (highest frequency). The
+    * is that I previously clipped illegal value instead of returning -1.
+
+    * BUG3 - in terminal.c, firstly we ignore the exit number of for loop. That is, we set for(i=0;i<= nbytes;i++), but
+    * we forget, after the loop, i is nbytes+1. The result is, if we want to read 10 characters, only 9 will be read.
+    * FIX - We subtract 1 from i after the loop if it reaches the end of the loop.s
+
+    * BUG4 - in lib.c, when we update the position of cursor, firstly the system will return with noting printed on
+    * screen.
+    * FIX - we forget the order of port and data in OUTB. So we just change the order and then the cursor behaves normally.s
+
 
 
 
