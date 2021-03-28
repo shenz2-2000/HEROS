@@ -343,6 +343,33 @@ static inline int system_call_test() {
     return FAIL;
 }
 
+int sys_file_op_test() {
+    TEST_HEADER;
+    // Print the root directory
+    int32_t fd, ret_val, buf_size = 32;
+    char buf[32+1];
+    if ((fd = sys_open((uint8_t *) ".") == -1)) {
+        printf("FAIL TO OPEN ROOT DIRECTORY\n");
+        return FAIL;
+    }
+    while ((ret_val = sys_read(fd, buf, buf_size)) != 0) {
+        if (ret_val == -1) {
+            printf("FAILED TO READ\n");
+            return FAIL;
+        }
+        if (sys_write(1, buf, ret_val) == -1) {
+            printf("FAILED TO WRITE TO STDOUT\n");
+            return FAIL;
+        }
+        dentry_t my_file;
+        if (read_dentry_by_name((uint8_t*)buf, &my_file) == -1) {
+            printf("File not found\n");
+            return FAIL;
+        }
+    }
+    return PASS;
+}
+
 /* Checkpoint 2 tests */
 
 /* RTC Test2
