@@ -16,6 +16,25 @@ static int screen_y;
 static char* video_mem = (char *)VIDEO;
 
 
+
+/* update_cursor
+ * Description: update the cursor position
+ * Inputs: x -- x position
+ *         y -- y position
+ * Return Value: none
+ * Function: write to video memory */
+void update_cursor(int x, int y){
+    uint16_t  pos = y* NUM_COLS + x;
+
+    // update the new position
+    outb(0x0F,0x3D4);
+    outb((uint8_t) (pos & 0xFF), 0x3D5);
+    outb(0x0E,0x3D4);
+    outb((uint8_t) ( ( pos >> 8) & 0xFF), 0x3D5);
+}
+
+
+
 /* void set_blue_screen(void);
  * Description: Set the whole screen into blue
  * Inputs: void
@@ -64,6 +83,8 @@ void delete_last(void) {
         screen_x = NUM_COLS;
         while(*(uint8_t *)(video_mem+((screen_x-1+screen_y*NUM_COLS)<<1))==0) --screen_x;
     }
+    // update the cursor position
+    update_cursor(screen_x,screen_y);
 }
 
 /* void reset_screen(void);
@@ -231,6 +252,7 @@ void putc(uint8_t c) {
                     *(uint8_t *)(video_mem+((NUM_COLS*i+j)<<1)+1) = ATTRIB;
                 }
             screen_y--;
+            update_cursor(screen_x,screen_y);
         }
     } else {
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;
@@ -244,6 +266,7 @@ void putc(uint8_t c) {
                     *(uint8_t *)(video_mem+((NUM_COLS*i+j)<<1)+1) = ATTRIB;
                 }
             screen_y--;
+//            update_cursor(screen_x,screen_y);
         }
 
 ////       screen_x %= NUM_COLS;
@@ -252,10 +275,12 @@ void putc(uint8_t c) {
        if (screen_x == NUM_COLS){
            screen_x = 0;
            screen_y += 1;
+           update_cursor(screen_x,screen_y);
        }
        else{
            screen_x %= NUM_COLS;
            screen_y = (screen_y + (screen_x / NUM_COLS)) % NUM_ROWS;
+           update_cursor(screen_x,screen_y);
        }
 
     }
