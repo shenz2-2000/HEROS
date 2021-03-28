@@ -65,7 +65,7 @@ int32_t file_sys_init(module_t *f_sys_mod) {
     pcb_arr[0].inode_idx = 0;
     pcb_arr[1].f_op = &terminal_op;
     pcb_arr[1].flags = 1;
-    pcb_arr[1].f_pos = 0;   // FIXME: what should be the position???
+    pcb_arr[1].f_pos = 1;   // FIXME: what should be the position???
     pcb_arr[1].inode_idx = 1;
 
     // init the pcb_arr
@@ -169,6 +169,26 @@ int32_t read_data(uint32_t inode, uint32_t offset, uint8_t *buf, uint32_t bufsiz
     }
 
     return bytes_cnt;
+}
+
+/**
+ * read_dentry_by_inode
+ * Description: read the dentry by the inode index
+ * Input: fname - the dentry index
+          dentry - the dentry struct
+ * Output: 0 if success, -1 if not.
+ * Side effect: the dentry pointer will be filled with output
+ */
+int32_t read_dentry_by_inode(uint32_t inode, dentry_t *dentry) {
+    int i;
+    // iterate all the directory entries
+    for (i = 0; i < bblock_ptr->n_dentries; i++) {
+        if (inode == bblock_ptr->dentries[i].inode_idx) {   // 0 means they are the same
+            *dentry = bblock_ptr->dentries[i];
+            return 0;
+        }
+    }
+    return -1;
 }
 
 /**
@@ -511,6 +531,12 @@ int32_t sys_read(int32_t fd, void *buf, int32_t bufsize) {
         printf("WARNING [SYS FILE] in sys_read: cannot READ a file that is not opened. fd: %d\n", fd);
         return 0;   // not a serious error
     }
+
+    /* for debug */
+    // dentry_t dentry;
+    // read_dentry_by_inode(pcb_arr[fd].inode_idx, &dentry);
+    // printf("In file_test: Now the file type is %d\n", dentry.f_type);
+
     return pcb_arr[fd].f_op->read(fd, buf, bufsize);
 }
 
