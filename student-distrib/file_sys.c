@@ -164,7 +164,7 @@ int32_t read_data(uint32_t inode, uint32_t offset, uint8_t *buf, uint32_t bufsiz
             dblock_vir_idx++;
             dblock_phy_idx = inodes_arr[inode].data_block_idx[dblock_vir_idx];
             // if the next block is not valid, meaning the file length is reached
-            if (dblock_phy_idx >= bblock_ptr->n_dblocks) break;
+            if (dblock_phy_idx >= bblock_ptr->n_dblocks) return -1;
         }
     }
 

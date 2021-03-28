@@ -306,6 +306,33 @@ static inline int system_call_test() {
     return FAIL;
 }
 
+int sys_file_op_test() {
+    TEST_HEADER;
+    // Print the root directory
+    int32_t fd, ret_val, buf_size = 32;
+    char buf[32+1];
+    if ((fd = sys_open((uint8_t *) ".") == -1)) {
+        printf("FAIL TO OPEN ROOT DIRECTORY\n");
+        return FAIL;
+    }
+    while ((ret_val = sys_read(fd, buf, buf_size)) != 0) {
+        if (ret_val == -1) {
+            printf("FAILED TO READ\n");
+            return FAIL;
+        }
+        if (sys_write(1, buf, ret_val) == -1) {
+            printf("FAILED TO WRITE TO STDOUT\n");
+            return FAIL;
+        }
+        dentry_t my_file;
+        if (read_dentry_by_name((uint8_t*)buf, &my_file) == -1) {
+            printf("File not found\n");
+            return FAIL;
+        }
+    }
+    return PASS;
+}
+
 /* Checkpoint 2 tests */
 
 /* RTC Test2
@@ -326,11 +353,6 @@ int rtc_test2() {
     int fd;
     fd = rtc_open((uint8_t *) "fn");
 
-    // default frequency
-    printf("Waiting 2 interrupts with RTC at 2 hz...\n");
-    rtc_read(fd, NULL, 0);
-    rtc_read(fd, NULL, 0);
-
     // test under valid frequencies
     for (i = 0; i < 9; i++) {   // 9: the number of valid frequency in our test
         freq = frequencies[i];
@@ -339,24 +361,36 @@ int rtc_test2() {
             result = FAIL;
         }
         printf("Waiting %u interrupts with RTC at %u hz...\n", freq, freq);
-        for (j = 0; j < frequencies[i]; j++) rtc_read(fd, NULL, 0);
+        for (j = 0; j < frequencies[i]; j++) {
+            rtc_read(fd, NULL, 0);
+            printf("1");
+        }
+        printf("\n");
     }
+
+    // ret to default frequency
+    fd = rtc_open((uint8_t *) "fn");
+    printf("Waiting 2 interrupts with RTC at 2 hz...\n");
+    rtc_read(fd, NULL, 0);
+    printf("1");
+    rtc_read(fd, NULL, 0);
+    printf("1\n");
 
     // test under invalid frequencies
     freq = 1;
     if (rtc_write(fd, &freq, 4) == 0) {
         result = FAIL;
-        printf("Illegal frequency value %u!", freq);
+        printf("Illegal frequency value %u!\n", freq);
     }
     freq = 18;
     if (rtc_write(fd, &freq, 4) == 0) {
         result = FAIL;
-        printf("Illegal frequency value %u!", freq);
+        printf("Illegal frequency value %u!\n", freq);
     }
     freq = 2048;
     if (rtc_write(fd, &freq, 4) == 0) {
         result = FAIL;
-        printf("Illegal frequency value %u!", freq);
+        printf("Illegal frequency value %u!\n", freq);
     }
 
     rtc_close(fd);
@@ -460,6 +494,6 @@ void launch_tests(){
 //    TEST_OUTPUT("system_call_test", system_call_test());
 //    TEST_OUTPUT("dereference_test2", deref_test2());
 
-//    TEST_OUTPUT("rtc_test2", rtc_test2());
-    TEST_OUTPUT("file_system_test", file_system_test());
+    TEST_OUTPUT("rtc_test2", rtc_test2());
+//    TEST_OUTPUT("file_system_test", file_system_test());
 }
