@@ -206,9 +206,6 @@ void entry(unsigned long magic, unsigned long addr) {
         ltr(KERNEL_TSS);
     }
 
-    /* init paging */
-    fill_page();
-    init_page_register();
 
     /* Init the PIC */
     i8259_init();
@@ -226,6 +223,10 @@ void entry(unsigned long magic, unsigned long addr) {
     init_IDT();
 
     file_sys_init((module_t *)mbi->mods_addr);
+
+    /* init paging */
+    fill_page();
+    init_page_register();
 
     /* Enable interrupts */
 

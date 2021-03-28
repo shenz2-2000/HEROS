@@ -363,7 +363,7 @@ int32_t dir_read(int32_t fd, void *buf, int32_t nbytes){
     nbytes = (nbytes > F_NAME_LIMIT) ? F_NAME_LIMIT : nbytes;
 
     // sanity check
-    if( cur_pos >= ( bblock_ptr->n_dentries - 1 ) ) return 0;
+    if( cur_pos > ( bblock_ptr->n_dentries - 1 ) ) return 0;
 
     // copy to buffer
     strncpy(buf, (int8_t *) (bblock_ptr->dentries[cur_pos].f_name), nbytes);
