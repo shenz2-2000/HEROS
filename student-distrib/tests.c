@@ -424,5 +424,6 @@ void launch_tests(){
 //    TEST_OUTPUT("system_call_test", system_call_test());
 //    TEST_OUTPUT("dereference_test2", deref_test2());
 
-    TEST_OUTPUT("rtc_test2", file_system_test());
+//    TEST_OUTPUT("rtc_test2", rtc_test2());
+    TEST_OUTPUT("file_system_test", file_system_test());
 }
