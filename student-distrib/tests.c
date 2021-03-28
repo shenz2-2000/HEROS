@@ -291,43 +291,6 @@ int terminal_test(){
 
 }
 
-/* file_system_test
- *
- * Test our file system
- * Inputs: None
- * Outputs: PASS/FAIL
- * Side Effects: None
- * Coverage: File System
- * Files: file_sys.c
- */
-int file_system_test() {
-    TEST_HEADER;
-    // Print the root directory
-    int32_t fd, ret_val, buf_size = 32;
-    char buf[32+1]; // Maximum byte is 32 with a extra end character
-    if ((fd = dir_open((uint8_t *) "." ) == -1)) {
-        printf("FAIL TO OPEN ROOT DIRECTORY\n");
-        return FAIL;
-    }
-    while ((ret_val=dir_read(fd, buf, buf_size))!=0) {
-        if (ret_val == -1) {
-            printf("FAILED TO READ\n");
-            return FAIL;
-        }
-        if (terminal_write(1, buf, ret_val) == -1) {
-            printf("FAILED TO WRITE TO STDOUT\n");
-            return FAIL;
-        }
-        dentry_t my_file;
-        if (read_dentry_by_name((uint8_t*)buf, &my_file) == -1) {
-            printf("File not found\n");
-            return FAIL;
-        }   
-        // printf("File type: %d and file size :%dB\n", file.file_type)
-    }
-    return PASS;
-}
-
 /* System Call Test
  *
  * int $0x80
@@ -399,6 +362,79 @@ int rtc_test2() {
     rtc_close(fd);
     return result;
 }
+
+/* file_system_test
+ *
+ * Test our file system
+ * Inputs: None
+ * Outputs: PASS/FAIL
+ * Side Effects: None
+ * Coverage: File System
+ * Files: file_sys.c
+ */
+int file_system_test() {
+    TEST_HEADER;
+    // Print the root directory
+    int32_t fd, ret_val, buf_size = 32;
+    char buf[32+1]; // Maximum byte is 32 with a extra end character
+    if ((fd = dir_open((uint8_t *) "." ) == -1)) {
+        printf("FAIL TO OPEN ROOT DIRECTORY\n");
+        return FAIL;
+    }
+    printf("Now we test the directory file\n");
+    while ((ret_val=dir_read(fd, buf, buf_size))!=0) {  
+        if (ret_val == -1) {
+            printf("FAILED TO READ\n");
+            return FAIL;
+        }
+        if (terminal_write(1, buf, ret_val) == -1) {
+            printf("FAILED TO WRITE TO STDOUT\n");
+            return FAIL;
+        }
+        dentry_t my_file;
+        if (read_dentry_by_name((uint8_t*)buf, &my_file) == -1) {
+            printf("File not found\n");
+            return FAIL;
+        }   
+        printf("\n");
+        // printf("File type: %d and file size :%dB\n", file.file_type)
+    }
+
+    const char *valid_test_file[] = {"frame0.txt", "frame1.txt", "grep", "ls", 
+                     "fish", "verylargetextwithverylongname.tx"};
+
+
+    int i;
+    for (i = 0; i < sizeof(valid_test_file)/sizeof(const char *); ++i) {
+        printf("Press Enter to Continue\n");
+        terminal_read(0, &buf, buf_size);
+        clear();
+        reset_screen();
+        if ((fd = file_open((uint8_t *) valid_test_file[i] ) == -1)) {
+            printf("FAIL TO OPEN FILE\n");
+            return FAIL;
+        }
+        printf("Now we test the content of the file %s\n", valid_test_file[i]);
+        while (0!=(ret_val=file_read(fd, buf, buf_size))) {
+            if (ret_val==-1) {
+                printf("FAILED TO READ\n");
+                file_close(fd);
+                return FAIL;
+            }
+            if (terminal_write(1, buf, ret_val) == -1) {
+                printf("FAILED TO WRITE TO STDOUT\n");
+                file_close(fd);
+                return FAIL;
+            }
+            printf("\n");
+        }
+        file_close(fd);
+    }
+    
+    return PASS;
+}
+
+
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
