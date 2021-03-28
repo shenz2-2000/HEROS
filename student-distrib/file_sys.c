@@ -210,6 +210,7 @@ int32_t file_open(const uint8_t *f_name) {
 
     // obtain an available fd number
     fd = allocate_fd();
+    // printf("In file_open: Now the fd = %d\n", fd);
 
     // populate the block
     pcb_arr[fd].f_op = &file_op;

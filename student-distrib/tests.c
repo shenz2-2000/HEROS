@@ -440,14 +440,15 @@ int file_system_test() {
 
     int i;
     for (i = 0; i < sizeof(valid_test_file)/sizeof(const char *); ++i) {
-        printf("Press Enter to Continue\n");
+        printf("\nPress Enter to Continue\n");
         terminal_read(0, &buf, buf_size);
         clear();
         reset_screen();
-        if ((fd = file_open((uint8_t *) valid_test_file[i] ) == -1)) {
+        if ((fd = file_open((uint8_t *) valid_test_file[i] )) == -1) {
             printf("FAIL TO OPEN FILE\n");
             return FAIL;
         }
+        // printf("In file_test: Now the fd = %d\n", fd);
         printf("Now we test the content of the file %s\n", valid_test_file[i]);
         while (0!=(ret_val=file_read(fd, buf, buf_size))) {
             if (ret_val==-1) {
@@ -460,7 +461,7 @@ int file_system_test() {
                 file_close(fd);
                 return FAIL;
             }
-            printf("\n");
+            // printf("\n");
         }
         file_close(fd);
     }
@@ -494,6 +495,6 @@ void launch_tests(){
 //    TEST_OUTPUT("system_call_test", system_call_test());
 //    TEST_OUTPUT("dereference_test2", deref_test2());
 
-    TEST_OUTPUT("rtc_test2", rtc_test2());
-//    TEST_OUTPUT("file_system_test", file_system_test());
+    // TEST_OUTPUT("rtc_test2", rtc_test2());
+   TEST_OUTPUT("file_system_test", file_system_test());
 }
