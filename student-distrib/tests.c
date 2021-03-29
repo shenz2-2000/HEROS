@@ -240,6 +240,24 @@ int rtc_test() {
     return PASS;
 }
 
+
+/* System Call Test
+ *
+ * int $0x80
+ * Inputs: None
+ * Outputs: None
+ * Side Effects: Execute system call handler
+ * Coverage: system call
+ * Files: x86_desc.h/S
+ */
+static inline int system_call_test() {
+    TEST_HEADER;
+    asm volatile("int $0x80");  // system call handler at index 0x80
+    return FAIL;
+}
+
+/* Checkpoint 2 tests */
+
 /* terminal Test
  *
  * receive 1024 interrupts
@@ -305,22 +323,6 @@ int terminal_test(){
 
 }
 
-/* System Call Test
- *
- * int $0x80
- * Inputs: None
- * Outputs: None
- * Side Effects: Execute system call handler
- * Coverage: system call
- * Files: x86_desc.h/S
- */
-static inline int system_call_test() {
-    TEST_HEADER;
-    asm volatile("int $0x80");  // system call handler at index 0x80
-    return FAIL;
-}
-
-/* Checkpoint 2 tests */
 
 /* RTC Test2
  *
