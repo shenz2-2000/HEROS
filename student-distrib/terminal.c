@@ -54,11 +54,10 @@ static const char shift_scan_code_table[128] = {
  *   RETURN VALUE: none
  *   SIDE EFFECTS: interrupt
  */
-
 void keyboard_interrupt_handler() {
     cli();
     uint8_t input = inb(KEYBOARD_PORT);
-    int capital, letter, shift_on, i;
+    int capital, letter, shift_on;
     char chr;
     if (input > KEY_BOARD_PRESSED) { // If it is a keyboard release signal
         flag[input - RELEASE_DIFF] = 0; 
@@ -73,24 +72,31 @@ void keyboard_interrupt_handler() {
             reset_screen();
         } else if (scan_code_table[input]) {
             // Manage the overflow issue
-            if (key_buf_cnt == 127) { //Should contain a maximum of 127 character
-                for (i = 0; i < key_buf_cnt - 1; ++i) keyboard_buf[i] = keyboard_buf[i + 1];
-                --key_buf_cnt;
+            if (key_buf_cnt < 127) {
+                letter = (input>=0x10&&input<=0x19) | (input>=0x1E&&input<=0x26) | (input>=0x2C&&input<=0x32);
+                if (letter) {
+                    chr = capital?shift_scan_code_table[input]:scan_code_table[input];
+                    keyboard_buf[key_buf_cnt++]=chr;
+                    putc(chr);
+                } else {
+                    shift_on = (flag[LEFT_SHIFT_PRESSED]|flag[RIGHT_SHIFT_PRESSED]);
+                    chr = shift_on?shift_scan_code_table[input]:scan_code_table[input]; 
+                    putc(chr);
+                    keyboard_buf[key_buf_cnt++]=chr;
+                }
             }
-            letter = (input>=0x10&&input<=0x19) | (input>=0x1E&&input<=0x26) | (input>=0x2C&&input<=0x32);
-            if (letter) {
-                chr = capital?shift_scan_code_table[input]:scan_code_table[input];
-                keyboard_buf[key_buf_cnt++]=chr;
-                putc(chr);
-            } else {
-                shift_on = (flag[LEFT_SHIFT_PRESSED]|flag[RIGHT_SHIFT_PRESSED]);
-                chr = shift_on?shift_scan_code_table[input]:scan_code_table[input]; 
-                putc(chr);
-                keyboard_buf[key_buf_cnt++]=chr;
+            // Handle the enter pressed
+            if (input == 0x1C) {
+                if (key_buf_cnt==127) putc(scan_code_table[input]);
+                if (run_read) {
+                    sti();
+                    return;
+                }else {
+                    key_buf_cnt = 0;
+                }
             }
         } else if (flag[BACKSPACE_PRESSED]) {  // Manage backspace
-            delete_last();
-            key_buf_cnt = max(key_buf_cnt-1, 0);
+            if (key_buf_cnt) delete_last(),--key_buf_cnt;
         }
 
     }
