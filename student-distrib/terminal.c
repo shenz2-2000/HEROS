@@ -63,8 +63,8 @@ void keyboard_interrupt_handler() {
             reset_screen();
         } else if (scan_code_table[input]) {
             // Manage the overflow issue
-            if (key_buf_cnt < 127) {
-                letter = (input>=0x10&&input<=0x19) | (input>=0x1E&&input<=0x26) | (input>=0x2C&&input<=0x32);
+            if (key_buf_cnt < KEYBOARD_BUF_SIZE - 1) {   
+                letter = (input>=0x10&&input<=0x19) | (input>=0x1E&&input<=0x26) | (input>=0x2C&&input<=0x32);   // Check whether the input is letter
                 if (letter) {
                     chr = capital?shift_scan_code_table[input]:scan_code_table[input];
                     keyboard_buf[key_buf_cnt++]=chr;
@@ -77,8 +77,8 @@ void keyboard_interrupt_handler() {
                 }
             }
             // Handle the enter pressed
-            if (input == 0x1C) {
-                if (key_buf_cnt==127) putc(scan_code_table[input]), keyboard_buf[key_buf_cnt++] = scan_code_table[input];
+            if (input == 0x1C) {    // If enter is pressed
+                if (key_buf_cnt==KEYBOARD_BUF_SIZE-1) putc(scan_code_table[input]), keyboard_buf[key_buf_cnt++] = scan_code_table[input];
                 if (run_read) {
                     sti();
                     return;
