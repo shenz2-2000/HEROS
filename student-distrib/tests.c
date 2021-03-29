@@ -540,19 +540,8 @@ int sys_file_op_test() {
  */
 /* Test suite entry point */
 void launch_tests(){
-    /* following tests should not raise exception */
-    TEST_OUTPUT("terminal_test", terminal_test());
-//    TEST_OUTPUT("page_test", page_test());
-
-    /* test_interrupts() called by rtc_interrupt_handler() in kernel.c */
-
-    /* following tests would try to raise exception */
-//    TEST_OUTPUT("div0_test", div0_test());
-//    TEST_OUTPUT("dereference_test", dereference_test());
-//    TEST_OUTPUT("system_call_test", system_call_test());
-//    TEST_OUTPUT("dereference_test2", deref_test2());
-
+    // TEST_OUTPUT("terminal_test", terminal_test());
     // TEST_OUTPUT("rtc_test2", rtc_test2());
-   TEST_OUTPUT("file_system_test", file_system_test());
-//    TEST_OUTPUT("sys_file_op_test", sys_file_op_test());
+    // TEST_OUTPUT("file_system_test", file_system_test());
+    TEST_OUTPUT("sys_file_op_test", sys_file_op_test());
 }

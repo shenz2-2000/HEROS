@@ -192,14 +192,13 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
 
     int i,j;
     int end_flag = 0;
-    int delete_length = -1;
 
     // invalid nbytes
     if(nbytes < 0) return -1;
     // meaningless nbytes
     if(nbytes == 0) return 0;
     // overflow nbytes
-    if(nbytes > KEYBOARD_BUF_SIZE) nbytes = KEYBOARD_BUF_SIZE;
+    if(nbytes >= KEYBOARD_BUF_SIZE) nbytes = KEYBOARD_BUF_SIZE - 1;
 
     run_read = 1;
     key_buf_cnt = 0;
