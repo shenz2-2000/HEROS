@@ -329,8 +329,8 @@ int32_t dir_write(int32_t fd, const void* buf, int32_t bufsize){
     bufsize++;
     (void) buf;
     // do not need to do anything meaningful
+    printf("ERROR [FILE]: cannot WRITE directory\n");
     return -1;
-
 }
 
 /**
@@ -415,6 +415,8 @@ int32_t file_rtc_open(const uint8_t *f_name) {
     // obtain an available fd number
     fd = allocate_fd();
 
+    // FIXME: if there exists an opened rtc file, then we just reopen it on the same fd
+    
     // populate the block
     pcb_arr[fd].f_op = &rtc_op;
     pcb_arr[fd].inode_idx = 0;
