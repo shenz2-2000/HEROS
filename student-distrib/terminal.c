@@ -58,7 +58,7 @@ static const char shift_scan_code_table[128] = {
 void keyboard_interrupt_handler() {
     cli();
     uint8_t input = inb(KEYBOARD_PORT);
-    int capital, letter, shift_on;
+    int capital, letter, shift_on, i;
     char chr;
     // Get input from keyboard and check whether the scan code can be output
     if (input > KEY_BOARD_PRESSED) {
@@ -72,6 +72,10 @@ void keyboard_interrupt_handler() {
             clear();
             reset_screen();
         } else if (scan_code_table[input]) {
+            // Manage the overflow issue
+            if (key_buf_cnt == 128) 
+                for (i=0;i<key_buf_cnt-1;++i) keyboard_buf[i] = keyboard_buf[i+1];
+            --key_buf_cnt;
             letter = (input>=0x10&&input<=0x19) | (input>=0x1E&&input<=0x26) | (input>=0x2C&&input<=0x32);
             if (letter) {
                 chr = capital?shift_scan_code_table[input]:scan_code_table[input];
