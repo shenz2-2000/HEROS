@@ -5,7 +5,7 @@
 #include "multiboot.h"
 
 // consts
-#define F_NAME_LIMIT    32
+#define F_NAME_LIMIT    32          // in bytes
 
 #define BLOCK_SIZE_IN_B             4096
 #define STATS_ENTRY_SIZE_IN_B       64
