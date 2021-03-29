@@ -202,13 +202,14 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     if(nbytes > KEYBOARD_BUF_SIZE) nbytes = KEYBOARD_BUF_SIZE;
 
     run_read = 1;
+    key_buf_cnt = 0;
 
     // loop until exit
     while(!end_flag){
         // prevent interrupt from modifying the line buffer
         cli();
         // detect enter
-        for(i = 0; i <= nbytes && (i <= (key_buf_cnt - 1) ); i++){
+        for(i = 0; i <= (key_buf_cnt - 1) ; i++){
             if(keyboard_buf[i] == '\n'){
                 j = i;
                 end_flag = 1;
@@ -221,13 +222,15 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
 
     // new critical section
     cli();
-
+    if(j > nbytes) j = nbytes;
+    if(keyboard_buf[j-1] != '\n'){
+        keyboard_buf[j] = '\n';
+        j = j + 1;
+    }
     // copy to user buf
     memcpy(buf,keyboard_buf,j);
 
     // set delete_length to handle two conditions of \n and no \n
-    delete_length = j + (keyboard_buf[j] == '\n');
-
     key_buf_cnt = 0;
 
     run_read = 0;
