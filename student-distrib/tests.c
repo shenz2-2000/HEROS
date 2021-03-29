@@ -292,16 +292,16 @@ int terminal_test(){
     }
 
     printf("\n please input at most 10 characters before pressing enter\n");
-    printf("\n");
+//    printf("\n");
     ret = terminal_read(0,user_buffer,10);
     user_buffer[ret] = '\0';
-    printf("\n The contents you have put in is: %s\n",user_buffer);
+    printf("The contents you have put in is: %s",user_buffer);
 
-    printf("\n please input whatever characters then pressing enter\n");
+    printf("please input whatever characters then pressing enter\n");
     ret = terminal_read(0,user_buffer,250);
 
     user_buffer[ret] = '\0';
-    printf("\n The contents you have put in is: %s\n",user_buffer);
+    printf("The contents you have put in is: %s\n",user_buffer);
 
 
     printf("---------------Terminal write test starts-----------------\n");
@@ -556,6 +556,6 @@ void launch_tests(){
 //    TEST_OUTPUT("dereference_test2", deref_test2());
 
     // TEST_OUTPUT("rtc_test2", rtc_test2());
-//   TEST_OUTPUT("file_system_test", file_system_test());
+   TEST_OUTPUT("file_system_test", file_system_test());
 //    TEST_OUTPUT("sys_file_op_test", sys_file_op_test());
 }
