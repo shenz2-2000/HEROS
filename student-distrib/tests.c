@@ -273,14 +273,10 @@ int terminal_test(){
     long result = PASS;
     char user_buffer[KEYBOARD_BUF_SIZE + 1];
     char test_buffer[2*KEYBOARD_BUF_SIZE];
-//    uint8_t test_filename;
     int i;
 
-//    printf("-----------Terminal initialization test starts-------------\n");
-//    i = terminal_open(&test_filename);
-//    printf("the return value of open is: %d\n",i);
-//    print_terminal_info();
 
+    // test read
     printf("---------------Terminal read test starts-----------------\n");
     printf("We set terminal_read(0,user_buffer,-2) to test the invalid nbytes \n");
     i = terminal_read(STDIN,user_buffer,-2);
@@ -291,19 +287,21 @@ int terminal_test(){
         return result;
     }
 
+    // 10 words test
     printf("\n please input at most 10 characters before pressing enter\n");
-//    printf("\n");
+
     ret = terminal_read(STDIN,user_buffer,10);
     user_buffer[ret] = '\0';
     printf("The contents you have put in is: %s",user_buffer);
 
+    // at most 127 words test
     printf("please input whatever characters then pressing enter\n");
     ret = terminal_read(STDIN,user_buffer,250);
 
     user_buffer[ret] = '\0';
     printf("The contents you have put in is: %s\n",user_buffer);
 
-
+    // test write
     printf("---------------Terminal write test starts-----------------\n");
     printf("\n we will firstly print out what you have just keyed in\n");
 
@@ -540,8 +538,8 @@ int sys_file_op_test() {
  */
 /* Test suite entry point */
 void launch_tests(){
-    // TEST_OUTPUT("terminal_test", terminal_test());
-    // TEST_OUTPUT("rtc_test2", rtc_test2());
-    // TEST_OUTPUT("file_system_test", file_system_test());
-    TEST_OUTPUT("sys_file_op_test", sys_file_op_test());
+    TEST_OUTPUT("terminal_test", terminal_test());
+//     TEST_OUTPUT("rtc_test2", rtc_test2());
+//     TEST_OUTPUT("file_system_test", file_system_test());
+//    TEST_OUTPUT("sys_file_op_test", sys_file_op_test());
 }

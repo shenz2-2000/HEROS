@@ -106,6 +106,7 @@ void keyboard_interrupt_handler() {
  */
 void terminal_initialization(){
     int i;
+    // initialization
     key_buf_cnt = 0;
     for(i = 0; i < KEYBOARD_BUF_SIZE; i++){
         flag[i] = 0;
@@ -124,6 +125,7 @@ void terminal_initialization(){
 void print_terminal_info(){
     int i;
     int fail_flag = 0;
+    // print current key buf cnt
     printf("current key_buf_cnt is: %d\n",key_buf_cnt);
     for(i = 0; i < KEYBOARD_BUF_SIZE; i++){
         if(flag[i] != 0) {
@@ -132,6 +134,7 @@ void print_terminal_info(){
         }
     }
 
+    // check fail_flag
     if(fail_flag == 1) printf("The flag array is wrong!!\n");
     else printf("The flag array is correct!!\n");
 
@@ -144,6 +147,7 @@ void print_terminal_info(){
         }
     }
 
+    // fail or not
     if(fail_flag == 1) printf("The keyboard buffer is wrong!!\n");
     else printf("The keyboard buffer is correct!!\n");
 
@@ -200,7 +204,9 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     // overflow nbytes
     if(nbytes >= KEYBOARD_BUF_SIZE) nbytes = KEYBOARD_BUF_SIZE - 1;
 
+    // change the status to 1
     run_read = 1;
+    // clear the line buffer
     key_buf_cnt = 0;
 
     // loop until exit
@@ -221,6 +227,7 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
 
     // new critical section
     cli();
+    // set the copy number
     if(j > nbytes) j = nbytes;
     if(keyboard_buf[j-1] != '\n'){
         keyboard_buf[j] = '\n';
@@ -232,6 +239,7 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     // set delete_length to handle two conditions of \n and no \n
     key_buf_cnt = 0;
 
+    // exit the function
     run_read = 0;
 
     sti();
