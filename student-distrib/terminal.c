@@ -8,24 +8,13 @@
 #include "terminal.h"
 
 #define RUN_TESTS
-//void keyboard_interrupt_handler();
 /* Declaration of constant */
-//#define KEYBOARD_PORT 0x60
-//// Maximum Size of keyboard buffer should be 128
-//#define KEYBOARD_BUF_SIZE 128
+// Maximum Size of keyboard buffer should be 128
 static int key_buf_cnt=0;
 static char keyboard_buf[KEYBOARD_BUF_SIZE];
 static int flag[128];       // There're at most 128 characters on the keyboard
 // check whether terminal_read is working
 static int run_read=0;
-//#define KEY_BOARD_PRESSED 0x60
-//#define RELEASE_DIFF      0x80
-//#define CTRL_PRESSED      0x1D
-//#define CAPLCL_PRESSED      0x3A
-//#define LEFT_SHIFT_PRESSED  0x2A
-//#define RIGHT_SHIFT_PRESSED 0x36
-//#define L_PRESSED           0x26
-//#define BACKSPACE_PRESSED   0x0E
 // Using scan code set 1 for we use "US QWERTY" keyboard
 // The table transform scan code to the echo character
 static int CUR_CAP = 0; // Keep the current state of caplock
