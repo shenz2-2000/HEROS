@@ -15,7 +15,9 @@
 //#define KEYBOARD_BUF_SIZE 128
 static int key_buf_cnt=0;
 static char keyboard_buf[KEYBOARD_BUF_SIZE];
-static int flag[128]; // There're at most 128 characters on the keyboard
+static int flag[128];       // There're at most 128 characters on the keyboard
+// check whether terminal_read is working
+static int run_read=0;
 //#define KEY_BOARD_PRESSED 0x60
 //#define RELEASE_DIFF      0x80
 //#define CTRL_PRESSED      0x1D
@@ -210,6 +212,8 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     // overflow nbytes
     if(nbytes > KEYBOARD_BUF_SIZE) nbytes = KEYBOARD_BUF_SIZE;
 
+    run_read = 1;
+
     // loop until exit
     while(!end_flag){
         // prevent interrupt from modifying the line buffer
@@ -221,12 +225,6 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
                 end_flag = 1;
                 break;
             }
-        }
-
-        // no enter but nbytes have been written
-        if(end_flag != 1 && (i >= nbytes)) {
-            j = nbytes;
-            end_flag = 1;
         }
 
         sti();
@@ -241,15 +239,13 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     // set delete_length to handle two conditions of \n and no \n
     delete_length = j + (keyboard_buf[j] == '\n');
 
-    for( i = delete_length; i < KEYBOARD_BUF_SIZE; i++){
-        keyboard_buf[i - delete_length] = keyboard_buf[i];
-    }
+    key_buf_cnt = 0;
 
-    // update key_buf_cnt
-    key_buf_cnt -= delete_length;
-    if(key_buf_cnt < 0) key_buf_cnt = 0;
+    run_read = 0;
 
     sti();
+
+
 
     return j;
 
