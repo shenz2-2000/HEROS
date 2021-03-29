@@ -251,40 +251,54 @@ int rtc_test() {
  */
 int terminal_test(){
     TEST_HEADER;
-    char user_buffer[KEYBOARD_BUF_SIZE];
-    uint8_t test_filename;
+    int ret;
+    long result = PASS;
+    char user_buffer[KEYBOARD_BUF_SIZE + 1];
+    char test_buffer[2*KEYBOARD_BUF_SIZE];
+//    uint8_t test_filename;
     int i;
 
-    printf("-----------Terminal initialization test starts-------------\n");
-    i = terminal_open(&test_filename);
-    printf("the return value of open is: %d\n",i);
-    print_terminal_info();
+//    printf("-----------Terminal initialization test starts-------------\n");
+//    i = terminal_open(&test_filename);
+//    printf("the return value of open is: %d\n",i);
+//    print_terminal_info();
 
     printf("---------------Terminal read test starts-----------------\n");
+    printf("We set terminal_read(0,user_buffer,-2) to test the invalid nbytes \n");
     i = terminal_read(0,user_buffer,-2);
     if(i < 0)  printf("the invalid input could be rejected!\n");
-    else  printf("the invalid input could not be rejected!\n");
+    else  {
+        printf("the invalid input could not be rejected!\n");
+        result = FAIL;
+        return result;
+    }
 
-    printf("please input at most 10 characters before pressing enter\n");
+    printf("\n please input at most 10 characters before pressing enter\n");
     printf("\n");
-    terminal_read(0,user_buffer,10);
-    for(i = 0; i < 11; i++){
-        printf("%d th char in user buffer is: %d ",i,user_buffer[i]);
-    }
+    ret = terminal_read(0,user_buffer,10);
+    user_buffer[ret] = '\0';
+    printf("\n The contents you have put in is: %s\n",user_buffer);
 
-    printf("please input 9 characters then pressing enter\n");
-    terminal_read(0,user_buffer,250);
-    for(i = 0; i < 8; i++){
-        printf("%d c is: %d ",i,user_buffer[i]);
-    }
+    printf("\n please input whatever characters then pressing enter\n");
+    ret = terminal_read(0,user_buffer,250);
+
+    user_buffer[ret] = '\0';
+    printf("\n The contents you have put in is: %s\n",user_buffer);
+
 
     printf("---------------Terminal write test starts-----------------\n");
-    for(i = 0; i < KEYBOARD_BUF_SIZE; i++){
-        user_buffer[i] = 48 + (i % 15);
-    }
+    printf("\n we will firstly print out what you have just keyed in\n");
 
-//    terminal_write(0,user_buffer,KEYBOARD_BUF_SIZE);
-    terminal_write(0,user_buffer,10);
+    terminal_write(0,user_buffer,ret);
+    printf("\n");
+    printf("\n now we will print out a string longer than 128 bytes \n");
+    for(i = 0; i < 2*KEYBOARD_BUF_SIZE; i++){
+        test_buffer[i] = 'a';
+    }
+    terminal_write(0,test_buffer,2*KEYBOARD_BUF_SIZE);
+    printf("\n");
+
+
 
 
     return PASS;
@@ -528,7 +542,7 @@ int sys_file_op_test() {
 /* Test suite entry point */
 void launch_tests(){
     /* following tests should not raise exception */
-//    TEST_OUTPUT("terminal_test", terminal_test());
+    TEST_OUTPUT("terminal_test", terminal_test());
 //    TEST_OUTPUT("page_test", page_test());
 
     /* test_interrupts() called by rtc_interrupt_handler() in kernel.c */
@@ -540,6 +554,6 @@ void launch_tests(){
 //    TEST_OUTPUT("dereference_test2", deref_test2());
 
     // TEST_OUTPUT("rtc_test2", rtc_test2());
-   TEST_OUTPUT("file_system_test", file_system_test());
+//   TEST_OUTPUT("file_system_test", file_system_test());
 //    TEST_OUTPUT("sys_file_op_test", sys_file_op_test());
 }

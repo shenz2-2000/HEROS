@@ -73,9 +73,10 @@ void keyboard_interrupt_handler() {
             reset_screen();
         } else if (scan_code_table[input]) {
             // Manage the overflow issue
-            if (key_buf_cnt == 128) 
-                for (i=0;i<key_buf_cnt-1;++i) keyboard_buf[i] = keyboard_buf[i+1];
-            --key_buf_cnt;
+            if (key_buf_cnt == 128) {
+                for (i = 0; i < key_buf_cnt - 1; ++i) keyboard_buf[i] = keyboard_buf[i + 1];
+                --key_buf_cnt;
+            }
             letter = (input>=0x10&&input<=0x19) | (input>=0x1E&&input<=0x26) | (input>=0x2C&&input<=0x32);
             if (letter) {
                 chr = capital?shift_scan_code_table[input]:scan_code_table[input];
@@ -244,7 +245,7 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
 
     sti();
 
-    return 0;
+    return j;
 
 }
 
