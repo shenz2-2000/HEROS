@@ -14,10 +14,16 @@
 #define N_DENTRY_LIMIT              (BLOCK_SIZE_IN_B - STATS_ENTRY_SIZE_IN_B) / DENTRY_SIZE_IN_B
 #define INODE_N_DBLOCK_LIMIT        (BLOCK_SIZE_IN_B - 4) / 4   // 4: an entry in inode block takes 4 bytes
 
+// the max number of pcbs
 #define N_PCB_LIMIT     8
 
+// PCB flags
 #define OCCUPIED  1
 #define AVAILABLE 0
+
+// the fd for terminal
+#define STDIN   0
+#define STDOUT  1
 
 // file operation table
 typedef struct file_operations {

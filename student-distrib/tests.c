@@ -283,7 +283,7 @@ int terminal_test(){
 
     printf("---------------Terminal read test starts-----------------\n");
     printf("We set terminal_read(0,user_buffer,-2) to test the invalid nbytes \n");
-    i = terminal_read(0,user_buffer,-2);
+    i = terminal_read(STDIN,user_buffer,-2);
     if(i < 0)  printf("the invalid input could be rejected!\n");
     else  {
         printf("the invalid input could not be rejected!\n");
@@ -293,12 +293,12 @@ int terminal_test(){
 
     printf("\n please input at most 10 characters before pressing enter\n");
 //    printf("\n");
-    ret = terminal_read(0,user_buffer,10);
+    ret = terminal_read(STDIN,user_buffer,10);
     user_buffer[ret] = '\0';
     printf("The contents you have put in is: %s",user_buffer);
 
     printf("please input whatever characters then pressing enter\n");
-    ret = terminal_read(0,user_buffer,250);
+    ret = terminal_read(STDIN,user_buffer,250);
 
     user_buffer[ret] = '\0';
     printf("The contents you have put in is: %s\n",user_buffer);
@@ -307,13 +307,13 @@ int terminal_test(){
     printf("---------------Terminal write test starts-----------------\n");
     printf("\n we will firstly print out what you have just keyed in\n");
 
-    terminal_write(0,user_buffer,ret);
+    terminal_write(STDOUT,user_buffer,ret);
     printf("\n");
     printf("\n now we will print out a string longer than 128 bytes \n");
     for(i = 0; i < 2*KEYBOARD_BUF_SIZE; i++){
         test_buffer[i] = 'a';
     }
-    terminal_write(0,test_buffer,2*KEYBOARD_BUF_SIZE);
+    terminal_write(STDOUT,test_buffer,2*KEYBOARD_BUF_SIZE);
     printf("\n");
 
 
@@ -427,7 +427,7 @@ int file_system_test() {
     int i;
     for (i = 0; i < sizeof(valid_test_file)/sizeof(const char *); ++i) {
         printf("\nPress Enter to Continue\n");
-        terminal_read(0, &buf, buf_size);
+        terminal_read(STDIN, &buf, buf_size);
         clear();
         reset_screen();
         if ((fd = file_open((uint8_t *) valid_test_file[i] )) == -1) {
@@ -442,7 +442,7 @@ int file_system_test() {
                 file_close(fd);
                 return FAIL;
             }
-            if (terminal_write(1, buf, ret_val) == -1) {
+            if (terminal_write(STDOUT, buf, ret_val) == -1) {
                 printf("FAILED TO WRITE TO STDOUT\n");
                 file_close(fd);
                 return FAIL;
@@ -480,7 +480,7 @@ int sys_file_op_test() {
             printf("FAILED TO READ\n");
             return FAIL;
         }
-        if (sys_write(1, buf, ret_val) == -1) {
+        if (sys_write(STDOUT, buf, ret_val) == -1) {
             printf("FAILED TO WRITE TO STDOUT\n");
             return FAIL;
         }
@@ -498,7 +498,7 @@ int sys_file_op_test() {
     int i;
     for (i = 0; i < sizeof(valid_test_file)/sizeof(const char *); ++i) {
         printf("\nPress Enter to Continue\n");
-        sys_read(0, &buf, buf_size);
+        sys_read(STDIN, &buf, buf_size);
         clear();
         reset_screen();
         if ((fd = sys_open((uint8_t *) valid_test_file[i] )) == -1) {
@@ -513,7 +513,7 @@ int sys_file_op_test() {
                 sys_close(fd);
                 return FAIL;
             }
-            if (terminal_write(1, buf, ret_val) == -1) {
+            if (sys_write(STDOUT, buf, ret_val) == -1) {
                 printf("FAILED TO WRITE TO STDOUT\n");
                 sys_close(fd);
                 return FAIL;
