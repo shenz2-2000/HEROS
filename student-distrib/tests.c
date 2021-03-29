@@ -341,6 +341,11 @@ int rtc_test2() {
     int frequencies[] = {4, 8, 16, 32, 64, 128, 256, 512, 1024};
     int fd;
     fd = rtc_open((uint8_t *) "fn");
+    printf("Waiting 2 interrupts with RTC at 2 hz...\n");
+    rtc_read(fd, NULL, 0);
+    printf("1");
+    rtc_read(fd, NULL, 0);
+    printf("1\n");
 
     // test under valid frequencies
     for (i = 0; i < 9; i++) {   // 9: the number of valid frequency in our test
@@ -356,14 +361,6 @@ int rtc_test2() {
         }
         printf("\n");
     }
-
-    // ret to default frequency
-    fd = rtc_open((uint8_t *) "fn");
-    printf("Waiting 2 interrupts with RTC at 2 hz...\n");
-    rtc_read(fd, NULL, 0);
-    printf("1");
-    rtc_read(fd, NULL, 0);
-    printf("1\n");
 
     // test under invalid frequencies
     freq = 1;
