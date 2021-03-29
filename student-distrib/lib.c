@@ -75,14 +75,14 @@ void clear(void) {
  * Return Value: none
  * Function: delete the last character */
 void delete_last(void) {
+    if (screen_x==0&&screen_y>0) {
+        screen_y--;
+        screen_x = NUM_COLS;
+    }
     if (screen_x>0) screen_x--,
                     *(uint8_t *)(video_mem+((screen_x+screen_y*NUM_COLS)<<1))=0,
                     *(uint8_t *)(video_mem+((screen_x+screen_y*NUM_COLS)<<1)+1)=ATTRIB;
-    else if (screen_y>0) {
-        screen_y--;
-        screen_x = NUM_COLS;
-        while(*(uint8_t *)(video_mem+((screen_x-1+screen_y*NUM_COLS)<<1))==0) --screen_x;
-    }
+
     // update the cursor position
     update_cursor(screen_x,screen_y);
 }

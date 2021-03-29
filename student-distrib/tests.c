@@ -240,6 +240,24 @@ int rtc_test() {
     return PASS;
 }
 
+
+/* System Call Test
+ *
+ * int $0x80
+ * Inputs: None
+ * Outputs: None
+ * Side Effects: Execute system call handler
+ * Coverage: system call
+ * Files: x86_desc.h/S
+ */
+static inline int system_call_test() {
+    TEST_HEADER;
+    asm volatile("int $0x80");  // system call handler at index 0x80
+    return FAIL;
+}
+
+/* Checkpoint 2 tests */
+
 /* terminal Test
  *
  * receive 1024 interrupts
@@ -274,16 +292,16 @@ int terminal_test(){
     }
 
     printf("\n please input at most 10 characters before pressing enter\n");
-    printf("\n");
+//    printf("\n");
     ret = terminal_read(0,user_buffer,10);
     user_buffer[ret] = '\0';
-    printf("\n The contents you have put in is: %s\n",user_buffer);
+    printf("The contents you have put in is: %s",user_buffer);
 
-    printf("\n please input whatever characters then pressing enter\n");
+    printf("please input whatever characters then pressing enter\n");
     ret = terminal_read(0,user_buffer,250);
 
     user_buffer[ret] = '\0';
-    printf("\n The contents you have put in is: %s\n",user_buffer);
+    printf("The contents you have put in is: %s\n",user_buffer);
 
 
     printf("---------------Terminal write test starts-----------------\n");
@@ -305,22 +323,6 @@ int terminal_test(){
 
 }
 
-/* System Call Test
- *
- * int $0x80
- * Inputs: None
- * Outputs: None
- * Side Effects: Execute system call handler
- * Coverage: system call
- * Files: x86_desc.h/S
- */
-static inline int system_call_test() {
-    TEST_HEADER;
-    asm volatile("int $0x80");  // system call handler at index 0x80
-    return FAIL;
-}
-
-/* Checkpoint 2 tests */
 
 /* RTC Test2
  *
@@ -339,6 +341,11 @@ int rtc_test2() {
     int frequencies[] = {4, 8, 16, 32, 64, 128, 256, 512, 1024};
     int fd;
     fd = rtc_open((uint8_t *) "fn");
+    printf("Waiting 2 interrupts with RTC at 2 hz...\n");
+    rtc_read(fd, NULL, 0);
+    printf("1");
+    rtc_read(fd, NULL, 0);
+    printf("1\n");
 
     // test under valid frequencies
     for (i = 0; i < 9; i++) {   // 9: the number of valid frequency in our test
@@ -354,14 +361,6 @@ int rtc_test2() {
         }
         printf("\n");
     }
-
-    // ret to default frequency
-    fd = rtc_open((uint8_t *) "fn");
-    printf("Waiting 2 interrupts with RTC at 2 hz...\n");
-    rtc_read(fd, NULL, 0);
-    printf("1");
-    rtc_read(fd, NULL, 0);
-    printf("1\n");
 
     // test under invalid frequencies
     freq = 1;
@@ -554,6 +553,6 @@ void launch_tests(){
 //    TEST_OUTPUT("dereference_test2", deref_test2());
 
     // TEST_OUTPUT("rtc_test2", rtc_test2());
-//   TEST_OUTPUT("file_system_test", file_system_test());
+   TEST_OUTPUT("file_system_test", file_system_test());
 //    TEST_OUTPUT("sys_file_op_test", sys_file_op_test());
 }

@@ -15,7 +15,9 @@
 //#define KEYBOARD_BUF_SIZE 128
 static int key_buf_cnt=0;
 static char keyboard_buf[KEYBOARD_BUF_SIZE];
-static int flag[128]; // There're at most 128 characters on the keyboard
+static int flag[128];       // There're at most 128 characters on the keyboard
+// check whether terminal_read is working
+static int run_read=0;
 //#define KEY_BOARD_PRESSED 0x60
 //#define RELEASE_DIFF      0x80
 //#define CTRL_PRESSED      0x1D
@@ -54,11 +56,10 @@ static const char shift_scan_code_table[128] = {
  *   RETURN VALUE: none
  *   SIDE EFFECTS: interrupt
  */
-
 void keyboard_interrupt_handler() {
     cli();
     uint8_t input = inb(KEYBOARD_PORT);
-    int capital, letter, shift_on, i;
+    int capital, letter, shift_on;
     char chr;
     if (input > KEY_BOARD_PRESSED) { // If it is a keyboard release signal
         flag[input - RELEASE_DIFF] = 0; 
@@ -73,24 +74,31 @@ void keyboard_interrupt_handler() {
             reset_screen();
         } else if (scan_code_table[input]) {
             // Manage the overflow issue
-            if (key_buf_cnt == 127) { //Should contain a maximum of 127 character
-                for (i = 0; i < key_buf_cnt - 1; ++i) keyboard_buf[i] = keyboard_buf[i + 1];
-                --key_buf_cnt;
+            if (key_buf_cnt < 127) {
+                letter = (input>=0x10&&input<=0x19) | (input>=0x1E&&input<=0x26) | (input>=0x2C&&input<=0x32);
+                if (letter) {
+                    chr = capital?shift_scan_code_table[input]:scan_code_table[input];
+                    keyboard_buf[key_buf_cnt++]=chr;
+                    putc(chr);
+                } else {
+                    shift_on = (flag[LEFT_SHIFT_PRESSED]|flag[RIGHT_SHIFT_PRESSED]);
+                    chr = shift_on?shift_scan_code_table[input]:scan_code_table[input]; 
+                    putc(chr);
+                    keyboard_buf[key_buf_cnt++]=chr;
+                }
             }
-            letter = (input>=0x10&&input<=0x19) | (input>=0x1E&&input<=0x26) | (input>=0x2C&&input<=0x32);
-            if (letter) {
-                chr = capital?shift_scan_code_table[input]:scan_code_table[input];
-                keyboard_buf[key_buf_cnt++]=chr;
-                putc(chr);
-            } else {
-                shift_on = (flag[LEFT_SHIFT_PRESSED]|flag[RIGHT_SHIFT_PRESSED]);
-                chr = shift_on?shift_scan_code_table[input]:scan_code_table[input]; 
-                putc(chr);
-                keyboard_buf[key_buf_cnt++]=chr;
+            // Handle the enter pressed
+            if (input == 0x1C) {
+                if (key_buf_cnt==127) putc(scan_code_table[input]), keyboard_buf[key_buf_cnt++] = scan_code_table[input];
+                if (run_read) {
+                    sti();
+                    return;
+                }else {
+                    key_buf_cnt = 0;
+                }
             }
         } else if (flag[BACKSPACE_PRESSED]) {  // Manage backspace
-            delete_last();
-            key_buf_cnt = max(key_buf_cnt-1, 0);
+            if (key_buf_cnt) delete_last(),--key_buf_cnt;
         }
 
     }
@@ -204,12 +212,15 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     // overflow nbytes
     if(nbytes > KEYBOARD_BUF_SIZE) nbytes = KEYBOARD_BUF_SIZE;
 
+    run_read = 1;
+    key_buf_cnt = 0;
+
     // loop until exit
     while(!end_flag){
         // prevent interrupt from modifying the line buffer
         cli();
         // detect enter
-        for(i = 0; i <= nbytes && (i <= (key_buf_cnt - 1) ); i++){
+        for(i = 0; i <= (key_buf_cnt - 1) ; i++){
             if(keyboard_buf[i] == '\n'){
                 j = i;
                 end_flag = 1;
@@ -217,33 +228,27 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
             }
         }
 
-        // no enter but nbytes have been written
-        if(end_flag != 1 && (i >= nbytes)) {
-            j = nbytes;
-            end_flag = 1;
-        }
-
         sti();
     }
 
     // new critical section
     cli();
-
+    if(j > nbytes) j = nbytes;
+    if(keyboard_buf[j-1] != '\n'){
+        keyboard_buf[j] = '\n';
+        j = j + 1;
+    }
     // copy to user buf
     memcpy(buf,keyboard_buf,j);
 
     // set delete_length to handle two conditions of \n and no \n
-    delete_length = j + (keyboard_buf[j] == '\n');
+    key_buf_cnt = 0;
 
-    for( i = delete_length; i < KEYBOARD_BUF_SIZE; i++){
-        keyboard_buf[i - delete_length] = keyboard_buf[i];
-    }
-
-    // update key_buf_cnt
-    key_buf_cnt -= delete_length;
-    if(key_buf_cnt < 0) key_buf_cnt = 0;
+    run_read = 0;
 
     sti();
+
+
 
     return j;
 
