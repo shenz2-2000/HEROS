@@ -424,7 +424,7 @@ int file_system_test() {
     const char *valid_test_file[] = {"frame0.txt", "frame1.txt", "grep", "ls", 
                      "fish", "verylargetextwithverylongname.tx"};
 
-
+    // Test to open the file
     int i;
     for (i = 0; i < sizeof(valid_test_file)/sizeof(const char *); ++i) {
         printf("\nPress Enter to Continue\n");
