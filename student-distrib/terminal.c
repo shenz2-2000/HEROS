@@ -89,7 +89,7 @@ void keyboard_interrupt_handler() {
             }
             // Handle the enter pressed
             if (input == 0x1C) {
-                if (key_buf_cnt==127) putc(scan_code_table[input]);
+                if (key_buf_cnt==127) putc(scan_code_table[input]), keyboard_buf[key_buf_cnt++] = scan_code_table[input];
                 if (run_read) {
                     sti();
                     return;
