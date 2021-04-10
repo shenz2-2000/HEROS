@@ -66,9 +66,11 @@ halt:
 	pushl %edx
 	pushl %ecx
 	pushl %ebx
+	pushl %eax
 .endm
 
 .macro RESTORE_ALL_REGS
+    popl %eax
 	popl %ebx
 	popl %ecx
 	popl %edx
@@ -78,6 +80,25 @@ halt:
 	popf
 .endm
 
+.macro SAVE_ALL_REGS_SYS
+	pushf
+	pushl %ebp
+	pushl %edi
+	pushl %esi
+	pushl %edx
+	pushl %ecx
+	pushl %ebx
+.endm
+
+.macro RESTORE_ALL_REGS_SYS
+	popl %ebx
+	popl %ecx
+	popl %edx
+	popl %esi
+	popl %edi
+	popl %ebp
+	popf
+.endm
 
 # here we define the exception handler with linkage
 
@@ -399,8 +420,6 @@ interrupt_entry_8:
     iret  # return from interrupt 
 
 # System call handler is in the same format as exception handler
-
-
 # naive system call handler
 .globl exception_handler_128
 exception_handler_128:
@@ -416,11 +435,21 @@ exception_handler_128:
          IRET
 
 
+
+/*
+ * sys_call_linkage
+ *   DESCRIPTION: jump to the correct system call handler
+ *   INPUTS: num and parameters -- the system call number and other parameters, all in registers
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: jump to the corresponding system call handler
+ */
+
 .globl sys_call_linkage
 sys_call_linkage:
 
            # --------------save all registers--------------
-           SAVE_ALL_REGS
+           SAVE_ALL_REGS_SYS
 
            # ----------------check sanity-----------------
            cmpl $MAXIMUM_SYS_CALL_NUM, %eax
@@ -435,7 +464,8 @@ invalid_sys_call:
            # TODO: what should we do here?
 
 sys_call_finish:
-           RESTORE_ALL_REGS
+           # --------------restore information--------------
+           RESTORE_ALL_REGS_SYS
            IRET
 
 sys_jump_table:

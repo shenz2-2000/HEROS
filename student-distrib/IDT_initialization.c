@@ -117,17 +117,42 @@ void init_IDT(){
 //extern int32_t set_handler_sys_call(int32_t signum, void* handler_address);
 //extern int32_t sig_return_sys_call(void);
 
+
+/* int32_t open_sys_call(const uint8_t* filename)
+ * Inputs: filename : the file we want to open
+ * Return Value: ret: whether the open is successful
+ */
+
 ASMLINKAGE int32_t open_sys_call(const uint8_t* filename){
     return sys_open(filename);
 }
+
+/* int32_t read_sys_call(int32_t fd, void* buf, int32_t nbytes)
+ * Inputs: fd : file descriptor
+ *         buf: container provided by caller
+ *         nbytes: number of bytes we want to read
+ * Return Value: ret: whether the read is successful
+ */
 
 ASMLINKAGE int32_t read_sys_call(int32_t fd, void* buf, int32_t nbytes){
     return sys_read(fd,buf,nbytes);
 }
 
+/* int32_t close_sys_call(int32_t fd)
+ * Inputs: fd : the file we want to close
+ * Return Value: ret: whether the close is successful
+ */
+
 ASMLINKAGE int32_t close_sys_call(int32_t fd){
     return sys_close(fd);
 }
+
+/* int32_t write_sys_call(int32_t fd, void* buf, int32_t nbytes)
+ * Inputs: fd : file descriptor
+ *         buf: container provided by caller
+ *         nbytes: number of bytes we want to write
+ * Return Value: ret: whether the write is successful
+ */
 
 ASMLINKAGE int32_t write_sys_call(int32_t fd, const void* buf, int32_t nbytes){
     return sys_write(fd,buf,nbytes);

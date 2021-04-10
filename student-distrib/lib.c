@@ -590,6 +590,12 @@ int max(int a, int b){
 }
 
 
+/* int32_t read(int32_t fd, void* buf, int32_t nbytes)
+ * Inputs: fd : file descriptor
+ *         buf: container provided by caller
+ *         nbytes: number of bytes we want to read
+ * Return Value: ret: whether the read is successful
+ */
 
 int32_t read(int32_t fd, void* buf, int32_t nbytes) {
     long ret;
@@ -600,6 +606,13 @@ int32_t read(int32_t fd, void* buf, int32_t nbytes) {
     return ret;
 }
 
+/* int32_t write(int32_t fd, void* buf, int32_t nbytes)
+ * Inputs: fd : file descriptor
+ *         buf: container provided by caller
+ *         nbytes: number of bytes we want to write
+ * Return Value: ret: whether the write is successful
+ */
+
 int32_t write(int32_t fd, const void* buf, int32_t nbytes) {
     long ret;
     asm volatile ("INT $0x80"
@@ -608,6 +621,11 @@ int32_t write(int32_t fd, const void* buf, int32_t nbytes) {
     : "memory", "cc");
     return ret;
 }
+
+/* int32_t open(const uint8_t* filename)
+ * Inputs: filename : the file we want to open
+ * Return Value: ret: whether the open is successful
+ */
 
 int32_t open(const uint8_t* filename) {
     long ret;
@@ -618,6 +636,10 @@ int32_t open(const uint8_t* filename) {
     return ret;
 }
 
+/* int32_t close(int32_t fd)
+ * Inputs: fd : the file we want to close
+ * Return Value: ret: whether the close is successful
+ */
 
 int32_t close(int32_t fd) {
     long ret;
