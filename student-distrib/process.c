@@ -1,5 +1,6 @@
 #include "process.h"
 #include "file_sys.h"
+#include "lib.h"
 
 pcb_t* pcb_ptrs[N_PCB_LIMIT];
 int32_t n_present_pcb;
@@ -77,4 +78,43 @@ pcb_t* delete_process(pcb_t* pcb) {
     pcb->present = 0;
     n_present_pcb -= 1;
     return pcb->parent;
+}
+
+/**
+ * system_halt
+ * Description: Implementation of halt()
+ * Input: status - exit status info
+ * Output: 0 if success.
+ * Return: should never return
+ * Side effect: terminate the process and return value to its parent
+ */
+int32_t system_halt(int32_t status) {
+
+
+    if (n_present_pcb == 0) {   // not in a process
+        return -1;
+    }
+
+//    clear_file_array(&cur_process()->file_array);
+//
+//    if (cur_process()->parent == NULL) {  // the last program has been halt
+//        int page_id = cur_process()->page_id;
+//        process_remove_from_list(cur_process());
+//        printf("Initial shell halt with status %u. Restarting...", status);
+//        task_reset_paging(page_id, page_id);  // do nothing to paging, but decrease count
+//        task_run_initial_process();  // execute shell again
+//        // Will not reach here
+//    }
+//
+//    process_t *parent = process_remove_from_list(cur_process());
+//
+//    task_reset_paging(cur_process()->page_id, parent->page_id);  // switch page to parent
+//
+//    tss.esp0 = parent->kesp;  // set tss to parent's kernel stack to make sure system calls use correct stack
+//
+//    halt_backtrack(parent->kesp, status);
+//
+//    DEBUG_ERR( "halt() should never return");
+
+    return -1;
 }

@@ -6,6 +6,7 @@
 #include "lib.h"
 #include "file_sys.h"
 #include "link.h"
+#include "process.h"
 
 /* Declaration of constant in interrupt */
 
@@ -160,8 +161,8 @@ ASMLINKAGE int32_t write_sys_call(int32_t fd, const void* buf, int32_t nbytes){
 
 
 
-ASMLINKAGE void halt_sys_call(){
-    return;
+ASMLINKAGE int32_t halt_sys_call(int32_t exit_code){
+    return system_halt(exit_code);
 }
 
 ASMLINKAGE void execute_sys_call(int32_t fd, const void* buf, int32_t nbytes){

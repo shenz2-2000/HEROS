@@ -6,6 +6,7 @@
 #define FAKE_PAGE_LIB_H
 
 #include "x86_desc.h"
+#include "file_sys.h"
 
 
 #define PDE_IDX         128
