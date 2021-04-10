@@ -76,6 +76,10 @@ typedef struct data_block {
 
 /* function headers */
 int32_t file_sys_init(module_t *f_sys_mod);
+
+int32_t init_file_arr(file_arr_t *file_arr);
+int32_t close_all_files(file_arr_t* file_arr);
+
 int32_t allocate_fd();
 int32_t get_file_length(dentry_t *dentry);
 
@@ -103,7 +107,5 @@ int32_t sys_open(const uint8_t *f_name);
 int32_t sys_close(int32_t fd);
 int32_t sys_read(int32_t fd, void *buf, int32_t bufsize);
 int32_t sys_write(int32_t fd, const void *buf, int32_t bufsize);
-
-int32_t close_all_files(file_arr_t* file_arr);
 
 #endif      // FILE_SYS_H
