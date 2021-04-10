@@ -1,5 +1,6 @@
 #include "process.h"
 #include "file_sys.h"
+#include "page_lib.h"
 #include "lib.h"
 
 pcb_t* pcb_ptrs[N_PCB_LIMIT];
@@ -89,11 +90,26 @@ pcb_t* delete_process(pcb_t* pcb) {
  * Side effect: terminate the process and return value to its parent
  */
 int32_t system_halt(int32_t status) {
-
-
+    // condition check
     if (n_present_pcb == 0) {   // not in a process
         return -1;
     }
+    if (get_cur_process()->parent == NULL) {
+        //TODO: if the last program has been halt, don't know if we need to consider this
+    }
+
+    close_all_files(&get_cur_process()->file_arr);  // close FDs
+    pcb_t *parent = delete_process(get_cur_process());  // clear the pcb
+    restore_paging(get_cur_process()->pid, parent->pid);  // restore parent paging
+    tss.esp0 = parent->k_esp;  // set tss to parent's kernel stack to make sure system calls use correct stack
+
+    asm volatile ("                                                                    \
+        movl %0, %%esp  /* load old ESP */                                           \n\
+        ret  /* now it's equivalent to jump execute return */"                          \
+        :                                                                              \
+        : "r" (parent->k_esp)   , "a" (status)                                         \
+        : "cc", "memory"                                                               \
+    );
 
     return -1;
 }

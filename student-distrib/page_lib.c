@@ -206,6 +206,17 @@ int get_new_page_id(){
 }
 
 
+int restore_paging(const int child_id, const int parent_id) {
+
+    // Check arguments
+    if ( (child_id >= MAX_PAGE) || (page_id_center[child_id] == 0) ) {
+        return -1;
+    }
+    set_private_page(parent_id);    // restore parent paging
+    page_id_center[child_id] = 0;
+    page_in_use--;
+    return 0;
+}
 
 
 

@@ -27,7 +27,7 @@ extern int executable_check(dentry_t * task_dentry_ptr);
 extern int set_page_for_task(uint8_t* task_file_name, uint32_t* eip);
 extern int get_new_page_id();
 
-
+int restore_paging(const int child_id, const int parent_id);
 
 
 #endif //FAKE_PAGE_LIB_H

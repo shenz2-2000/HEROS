@@ -2,6 +2,7 @@
 #define _PROCESS_H
 
 #include "file_sys.h"
+#include "x86_desc.h"
 
 #define N_PCB_LIMIT 2
 
@@ -20,6 +21,7 @@ struct pcb_t {
     uint32_t k_esp;
 
     file_arr_t file_arr;
+    uint8_t pid;
 };
 
 typedef union task_kstack_t {
