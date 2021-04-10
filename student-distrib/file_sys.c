@@ -263,14 +263,12 @@ int32_t get_file_length(dentry_t *dentry) {
 /**
  * allocate_fd
  * Description: generate a available fd
- * Input: None
+ * Input: cur_pcb - the current pcb
  * Output: the allocated fd
  * Side effect: None
  */
-int32_t allocate_fd() {
+int32_t allocate_fd(pcb_t *cur_pcb) {
     int i;
-    pcb_t *cur_pcb;
-    cur_pcb = get_cur_process();
     if (cur_pcb->file_arr.n_opend_files >= N_FILE_LIMIT) return -1;
     for (i = 2; i < N_FILE_LIMIT; i++) {
         if (cur_pcb->file_arr.files[i].flags == AVAILABLE) {    // this entry is available
@@ -300,11 +298,12 @@ int32_t file_open(const uint8_t *f_name) {
         return -1;
     }
 
-    // obtain an available fd number
-    fd = allocate_fd();
-    // printf("In file_open: Now the fd = %d\n", fd);
-
+    // get the current pcb
     cur_pcb = get_cur_process();
+
+    // obtain an available fd number
+    fd = allocate_fd(cur_pcb);
+    // printf("In file_open: Now the fd = %d\n", fd);
 
     // populate the block
     cur_pcb->file_arr.files[fd].f_op = &file_op;
@@ -416,10 +415,8 @@ int32_t dir_close(int32_t fd){
  */
 int32_t dir_open(const uint8_t *f_name){
     // we do not need to use filename, since this is a single level file system
-    pcb_t *cur_pcb;
-    int32_t cur_fd = allocate_fd();
-
-    cur_pcb = get_cur_process();
+    pcb_t *cur_pcb = get_cur_process();
+    int32_t cur_fd = allocate_fd(cur_pcb);
 
     // initialize the file struct array entry
     cur_pcb->file_arr.files[cur_fd].inode_idx = 0;
@@ -479,10 +476,12 @@ int32_t file_rtc_open(const uint8_t *f_name) {
     pcb_t *cur_pcb;
     
     if (rtc_open(NULL)!=0) return -1;
-    // obtain an available fd number
-    fd = allocate_fd();
 
+    // get the current pcb
     cur_pcb = get_cur_process();
+
+    // obtain an available fd number
+    fd = allocate_fd(cur_pcb);
 
     // FIXME: if there exists an opened rtc file, then we just reopen it on the same fd
     
