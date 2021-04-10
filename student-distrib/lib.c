@@ -588,3 +588,42 @@ void test_interrupts(void) {
 int max(int a, int b){
     return a>b?a:b;
 }
+
+
+
+int32_t read(int32_t fd, void* buf, int32_t nbytes) {
+    long ret;
+    asm volatile ("INT $0x80"
+    : "=a" (ret)
+    : "a" (0x03), "b" (fd), "c" (buf), "d" (nbytes)
+    : "memory", "cc");
+    return ret;
+}
+
+int32_t write(int32_t fd, const void* buf, int32_t nbytes) {
+    long ret;
+    asm volatile ("INT $0x80"
+    : "=a" (ret)
+    : "a" (0x04), "b" (fd), "c" (buf), "d" (nbytes)
+    : "memory", "cc");
+    return ret;
+}
+
+int32_t open(const uint8_t* filename) {
+    long ret;
+    asm volatile ("INT $0x80"
+    : "=a" (ret)
+    : "a" (0x05), "b" (filename)
+    : "memory", "cc");
+    return ret;
+}
+
+
+int32_t close(int32_t fd) {
+    long ret;
+    asm volatile ("INT $0x80"
+    : "=a" (ret)
+    : "a" (0x06), "b" (fd)
+    : "memory", "cc");
+    return ret;
+}

@@ -402,6 +402,8 @@ interrupt_entry_8:
 
 # System call handler is in the same format as exception handler
 
+
+# naive system call handler
 .globl exception_handler_128
 exception_handler_128:
          # ----------------------push all registers--------------------
@@ -415,6 +417,41 @@ exception_handler_128:
          RESTORE_ALL_REGS
          IRET
 
+
+.globl sys_call_linkage
+sys_call_linkage:
+
+           # --------------save all registers--------------
+           SAVE_ALL_REGS
+
+           # ----------------check sanity-----------------
+           cmpl $MAXIMUM_SYS_CALL_NUM, %eax
+           jae  invalid_sys_call
+
+           # ----------------jump to real func------------
+           call *sys_jump_table(,%eax,4)
+           jmp sys_call_finish
+
+invalid_sys_call:
+
+           # TODO: what should we do here?
+
+sys_call_finish:
+           RESTORE_ALL_REGS
+           IRET
+
+sys_jump_table:
+          .long dummy_sys_call
+          .long halt_sys_call
+          .long execute_sys_call
+          .long read_sys_call
+          .long write_sys_call
+          .long open_sys_call
+          .long close_sys_call
+          .long get_args_sys_call
+          .long vidmap_sys_call
+          .long set_handler_sys_call
+          .long sig_return_sys_call
 
 
 /**

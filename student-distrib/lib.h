@@ -36,6 +36,15 @@ int8_t* strncpy(int8_t* dest, const int8_t*src, uint32_t n);
 int32_t bad_userspace_addr(const void* addr, int32_t len);
 int32_t safe_strncpy(int8_t* dest, const int8_t* src, int32_t n);
 
+
+// system calls
+int32_t open(const uint8_t* filename);
+int32_t close(int32_t fd);
+int32_t read(int32_t fd, void* buf, int32_t nbytes);
+int32_t write(int32_t fd, const void* buf, int32_t nbytes);
+
+
+
 // cursor function
 void update_cursor(int x, int y);
 

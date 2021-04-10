@@ -4,6 +4,8 @@
 #include "multiboot.h"
 #include "x86_desc.h"
 #include "lib.h"
+#include "file_sys.h"
+#include "link.h"
 
 /* Declaration of constant in interrupt */
 
@@ -94,9 +96,88 @@ void init_IDT(){
     idt[IDT_ENTRY_RTC].present = 1;
 
     // set the system call entry
-    SET_IDT_ENTRY(idt[IDT_SYSTEM_CALL],exception_handler_128);
+    SET_IDT_ENTRY(idt[IDT_SYSTEM_CALL],sys_call_linkage);
     idt[IDT_SYSTEM_CALL].dpl = 3;
+    idt[IDT_SYSTEM_CALL].present = 1;
 
     LOAD_IDTR(idt_desc_ptr);
 
 }
+
+// Ten system calls
+
+//extern int32_t halt_sys_call(uint8_t status);
+//extern int32_t execute_sys_call(const uint8_t* command);
+//extern int32_t read_sys_call(int32_t fd, void* buf, int32_t nbytes);
+//extern int32_t write_sys_call(int32_t fd, const void* buf, int32_t nbytes);
+//extern int32_t open_sys_call(const uint8_t* filename);
+//extern int32_t close_sys_call(int32_t fd);
+//extern int32_t get_args_sys_call(uint8_t *buf, int32_t nbytes);
+//extern int32_t vidmap_sys_call(uint8_t ** screen_start);
+//extern int32_t set_handler_sys_call(int32_t signum, void* handler_address);
+//extern int32_t sig_return_sys_call(void);
+
+ASMLINKAGE int32_t open_sys_call(const uint8_t* filename){
+    return sys_open(filename);
+}
+
+ASMLINKAGE int32_t read_sys_call(int32_t fd, void* buf, int32_t nbytes){
+    return sys_read(fd,buf,nbytes);
+}
+
+ASMLINKAGE int32_t close_sys_call(int32_t fd){
+    return sys_close(fd);
+}
+
+ASMLINKAGE int32_t write_sys_call(int32_t fd, const void* buf, int32_t nbytes){
+    return sys_write(fd,buf,nbytes);
+}
+
+
+
+ASMLINKAGE void halt_sys_call(){
+    return;
+}
+
+ASMLINKAGE void execute_sys_call(int32_t fd, const void* buf, int32_t nbytes){
+    return;
+}
+
+ASMLINKAGE void get_args_sys_call(int32_t fd, const void* buf, int32_t nbytes){
+    return;
+}
+
+ASMLINKAGE void vidmap_sys_call(int32_t fd, const void* buf, int32_t nbytes){
+    return;
+}
+
+ASMLINKAGE void set_handler_sys_call(int32_t fd, const void* buf, int32_t nbytes){
+    return;
+}
+
+ASMLINKAGE void sig_return_sys_call(int32_t fd, const void* buf, int32_t nbytes){
+    return;
+}
+
+ASMLINKAGE void dummy_sys_call(int32_t fd, const void* buf, int32_t nbytes){
+    return;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
