@@ -1,5 +1,6 @@
 #include "process.h"
 #include "file_sys.h"
+#include "lib.h"
 
 pcb_t* pcb_ptrs[N_PCB_LIMIT];
 int32_t n_present_pcb;
@@ -77,4 +78,22 @@ pcb_t* delete_process(pcb_t* pcb) {
     pcb->present = 0;
     n_present_pcb -= 1;
     return pcb->parent;
+}
+
+/**
+ * system_halt
+ * Description: Implementation of halt()
+ * Input: status - exit status info
+ * Output: 0 if success.
+ * Return: should never return
+ * Side effect: terminate the process and return value to its parent
+ */
+int32_t system_halt(int32_t status) {
+
+
+    if (n_present_pcb == 0) {   // not in a process
+        return -1;
+    }
+
+    return -1;
 }

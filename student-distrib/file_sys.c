@@ -610,3 +610,8 @@ int32_t sys_write(int32_t fd, const void *buf, int32_t bufsize) {
     }
     return file_arr[fd].f_op->write(fd, buf, bufsize);
 }
+
+
+int32_t close_all_files(file_arr_t* file_arr) {
+    return -1;
+}

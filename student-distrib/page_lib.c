@@ -20,12 +20,30 @@ void flush_tlb() {
 
 void set_private_page(int32_t pid){
 
-      // initialization of current pde
-      uint32_t cur_PDE = ((pid + 2) << 22) | PDE_MASK ;
-      page_directory[PRIVATE_PAGE_VA] = cur_PDE;
+    // initialization of current pde
+    uint32_t cur_PDE = ((pid + 2) << 22) | PDE_MASK ;
 
-      // flush the CR3 register
-      flush_tlb();
+    // set the PDE entry
+    PDE cur_entry;
+
+    cur_entry.P = cur_PDE & 0x00000001;
+    cur_entry.RW = (cur_PDE >> 1) & 0x00000001;
+    cur_entry.US = (cur_PDE >> 2)  & 0x00000001;
+    cur_entry.PWT = (cur_PDE >> 3)  & 0x00000001;
+    cur_entry.PCD = (cur_PDE >> 4)  & 0x00000001;
+    cur_entry.A = (cur_PDE >> 5)  & 0x00000001;
+    cur_entry.D = (cur_PDE >> 6)  & 0x00000001;
+    cur_entry.PS = (cur_PDE >> 7)  & 0x00000001;
+    cur_entry.G = (cur_PDE >> 8)  & 0x00000001;
+    cur_entry.AVAIAL = (cur_PDE >> 9)  & 0x00000007;
+    cur_entry.PAT = (cur_PDE >> 12) & 0x00000001;
+    cur_entry.reserved = (cur_PDE >> 13) & 0x000001FF;
+    cur_entry.Base_address = (cur_PDE >> 22);
+
+    page_directory[PRIVATE_PAGE_VA] = cur_entry;
+
+    // flush the CR3 register
+    flush_tlb();
 }
 
 uint32_t get_eip(dentry_t* task_dentry_ptr){

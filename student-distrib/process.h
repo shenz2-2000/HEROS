@@ -31,4 +31,7 @@ pcb_t* get_cur_process();
 pcb_t* create_process();
 pcb_t* delete_process(pcb_t* pcb);
 
+
+int32_t system_halt(int32_t status);
+
 #endif
