@@ -9,7 +9,8 @@
 #define TASK_KSTK_BOTTOM 0x800000    
 #define TASK_KSTK_PCB_ADDR_MASK 0xFFFFE000
 
-typedef struct pcb_t {
+typedef struct pcb_t pcb_t;
+struct pcb_t {
     uint8_t present;
     pcb_t* parent;
     
@@ -18,7 +19,7 @@ typedef struct pcb_t {
     uint32_t k_esp;
 
     file_arr_t file_arr;
-} pcb_t;
+};
 
 typedef union task_kstack_t {
     pcb_t pcb;

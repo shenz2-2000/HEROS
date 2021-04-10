@@ -39,3 +39,10 @@ pcb_t* get_cur_process() {
     return ret;
 }
 
+pcb_t* create_process() {
+    return NULL;
+}
+
+pcb_t* delete_process() {
+    return NULL;
+}
