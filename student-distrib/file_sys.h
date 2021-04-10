@@ -41,6 +41,12 @@ typedef struct file_struct {
     uint32_t flags;     // 1 if in use, 0 not in use
 } file_struct_t;
 
+// the file array struct
+typedef struct file_arr_t {
+    int32_t n_opend_files;   // the first and second file struct are for stdin and stdout
+    file_struct_t files[N_FILE_LIMIT];  // the file struct array
+} file_arr_t;
+
 // dir.entry struct
 typedef struct dentry {
     uint8_t f_name[F_NAME_LIMIT];
