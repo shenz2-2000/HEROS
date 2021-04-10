@@ -60,3 +60,10 @@
 
     * BUG8 - a collection of bugs of small typos and missing of headers.
     * FIX  - using printf() and gdb to locate these bugs and correct them correspondingly.
+
+## CP 3.3
+
+    * BUG1 - in boot.S, when we write the system call linkage, we forget to ensure ebx is at the top of the stack. Instead we put eax at
+             the top of stack. That will result in a page fault since 0x05 is not activated by our paging system
+    * FIX  - Ensure ebx is the last one to push
+

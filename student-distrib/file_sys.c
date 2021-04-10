@@ -88,6 +88,7 @@ int32_t read_dentry_by_name (const uint8_t *fname, dentry_t *dentry) {
     int fname_len;
 
     // bad input check
+    printf("in read_dentry: &fname: %d\n", fname);
     fname_len = strlen((int8_t*)fname);
     if ((fname_len > F_NAME_LIMIT) || (fname_len == 0)) return -1;
 

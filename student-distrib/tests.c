@@ -467,7 +467,9 @@ int sys_file_op_test() {
     // Print the root directory
     int32_t fd, ret_val, buf_size = 32;
     char buf[32+1];
-    if ((fd = open((uint8_t *) ".")) == -1) {
+    char root_name[5] = ".";
+    printf("%d\n", root_name);
+    if ((fd = open((uint8_t *) root_name)) == -1) {
         printf("FAIL TO OPEN ROOT DIRECTORY\n");
         return FAIL;
     }

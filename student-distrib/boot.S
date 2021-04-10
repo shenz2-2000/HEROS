@@ -66,11 +66,9 @@ halt:
 	pushl %edx
 	pushl %ecx
 	pushl %ebx
-	pushl %eax
 .endm
 
 .macro RESTORE_ALL_REGS
-	popl %eax
 	popl %ebx
 	popl %ecx
 	popl %edx
