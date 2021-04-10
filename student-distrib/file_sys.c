@@ -9,9 +9,9 @@ static boot_block_t *bblock_ptr;    // boot block
 static inode_block_t *inodes_arr;   // inode block
 static data_block_t *dblocks_arr;   // data block
 
-// file array (pcb)
-static int32_t n_opend_files = 2;   // the first and second pcb are for stdin and stdout
-static pcb_t pcb_arr[N_PCB_LIMIT];  // the PCB array
+// file array
+static int32_t n_opend_files = 2;   // the first and second file struct are for stdin and stdout
+static file_struct_t file_arr[N_FILE_LIMIT];  // the file struct array
 
 // op table
 static file_operations_t file_op;       // the op table for regular file
@@ -58,17 +58,17 @@ int32_t file_sys_init(module_t *f_sys_mod) {
     rtc_op.write =  file_rtc_write;
     rtc_op.close =  file_rtc_close;
 
-    // init the pcb_arr
-    pcb_arr[0].f_op = &terminal_op;
-    pcb_arr[0].flags = OCCUPIED;
-    pcb_arr[0].f_pos = 0;
-    pcb_arr[0].inode_idx = 0;
-    pcb_arr[1].f_op = &terminal_op;
-    pcb_arr[1].flags = OCCUPIED;
-    pcb_arr[1].f_pos = 1;   // FIXME: what should be the position???
-    pcb_arr[1].inode_idx = 1;
+    // init the file_arr
+    file_arr[0].f_op = &terminal_op;
+    file_arr[0].flags = OCCUPIED;
+    file_arr[0].f_pos = 0;
+    file_arr[0].inode_idx = 0;
+    file_arr[1].f_op = &terminal_op;
+    file_arr[1].flags = OCCUPIED;
+    file_arr[1].f_pos = 1;   // FIXME: what should be the position???
+    file_arr[1].inode_idx = 1;
 
-    for (i = 2; i < N_PCB_LIMIT; i++) pcb_arr[i].flags = AVAILABLE;
+    for (i = 2; i < N_FILE_LIMIT; i++) file_arr[i].flags = AVAILABLE;
 
     return 0;
 }
@@ -218,10 +218,10 @@ int32_t get_file_length(dentry_t *dentry) {
  */
 int32_t allocate_fd() {
     int i;
-    if (n_opend_files >= N_PCB_LIMIT) return -1;
-    for (i = 2; i < N_PCB_LIMIT; i++) {
-        if (pcb_arr[i].flags == AVAILABLE) {    // this entry is available
-            pcb_arr[i].flags = OCCUPIED;       // this flag must be filled here (avoid race)
+    if (n_opend_files >= N_FILE_LIMIT) return -1;
+    for (i = 2; i < N_FILE_LIMIT; i++) {
+        if (file_arr[i].flags == AVAILABLE) {    // this entry is available
+            file_arr[i].flags = OCCUPIED;       // this flag must be filled here (avoid race)
             break;
         }
     }
@@ -251,9 +251,9 @@ int32_t file_open(const uint8_t *f_name) {
     // printf("In file_open: Now the fd = %d\n", fd);
 
     // populate the block
-    pcb_arr[fd].f_op = &file_op;
-    pcb_arr[fd].inode_idx = dentry.inode_idx;
-    pcb_arr[fd].f_pos = 0;  // the global cursor is at the beginning
+    file_arr[fd].f_op = &file_op;
+    file_arr[fd].inode_idx = dentry.inode_idx;
+    file_arr[fd].f_pos = 0;  // the global cursor is at the beginning
     // no need to fill flags (it's filled in fd allocation)
 
     return fd;
@@ -281,14 +281,14 @@ int32_t file_close(int32_t fd) {
  */
 int32_t file_read(int32_t fd, void *buf, int32_t bufsize) {
     int32_t bytes_cnt;
-    uint32_t offset = pcb_arr[fd].f_pos;
+    uint32_t offset = file_arr[fd].f_pos;
 
     // read the data
-    bytes_cnt = read_data(pcb_arr[fd].inode_idx, offset, buf, bufsize);
+    bytes_cnt = read_data(file_arr[fd].inode_idx, offset, buf, bufsize);
     if (bytes_cnt == -1) return -1;
 
     // update position
-    pcb_arr[fd].f_pos += bytes_cnt;
+    file_arr[fd].f_pos += bytes_cnt;
 
     return bytes_cnt;
 }
@@ -359,11 +359,11 @@ int32_t dir_open(const uint8_t *f_name){
     // we do not need to use filename, since this is a single level file system
     int32_t cur_fd = allocate_fd();
 
-    // initialize the pcb array entry
-    pcb_arr[cur_fd].inode_idx = 0;
-    pcb_arr[cur_fd].f_pos = 0;
-    pcb_arr[cur_fd].flags = OCCUPIED;
-    pcb_arr[cur_fd].f_op = &dir_op;
+    // initialize the file struct array entry
+    file_arr[cur_fd].inode_idx = 0;
+    file_arr[cur_fd].f_pos = 0;
+    file_arr[cur_fd].flags = OCCUPIED;
+    file_arr[cur_fd].f_op = &dir_op;
 
     // we could use this to read file names under the '.' directory
     return cur_fd;
@@ -382,7 +382,7 @@ int32_t dir_open(const uint8_t *f_name){
 int32_t dir_read(int32_t fd, void *buf, int32_t bufsize){
 
     // cur file position to read
-    int cur_pos = pcb_arr[fd].f_pos;
+    int cur_pos = file_arr[fd].f_pos;
     cur_pos++;
 
     // check the #bytes to read
@@ -393,7 +393,7 @@ int32_t dir_read(int32_t fd, void *buf, int32_t bufsize){
 
     // copy to buffer
     strncpy(buf, (int8_t *) (bblock_ptr->dentries[cur_pos].f_name), bufsize);
-    pcb_arr[fd].f_pos = cur_pos;
+    file_arr[fd].f_pos = cur_pos;
 
     return bufsize;
 
@@ -405,10 +405,10 @@ int32_t dir_read(int32_t fd, void *buf, int32_t bufsize){
 
 /**
  * file_rtc_open
- * Description: Just get a file descriptor in PCB for RTC
+ * Description: Just get a file descriptor in file struct for RTC
  * Input: f_name - file name
  * Output: the allocated fd
- * Side effect: One posistion in the PCB is occupied
+ * Side effect: One posistion in the file struct array is occupied
  */
 int32_t file_rtc_open(const uint8_t *f_name) {
     int32_t fd;
@@ -420,9 +420,9 @@ int32_t file_rtc_open(const uint8_t *f_name) {
     // FIXME: if there exists an opened rtc file, then we just reopen it on the same fd
     
     // populate the block
-    pcb_arr[fd].f_op = &rtc_op;
-    pcb_arr[fd].inode_idx = 0;
-    pcb_arr[fd].f_pos = 0;  // the global cursor is at the beginning
+    file_arr[fd].f_op = &rtc_op;
+    file_arr[fd].inode_idx = 0;
+    file_arr[fd].f_pos = 0;  // the global cursor is at the beginning
     // no need to fill flags
 
     return fd;
@@ -434,7 +434,7 @@ int32_t file_rtc_open(const uint8_t *f_name) {
  * Description: close the RTC driver
  * Input: fd - the file descriptor
  * Output: 0 if success -1 if unccessful
- * Side effect: release the place in pcb
+ * Side effect: release the place in file struct array
  */
 int32_t file_rtc_close(int32_t fd) {
     // if (file_close(fd)!=0 || rtc_close(fd)!=0) return -1;
@@ -480,7 +480,7 @@ int32_t sys_open(const uint8_t *f_name) {
     dentry_t dentry;
     int32_t fd = -1;
 
-    if (n_opend_files >= N_PCB_LIMIT) {
+    if (n_opend_files >= N_FILE_LIMIT) {
         printf("ERROR [SYS FILE] in sys_open: cannot OPEN file [%s] because the max number of files is reached", f_name);
         return -1;
     }
@@ -522,20 +522,20 @@ int32_t sys_open(const uint8_t *f_name) {
 int32_t sys_close(int32_t fd) {
     int32_t ret;
 
-    if (fd < 0 || fd > N_PCB_LIMIT) {
+    if (fd < 0 || fd > N_FILE_LIMIT) {
         printf("ERROR [FILE]: fd overflow\n");
         return -1;
     }
     if (fd == 0) {printf("ERROR [FILE]: cannot CLOSE stdin\n"); return -1;}
     if (fd == 1) {printf("ERROR [FILE]: cannot CLOSE stdout\n"); return -1;}
-    if (pcb_arr[fd].flags == AVAILABLE) {
+    if (file_arr[fd].flags == AVAILABLE) {
         printf("WARNING [FILE]: cannot CLOSE a file that is not opened. fd: %d\n", fd);
         return 0;   // not a serious error
     }
 
-    ret = pcb_arr[fd].f_op->close(fd);
+    ret = file_arr[fd].f_op->close(fd);
 
-    pcb_arr[fd].flags = AVAILABLE;  // empty the block
+    file_arr[fd].flags = AVAILABLE;  // empty the block
     n_opend_files--;
 
     return ret;
@@ -552,7 +552,7 @@ int32_t sys_close(int32_t fd) {
  */
 int32_t sys_read(int32_t fd, void *buf, int32_t bufsize) {
     // bad input checking
-    if (fd < 0 || fd > N_PCB_LIMIT) {
+    if (fd < 0 || fd > N_FILE_LIMIT) {
         printf("ERROR [SYS FILE] in sys_read: fd overflow\n");
         return -1;
     }
@@ -564,7 +564,7 @@ int32_t sys_read(int32_t fd, void *buf, int32_t bufsize) {
         printf("ERROR [SYS FILE] in sys_read: read buffer size should be non-negative");
         return -1;
     }
-    if (pcb_arr[fd].flags == AVAILABLE) {
+    if (file_arr[fd].flags == AVAILABLE) {
         printf("WARNING [SYS FILE] in sys_read: cannot READ a file that is not opened. fd: %d\n", fd);
         return 0;   // not a serious error
     }
@@ -576,10 +576,10 @@ int32_t sys_read(int32_t fd, void *buf, int32_t bufsize) {
 
     /* for debug */
     // dentry_t dentry;
-    // read_dentry_by_inode(pcb_arr[fd].inode_idx, &dentry);
+    // read_dentry_by_inode(file_arr[fd].inode_idx, &dentry);
     // printf("In file_test: Now the file type is %d\n", dentry.f_type);
 
-    return pcb_arr[fd].f_op->read(fd, buf, bufsize);
+    return file_arr[fd].f_op->read(fd, buf, bufsize);
 }
 
 /**
@@ -592,7 +592,7 @@ int32_t sys_read(int32_t fd, void *buf, int32_t bufsize) {
  * Side effect: an error will be promped
  */
 int32_t sys_write(int32_t fd, const void *buf, int32_t bufsize) {
-    if (fd < 0 || fd > N_PCB_LIMIT) {
+    if (fd < 0 || fd > N_FILE_LIMIT) {
         printf("ERROR [SYS FILE] in sys_write: fd overflow\n");
         return -1;
     }
@@ -604,9 +604,9 @@ int32_t sys_write(int32_t fd, const void *buf, int32_t bufsize) {
         printf("ERROR [SYS FILE] in sys_write: write buffer size should be non-negative");
         return -1;
     }
-    if (pcb_arr[fd].flags == AVAILABLE) {
+    if (file_arr[fd].flags == AVAILABLE) {
         printf("WARNING [SYS FILE] in sys_write: the file is not opened. fd: %d\n", fd);
         return 0;   // not a serious error
     }
-    return pcb_arr[fd].f_op->write(fd, buf, bufsize);
+    return file_arr[fd].f_op->write(fd, buf, bufsize);
 }

@@ -14,10 +14,10 @@
 #define N_DENTRY_LIMIT              (BLOCK_SIZE_IN_B - STATS_ENTRY_SIZE_IN_B) / DENTRY_SIZE_IN_B
 #define INODE_N_DBLOCK_LIMIT        (BLOCK_SIZE_IN_B - 4) / 4   // 4: an entry in inode block takes 4 bytes
 
-// the max number of pcbs
-#define N_PCB_LIMIT     8
+// the max number of opened files
+#define N_FILE_LIMIT     8
 
-// PCB flags
+// file structure flags
 #define OCCUPIED  1
 #define AVAILABLE 0
 
@@ -33,13 +33,13 @@ typedef struct file_operations {
     int32_t (*write) (int32_t fd, const void *buf, int32_t bufsize);
 } file_operations_t;
 
-// process control block (PCB), entries in the file array
-typedef struct pcb {
+// entries in the file array
+typedef struct file_struct {
     file_operations_t *f_op;    // the file operation table
     uint32_t inode_idx;
     uint32_t f_pos;
     uint32_t flags;     // 1 if in use, 0 not in use
-} pcb_t;
+} file_struct_t;
 
 // dir.entry struct
 typedef struct dentry {
