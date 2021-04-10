@@ -463,6 +463,77 @@ int file_system_test() {
  * Files: file_sys.c
  */
 int sys_file_op_test() {
+   TEST_HEADER;
+   // Print the root directory
+   int32_t fd, ret_val, buf_size = 32;
+   char buf[32+1];
+   if ((fd = sys_open((uint8_t *) ".")) == -1) {
+       printf("FAIL TO OPEN ROOT DIRECTORY\n");
+       return FAIL;
+   }
+   // printf("In sys file_test: Now the fd = %d\n", fd);
+   while ((ret_val = sys_read(fd, buf, buf_size)) != 0) {
+       // printf("1\n");
+       if (ret_val == -1) {
+           printf("FAILED TO READ\n");
+           return FAIL;
+       }
+       if (sys_write(STDOUT, buf, ret_val) == -1) {
+           printf("FAILED TO WRITE TO STDOUT\n");
+           return FAIL;
+       }
+       dentry_t my_file;
+       if (read_dentry_by_name((uint8_t*)buf, &my_file) == -1) {
+           printf("File not found\n");
+           return FAIL;
+       }
+       printf("\n");
+   }
+
+   const char *valid_test_file[] = {"frame0.txt", "frame1.txt", "grep", "ls",
+                                    "fish", "verylargetextwithverylongname.tx"};
+
+   int i;
+   for (i = 0; i < sizeof(valid_test_file)/sizeof(const char *); ++i) {
+       printf("\nPress Enter to Continue\n");
+       sys_read(STDIN, &buf, buf_size);
+       clear();
+       reset_screen();
+       if ((fd = sys_open((uint8_t *) valid_test_file[i] )) == -1) {
+           printf("FAIL TO OPEN FILE\n");
+           return FAIL;
+       }
+       // printf("In file_test: Now the fd = %d\n", fd);
+       printf("Now we test the content of the file %s\n", valid_test_file[i]);
+       while (0!=(ret_val=sys_read(fd, buf, buf_size))) {
+           if (ret_val==-1) {
+               printf("FAILED TO READ\n");
+               sys_close(fd);
+               return FAIL;
+           }
+           if (sys_write(STDOUT, buf, ret_val) == -1) {
+               printf("FAILED TO WRITE TO STDOUT\n");
+               sys_close(fd);
+               return FAIL;
+           }
+           // printf("\n");
+       }
+       sys_close(fd);
+   }
+
+   return PASS;
+}
+
+/* system_call_test
+ *
+ * Test for the system call
+ * Inputs: None
+ * Outputs: PASS/FAIL
+ * Side Effects: None
+ * Coverage: system call of 4 functions: read, write, open, close
+ * Files: 
+ */
+int system_call_test() {
     TEST_HEADER;
     // Print the root directory
     int32_t fd, ret_val, buf_size = 32;
@@ -523,74 +594,10 @@ int sys_file_op_test() {
         close(fd);
     }
 
-
     return PASS;
 }
 
 
-
-//int sys_file_op_test() {
-//    TEST_HEADER;
-//    // Print the root directory
-//    int32_t fd, ret_val, buf_size = 32;
-//    char buf[32+1];
-//    if ((fd = sys_open((uint8_t *) ".")) == -1) {
-//        printf("FAIL TO OPEN ROOT DIRECTORY\n");
-//        return FAIL;
-//    }
-//    // printf("In sys file_test: Now the fd = %d\n", fd);
-//    while ((ret_val = sys_read(fd, buf, buf_size)) != 0) {
-//        // printf("1\n");
-//        if (ret_val == -1) {
-//            printf("FAILED TO READ\n");
-//            return FAIL;
-//        }
-//        if (sys_write(STDOUT, buf, ret_val) == -1) {
-//            printf("FAILED TO WRITE TO STDOUT\n");
-//            return FAIL;
-//        }
-//        dentry_t my_file;
-//        if (read_dentry_by_name((uint8_t*)buf, &my_file) == -1) {
-//            printf("File not found\n");
-//            return FAIL;
-//        }
-//        printf("\n");
-//    }
-//
-//    const char *valid_test_file[] = {"frame0.txt", "frame1.txt", "grep", "ls",
-//                                     "fish", "verylargetextwithverylongname.tx"};
-//
-//    int i;
-//    for (i = 0; i < sizeof(valid_test_file)/sizeof(const char *); ++i) {
-//        printf("\nPress Enter to Continue\n");
-//        sys_read(STDIN, &buf, buf_size);
-//        clear();
-//        reset_screen();
-//        if ((fd = sys_open((uint8_t *) valid_test_file[i] )) == -1) {
-//            printf("FAIL TO OPEN FILE\n");
-//            return FAIL;
-//        }
-//        // printf("In file_test: Now the fd = %d\n", fd);
-//        printf("Now we test the content of the file %s\n", valid_test_file[i]);
-//        while (0!=(ret_val=sys_read(fd, buf, buf_size))) {
-//            if (ret_val==-1) {
-//                printf("FAILED TO READ\n");
-//                sys_close(fd);
-//                return FAIL;
-//            }
-//            if (sys_write(STDOUT, buf, ret_val) == -1) {
-//                printf("FAILED TO WRITE TO STDOUT\n");
-//                sys_close(fd);
-//                return FAIL;
-//            }
-//            // printf("\n");
-//        }
-//        sys_close(fd);
-//    }
-//
-//
-//    return PASS;
-//}
 /* Checkpoint 3 tests */
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
@@ -607,5 +614,5 @@ void launch_tests(){
 //    TEST_OUTPUT("terminal_test", terminal_test());
 //     TEST_OUTPUT("rtc_test2", rtc_test2());
 //     TEST_OUTPUT("file_system_test", file_system_test());
-    TEST_OUTPUT("sys_file_op_test", sys_file_op_test());
+    TEST_OUTPUT("system_call_test", system_call_test());
 }
