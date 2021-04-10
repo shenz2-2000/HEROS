@@ -116,8 +116,8 @@ int sys_execute(char *command) {
         process->k_esp-=length;
         process->args=(uint8_t *)strcpy((int8_t *)process->k_esp, (int8_t *) process->args);
     } 
-    process->page_num = set_up_memory_for_task(command, &eip);
-    if (process->page_num) {
+    process->pid = set_up_memory_for_task(command, &eip);
+    if (process->pid) {
         delete_process(process);
         return -1;
     }
@@ -128,4 +128,53 @@ int sys_execute(char *command) {
     if (process->parent==NULL) ret = launch_program(NULL, US_STARTING, eip);
     else ret = launch_program(get_cur_process()->k_esp, US_STARTING, eip);
     return ret;
+}
+
+/**
+ * delete_process
+ * Description: delete the process
+ * Input: the pcb of target process
+ * Output: the parent of the deleted process
+ * Side effect: the process is deleted
+ */
+pcb_t* delete_process(pcb_t* pcb) {
+    pcb->present = 0;
+    n_present_pcb -= 1;
+    return pcb->parent;
+}
+
+/**
+ * system_halt
+ * Description: Implementation of halt()
+ * Input: status - exit status info
+ * Output: 0 if success.
+ * Return: should never return
+ * Side effect: terminate the process and return value to its parent
+ */
+
+int32_t system_halt(int32_t status) {
+
+
+    // condition check
+    if (n_present_pcb == 0) {   // not in a process
+        return -1;
+    }
+    if (get_cur_process()->parent == NULL) {
+        //TODO: if the last program has been halt, don't know if we need to consider this
+    }
+
+    close_all_files(&get_cur_process()->file_arr);  // close FDs
+    pcb_t *parent = delete_process(get_cur_process());  // clear the pcb
+    restore_paging(get_cur_process()->pid, parent->pid);  // restore parent paging
+    tss.esp0 = parent->k_esp;  // set tss to parent's kernel stack to make sure system calls use correct stack
+
+    asm volatile ("                                                                    \
+        movl %0, %%esp  /* load old ESP */                                           \n\
+        ret  /* now it's equivalent to jump execute return */"                          \
+        :                                                                              \
+        : "r" (parent->k_esp)   , "a" (status)                                         \
+        : "cc", "memory"                                                               \
+    );
+
+    return -1;
 }

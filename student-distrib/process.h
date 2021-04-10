@@ -17,7 +17,6 @@ struct pcb_t {
     uint8_t* name;
     uint8_t* args;
     uint32_t k_esp;
-    uint32_t page_id;
     file_arr_t file_arr;
     uint8_t pid;
 };
