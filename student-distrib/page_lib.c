@@ -10,6 +10,13 @@
 static uint32_t page_in_use = 0;
 static uint32_t page_id_center[MAX_PAGE] = {0};
 
+/* flush_tlb
+ * Description: update the cursor position
+ * Inputs: none
+ * Return Value: none
+ * Function: reload value of cr3
+ * Side effect: change value of eax*/
+
 void flush_tlb() {
     asm volatile("         \n\
     movl %%cr3, %%eax      \n\
@@ -18,11 +25,18 @@ void flush_tlb() {
     :
     :
     :"cc", "memory", "eax");
-
 }
 
-// return -1 means failure
-// otherwise return current page id
+
+/* set_page_for_task
+ * Description: do the background setup for the new task
+ * Inputs: task_file_name -- file name of new task
+ *         eip -- pointer for new eip we need to fill
+ * Return Value: -1 -- failure
+ *               page_id -- success
+ * Function: set up page directory and load the code for the new task (with sanity check)
+ * Side effect: change the value of Page Directory*/
+
 int set_page_for_task(uint8_t* task_file_name, uint32_t* eip){
 
     int i;
@@ -67,7 +81,11 @@ int set_page_for_task(uint8_t* task_file_name, uint32_t* eip){
 }
 
 
-
+/* set_private_page
+ * Description: set page directory entry for the new task
+ * Inputs: pid -- page id (allocate in set_page_for_task)
+ * Return Value: none
+ * Side effect: change value of PD and flush the TLB*/
 
 void set_private_page(int32_t pid){
 
@@ -76,7 +94,6 @@ void set_private_page(int32_t pid){
 
     // set the PDE entry
     PDE cur_entry;
-
     cur_entry.P = cur_PDE & 0x00000001;
     cur_entry.RW = (cur_PDE >> 1) & 0x00000001;
     cur_entry.US = (cur_PDE >> 2)  & 0x00000001;
@@ -97,9 +114,16 @@ void set_private_page(int32_t pid){
       flush_tlb();
 }
 
-uint32_t get_eip(dentry_t* task_dentry_ptr){
+/* get_eip
+ * Description: get a new eip from task file
+ * Inputs: pid -- page id (allocate in set_page_for_task)
+ * Return Value: -1 -- failure
+ *               return_val -- new eip
+ * Side effect: read file*/
 
-    uint32_t return_val;
+int get_eip(dentry_t* task_dentry_ptr){
+
+    int return_val;
 
     // NULL pointer
     if(task_dentry_ptr == NULL) return -1;
@@ -111,8 +135,16 @@ uint32_t get_eip(dentry_t* task_dentry_ptr){
 
 }
 
+/* load_private_code
+ * Description: load code to the prescribed virtual memory
+ * Inputs: task_dentry_ptr -- ptr to task dentry
+ * Return Value: -1 -- failure
+ *               0 -- success
+ * Side effect: read file*/
 
 int load_private_code(dentry_t * task_dentry_ptr){
+
+    if(task_dentry_ptr == NULL) return -1;
 
     // variable declaration
     int i;
@@ -134,7 +166,13 @@ int load_private_code(dentry_t * task_dentry_ptr){
     return 0;
 }
 
-// return 0 for fail, 1 for success
+/* executable_check
+ * Description: check whether the file is executable
+ * Inputs: task_dentry_ptr -- ptr to task dentry
+ * Return Value: 0 -- failure
+ *               1 -- success
+ * Side effect: read file*/
+
 int executable_check(dentry_t* task_dentry_ptr){
     uint8_t temp[ELF_LENGTH];
     read_data(task_dentry_ptr->inode_idx,0,temp,ELF_LENGTH);
@@ -149,7 +187,13 @@ int executable_check(dentry_t* task_dentry_ptr){
 
 }
 
-// get a new page id, return -1 if fails
+/* get_new_page_id
+ * Description: get a free page id
+ * Inputs: none
+ * Return Value: -1 -- failure
+ *               i -- page id
+ * Side effect: None*/
+
 int get_new_page_id(){
     int i;
     for(i = 0; i < MAX_PAGE; i++){
