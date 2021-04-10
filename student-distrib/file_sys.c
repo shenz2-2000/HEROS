@@ -250,21 +250,6 @@ int32_t file_open(const uint8_t *f_name) {
  * Side effect: the file is not in use
  */
 int32_t file_close(int32_t fd) {
-    
-    if (fd == 0) {printf("ERROR [FILE]: cannot CLOSE stdin\n"); return -1;}
-    if (fd == 1) {printf("ERROR [FILE]: cannot CLOSE stdout\n"); return -1;}
-    if (fd < 0 || fd > N_PCB_LIMIT) {
-        printf("ERROR [FILE]: fd overflow\n");
-        return -1;
-    }
-    if (pcb_arr[fd].flags == AVAILABLE) {
-        printf("WARNING [FILE]: cannot CLOSE a file that is not opened. fd: %d\n", fd);
-        return 0;   // not a serious error
-    }
-
-    pcb_arr[fd].flags = AVAILABLE;  // empty the block
-    n_opend_files--;
-
     return 0;
 }
 
@@ -342,7 +327,7 @@ int32_t dir_write(int32_t fd, const void* buf, int32_t bufsize){
  */
 int32_t dir_close(int32_t fd){
     // call file_close to reset flag
-    file_close(fd);
+    // file_close(fd);
     return 0;
 }
 
@@ -435,7 +420,8 @@ int32_t file_rtc_open(const uint8_t *f_name) {
  * Side effect: release the place in pcb
  */
 int32_t file_rtc_close(int32_t fd) {
-    if (file_close(fd)!=0 || rtc_close(fd)!=0) return -1;
+    // if (file_close(fd)!=0 || rtc_close(fd)!=0) return -1;
+    if (rtc_close(fd)!=0) return -1;
     return 0;
 }
 
@@ -517,7 +503,25 @@ int32_t sys_open(const uint8_t *f_name) {
  * Side effect: the file is not in use
  */
 int32_t sys_close(int32_t fd) {
-    return pcb_arr[fd].f_op->close(fd);
+    int32_t ret;
+
+    if (fd < 0 || fd > N_PCB_LIMIT) {
+        printf("ERROR [FILE]: fd overflow\n");
+        return -1;
+    }
+    if (fd == 0) {printf("ERROR [FILE]: cannot CLOSE stdin\n"); return -1;}
+    if (fd == 1) {printf("ERROR [FILE]: cannot CLOSE stdout\n"); return -1;}
+    if (pcb_arr[fd].flags == AVAILABLE) {
+        printf("WARNING [FILE]: cannot CLOSE a file that is not opened. fd: %d\n", fd);
+        return 0;   // not a serious error
+    }
+
+    ret = pcb_arr[fd].f_op->close(fd);
+
+    pcb_arr[fd].flags = AVAILABLE;  // empty the block
+    n_opend_files--;
+
+    return ret;
 }
 
 /**
@@ -535,11 +539,18 @@ int32_t sys_read(int32_t fd, void *buf, int32_t bufsize) {
         printf("ERROR [SYS FILE] in sys_read: fd overflow\n");
         return -1;
     }
+    if (buf == NULL) {
+        printf("ERROR [SYS FILE] in sys_read: read buffer NULL pointer");
+        return -1;
+    }
+    if (bufsize < 0) {
+        printf("ERROR [SYS FILE] in sys_read: read buffer size should be non-negative");
+        return -1;
+    }
     if (pcb_arr[fd].flags == AVAILABLE) {
         printf("WARNING [SYS FILE] in sys_read: cannot READ a file that is not opened. fd: %d\n", fd);
         return 0;   // not a serious error
     }
-
     // stdout is write-only
     if (fd == 1) {
         printf("ERROR [SYS FILE] in sys_read: stdout is write-only");
@@ -566,6 +577,14 @@ int32_t sys_read(int32_t fd, void *buf, int32_t bufsize) {
 int32_t sys_write(int32_t fd, const void *buf, int32_t bufsize) {
     if (fd < 0 || fd > N_PCB_LIMIT) {
         printf("ERROR [SYS FILE] in sys_write: fd overflow\n");
+        return -1;
+    }
+    if (buf == NULL) {
+        printf("ERROR [SYS FILE] in sys_write: write buffer NULL pointer");
+        return -1;
+    }
+    if (bufsize < 0) {
+        printf("ERROR [SYS FILE] in sys_write: write buffer size should be non-negative");
         return -1;
     }
     if (pcb_arr[fd].flags == AVAILABLE) {
