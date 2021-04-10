@@ -6,6 +6,9 @@
 #include "x86_desc.h"
 #include "file_sys.h"
 
+// Page control structure
+static uint32_t page_in_use = 0;
+static uint32_t page_id_center[MAX_PAGE] = {0};
 
 void flush_tlb() {
     asm volatile("         \n\
@@ -17,6 +20,54 @@ void flush_tlb() {
     :"cc", "memory", "eax");
 
 }
+
+// return -1 means failure
+// otherwise return current page id
+int set_page_for_task(uint8_t* task_file_name, uint32_t* eip){
+
+    int i;
+    int cur_page_id;
+    dentry_t task_dentry;
+
+    // sanity check
+    if(eip == NULL || task_file_name == NULL) return -1;
+
+    // potential initialization
+    if(page_in_use == 0){
+        for(i = 0; i < MAX_PAGE; i++)
+            page_id_center[i] = 0;
+    }
+
+    // get task_dentry with sanity check
+    if (read_dentry_by_name(task_file_name, &task_dentry) < 0) return -1;
+
+    // check executable
+    i = executable_check(&task_dentry);
+    if(i == 0) return -1;
+
+    // get a page id with sanity check
+    cur_page_id = get_new_page_id();
+    if(cur_page_id < 0) return -1;
+
+    // get new eip pointer with sanity check
+    i = get_eip(&task_dentry);
+    if(i == -1) return -1;
+    *eip = i;
+
+    // set the page and load code from file
+    set_private_page(cur_page_id);
+    load_private_code(&task_dentry);
+
+    // finally we update page_id_center
+    // Warning: can only update it when everything is working properly!
+    page_in_use ++;
+    page_id_center[cur_page_id] = 1;
+
+    return cur_page_id;
+}
+
+
+
 
 void set_private_page(int32_t pid){
 
@@ -42,8 +93,8 @@ void set_private_page(int32_t pid){
 
     page_directory[PRIVATE_PAGE_VA] = cur_entry;
 
-    // flush the CR3 register
-    flush_tlb();
+      // flush the CR3 register
+      flush_tlb();
 }
 
 uint32_t get_eip(dentry_t* task_dentry_ptr){
@@ -83,6 +134,7 @@ int load_private_code(dentry_t * task_dentry_ptr){
     return 0;
 }
 
+// return 0 for fail, 1 for success
 int executable_check(dentry_t* task_dentry_ptr){
     uint8_t temp[ELF_LENGTH];
     read_data(task_dentry_ptr->inode_idx,0,temp,ELF_LENGTH);
@@ -95,7 +147,18 @@ int executable_check(dentry_t* task_dentry_ptr){
 
     return 1;
 
+}
 
+// get a new page id, return -1 if fails
+int get_new_page_id(){
+    int i;
+    for(i = 0; i < MAX_PAGE; i++){
+        if(page_id_center[i] == 0){
+            return i;
+        }
+    }
+
+    return -1;
 }
 
 

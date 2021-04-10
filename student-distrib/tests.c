@@ -250,7 +250,7 @@ int rtc_test() {
  * Coverage: system call
  * Files: x86_desc.h/S
  */
-static inline int system_call_test() {
+static inline int naive_system_call_test() {
     TEST_HEADER;
     asm volatile("int $0x80");  // system call handler at index 0x80
     return FAIL;
@@ -524,15 +524,15 @@ int sys_file_op_test() {
    return PASS;
 }
 
-int sys_execute_test() {
-    TEST_HEADER;
-
-    int32_t ret;
-
-    ret = sys_execute((uint8_t *) "ls");
-    if (ret == 0) return PASS;
-    else return FAIL;
-}
+//int sys_execute_test() {
+//    TEST_HEADER;
+//
+//    int32_t ret;
+//
+//    ret = sys_execute((uint8_t *) "ls");
+//    if (ret == 0) return PASS;
+//    else return FAIL;
+//}
 
 /* system_call_test
  *
