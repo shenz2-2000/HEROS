@@ -1,5 +1,8 @@
 #include "process.h"
 #include "file_sys.h"
+#include "page_lib.h"
+#include "lib.h"
+
 pcb_t* pcb_ptrs[N_PCB_LIMIT];
 int32_t n_present_pcb;
 
@@ -8,7 +11,7 @@ int32_t n_present_pcb;
  * Description: Initialize the process array system
  * Input: None
  * Output: 0 if success.
- * Side effect: Initialize the file system
+ * Side effect: all processes are set not present
  */
 void process_init() {
     int i;
@@ -24,7 +27,7 @@ void process_init() {
  * Description: obtain the current running process
  * Input: None
  * Output: the address of the current pcb
- * Side effect: Initialize the file system
+ * Side effect: None
  */
 pcb_t* get_cur_process() {
     pcb_t *ret;
