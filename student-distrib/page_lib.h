@@ -20,7 +20,7 @@
 
 // tool functions
 extern void flush_tlb();
-extern uint32_t get_eip(dentry_t * task_dentry_ptr);
+extern int get_eip(dentry_t * task_dentry_ptr);
 extern void set_private_page(int32_t pid);
 extern int load_private_code(dentry_t * task_dentry_ptr);
 extern int executable_check(dentry_t * task_dentry_ptr);
