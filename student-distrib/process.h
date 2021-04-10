@@ -26,4 +26,9 @@ typedef union task_kstack_t {
     uint8_t stk[TASK_KSTK_SIZE_IN_B];
 } task_kstack_t;
 
+void process_init();
+pcb_t* get_cur_process();
+pcb_t* create_process();
+pcb_t* delete_process(pcb_t* pcb);
+
 #endif

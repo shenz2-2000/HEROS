@@ -9,7 +9,7 @@ int32_t n_present_pcb;
  * Description: Initialize the process array system
  * Input: None
  * Output: 0 if success.
- * Side effect: Initialize the file system
+ * Side effect: all processes are set not present
  */
 void process_init() {
     int i;
@@ -25,7 +25,7 @@ void process_init() {
  * Description: obtain the current running process
  * Input: None
  * Output: the address of the current pcb
- * Side effect: Initialize the file system
+ * Side effect: None
  */
 pcb_t* get_cur_process() {
     pcb_t *ret;
@@ -39,10 +39,42 @@ pcb_t* get_cur_process() {
     return ret;
 }
 
+/**
+ * create_process
+ * Description: create a new pcb and return the pcb pointer
+ * Input: None
+ * Output: the pointer to the new pcb
+ * Side effect: everything in the pcb is not initialized
+ */
 pcb_t* create_process() {
+    int i;
+
+    if (n_present_pcb >= N_PCB_LIMIT) {
+        printf("ERROR in create_process: number of process limit reached");
+        return NULL;
+    }
+    n_present_pcb += 1;
+
+    for (i = 0; i < N_PCB_LIMIT; i++) {
+        if (!(pcb_ptrs[i]->present)) {
+            pcb_ptrs[i]->present = 1;
+            return pcb_ptrs[i];
+        }
+    }
+
+    printf("ERROR in create_process: somethings wrong");
     return NULL;
 }
 
-pcb_t* delete_process() {
-    return NULL;
+/**
+ * delete_process
+ * Description: delete the process
+ * Input: the pcb of target process
+ * Output: the parent of the deleted process
+ * Side effect: the process is deleted
+ */
+pcb_t* delete_process(pcb_t* pcb) {
+    pcb->present = 0;
+    n_present_pcb -= 1;
+    return pcb->parent;
 }
