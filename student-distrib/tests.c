@@ -524,6 +524,16 @@ int sys_file_op_test() {
    return PASS;
 }
 
+int sys_execute_test() {
+    TEST_HEADER;
+
+    int32_t ret;
+
+    ret = sys_execute((uint8_t *) "ls");
+    if (ret == 0) return PASS;
+    else return FAIL;
+}
+
 /* system_call_test
  *
  * Test for the system call
