@@ -194,6 +194,22 @@ int32_t read_dentry_by_inode(uint32_t inode, dentry_t *dentry) {
 }
 
 /**
+ * get_file_length
+ * Description: get the length of file
+ * Input: dentry - the dentry struct
+ * Output: 0 or positive length if success, -1 if not.
+ * Side effect: None
+ */
+int32_t get_file_length(dentry_t *dentry) {
+    if (dentry == NULL) {
+        printf("ERROR in get_file_length: dentry NULL pointer");
+        return -1;
+    }
+    
+    return inodes_arr[dentry->inode_idx].length_in_B;
+}
+
+/**
  * allocate_fd
  * Description: generate a available fd
  * Input: None
