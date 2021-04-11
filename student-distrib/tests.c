@@ -608,8 +608,51 @@ int system_call_test() {
     return PASS;
 }
 
-
 /* Checkpoint 3 tests */
+/* fs_err_test
+ *
+ * Test file system for error input
+ * Inputs: None
+ * Outputs: PASS/FAIL
+ * Side Effects: None
+ * Coverage: file system
+ * Files: 
+ */
+long fs_err_test() {
+    TEST_HEADER;
+
+    long result = PASS;
+    int32_t ret;
+    uint8_t buf[32];
+
+    printf("Try passing error fds to fs syscalls...\n");
+    if (-1 != (ret = read(-1, buf, 31))) {
+        printf("read error return value %d\n", ret);
+        result = FAIL;
+    }
+    if (-1 != (ret = read(99999999, buf, 31))) {
+        printf("read error return value %d\n", ret);
+        result = FAIL;
+    }
+    if (-1 != (ret = write(-1, buf, 31))) {
+        printf("write error return value %d\n", ret);
+        result = FAIL;
+    }
+    if (-1 != (ret = write(99999999, buf, 31))) {
+        printf("write error return value %d\n", ret);
+        result = FAIL;
+    }
+    if (-1 != (ret = close(-1))) {
+        printf("close error return value %d\n", ret);
+        result = FAIL;
+    }
+    if (-1 != (ret = close(99999999))) {
+        printf("close error return value %d\n", ret);
+        result = FAIL;
+    }
+
+    return result;
+}
 /* shell_test
  *
  * Test for the sys_execute
