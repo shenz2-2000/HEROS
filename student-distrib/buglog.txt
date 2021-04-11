@@ -67,3 +67,10 @@
              the top of stack. That will result in a page fault since 0x05 is not activated by our paging system
     * FIX  - Ensure ebx is the last one to push
 
+    * BUG2 - in process.c, when we check the return value of set_page_for_task, it will never be zero for pid is set to be unsigned,
+             and it will never raise error.
+    * FIX  - change it to be signed type.
+
+    * BUG3 - in process.c, at first I didn't handle the case when the user is trying to exit the base shell.
+           - then I check the condition and force the halt of base shell (last process) to be invalid
+           - however, the main() of shell would return on entering exit, therefore I instead init a new shell when the base shell is halted. 
