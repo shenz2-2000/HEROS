@@ -232,7 +232,7 @@ int32_t system_halt(int32_t status) {
     }
 
     // CHECK ALL FILES ARE CLEANED UP
-    check_all_files_closed();
+    file_closed_test();
 
     close_all_files(&get_cur_process()->file_arr);  // close FDs
     pcb_t *parent = delete_process(get_cur_process());  // clear the pcb

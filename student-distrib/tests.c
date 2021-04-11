@@ -700,6 +700,17 @@ int shell_test() {
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
 
+void file_closed_test(){
+    int i;
+    for(i = 0; i < N_FILE_LIMIT; i++){
+        if(close(i) != -1){
+            printf("NO, file is not cleaned up!!\n");
+            return;
+        }
+    }
+    printf("YES, file is not cleaned up!!\n");
+    return;
+}
 
 /* launch_tests
  *
