@@ -2,6 +2,7 @@
 #include "file_sys.h"
 #include "page_lib.h"
 #include "lib.h"
+#include "tests.h"
 
 pcb_t* pcb_ptrs[N_PCB_LIMIT];
 int32_t n_present_pcb;
@@ -221,24 +222,29 @@ int32_t system_halt(int32_t status) {
         return -1;
     }
     if (get_cur_process()->parent == NULL) {
-        //TODO: if the last program has been halt, don't know if we need to consider this
-        printf("In system_halt: cannot halt the base shell");
+        // So the main program of base shell return on exit, so we need to execute shell again
+        printf("Warning in system_halt(): halting the base shell...\n");
+        close_all_files(&get_cur_process()->file_arr);  // close FDs
+        delete_process(get_cur_process());
+        restore_paging(get_cur_process()->pid, get_cur_process()->pid); // restore the current paging
+        sys_execute((uint8_t *) "shell");
         return -1;
     }
+
+    // CHECK ALL FILES ARE CLEANED UP
+    check_all_files_closed();
 
     close_all_files(&get_cur_process()->file_arr);  // close FDs
     pcb_t *parent = delete_process(get_cur_process());  // clear the pcb
     restore_paging(get_cur_process()->pid, parent->pid);  // restore parent paging
     tss.esp0 = parent->k_esp;  // set tss to parent's kernel stack to make sure system calls use correct stack
 
-    uint32_t temp = parent->k_esp;
-
     // load esp and return
     asm volatile ("                                                                    \
         movl %0, %%esp  /* load old ESP */                                           \n\
         ret  /* now it's equivalent to jump execute return */"                          \
         :                                                                              \
-        : "r" (temp)   , "a" (status)                                         \
+        : "r" (parent->k_esp)   , "a" (status)                                         \
         : "cc", "memory"                                                               \
     );
 
