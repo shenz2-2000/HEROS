@@ -138,8 +138,13 @@ int32_t read_dentry_by_name (const uint8_t *fname, dentry_t *dentry) {
     int i;
     int fname_len;
 
+    if (dentry == NULL) {
+        printf("ERROR in read_dentry_by_inode: dentry NULL pointer");
+        return -1;
+    }
+
     // bad input check
-    printf("in read_dentry: &fname: %d\n", fname);
+    // printf("in read_dentry: &fname: %d\n", fname);
     fname_len = strlen((int8_t*)fname);
     if ((fname_len > F_NAME_LIMIT) || (fname_len == 0)) return -1;
 
@@ -167,7 +172,10 @@ int32_t read_dentry_by_name (const uint8_t *fname, dentry_t *dentry) {
 int32_t read_dentry_by_index(uint32_t index, dentry_t *dentry) {
     // bad input check
     if ((index >= N_DENTRY_LIMIT) || (index >= bblock_ptr->n_dentries)) return -1;
-
+    if (dentry == NULL) {
+        printf("ERROR in read_dentry_by_inode: dentry NULL pointer");
+        return -1;
+    }
     *dentry = bblock_ptr->dentries[index];
     return 0;
 }
@@ -193,6 +201,11 @@ int32_t read_data(uint32_t inode, uint32_t offset, uint8_t *buf, uint32_t bufsiz
     
     // bad input check
     if (inode >= bblock_ptr->n_inodes) return -1;
+
+    if (buf == NULL) {
+        printf("ERROR in read_data: buf NULL pointer");
+        return -1;
+    }
 
     pos = offset;
     dblock_vir_idx = offset / BLOCK_SIZE_IN_B;
@@ -234,6 +247,10 @@ int32_t read_data(uint32_t inode, uint32_t offset, uint8_t *buf, uint32_t bufsiz
  */
 int32_t read_dentry_by_inode(uint32_t inode, dentry_t *dentry) {
     int i;
+    if (dentry == NULL) {
+        printf("ERROR in read_dentry_by_inode: dentry NULL pointer");
+        return -1;
+    }
     // iterate all the directory entries
     for (i = 0; i < bblock_ptr->n_dentries; i++) {
         if (inode == bblock_ptr->dentries[i].inode_idx) {   // 0 means they are the same
@@ -269,6 +286,10 @@ int32_t get_file_length(dentry_t *dentry) {
  */
 int32_t allocate_fd(pcb_t *cur_pcb) {
     int i;
+    if (cur_pcb == NULL) {
+        printf("ERROR in allocate_fd: cur_pcb NULL pointer");
+        return -1;
+    }
     if (cur_pcb->file_arr.n_opend_files >= N_FILE_LIMIT) return -1;
     for (i = 2; i < N_FILE_LIMIT; i++) {
         if (cur_pcb->file_arr.files[i].flags == AVAILABLE) {    // this entry is available
@@ -551,6 +572,11 @@ int32_t sys_open(const uint8_t *f_name) {
 
     if (cur_pcb->file_arr.n_opend_files >= N_FILE_LIMIT) {
         printf("ERROR [SYS FILE] in sys_open: cannot OPEN file [%s] because the max number of files is reached", f_name);
+        return -1;
+    }
+
+    if (f_name == NULL) {
+        printf("ERROR [SYS FILE] in sys_open: f_name NULL pointer");
         return -1;
     }
 
