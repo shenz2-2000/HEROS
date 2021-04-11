@@ -33,7 +33,7 @@ pcb_t* create_process() {
     int i;
 
     if (n_present_pcb >= N_PCB_LIMIT) {
-        printf("ERROR in create_process: number of process limit reached");
+        printf("ERROR in create_process: number of process limit reached\n");
         return NULL;
     }
     n_present_pcb += 1;
@@ -45,7 +45,7 @@ pcb_t* create_process() {
         }
     }
 
-    printf("ERROR in create_process: somethings wrong");
+    printf("ERROR in create_process: somethings wrong\n");
     return NULL;
 }
 
@@ -79,6 +79,15 @@ pcb_t* get_cur_process() {
  * Side effect: None
  */
 int parse_args(uint8_t *command, uint8_t **args){
+    // bad input
+    if (command == NULL) {
+        printf("ERROR in parse_args: command NULL pointer\n");
+        return -1;
+    }
+    if (args == NULL || *args == NULL) {
+        printf("ERROR in parse_args: args NULL pointer\n");
+        return -1;
+    }
     // Possible to have no arguments
     *args = NULL;
     while(*command !='\0') {
@@ -106,6 +115,13 @@ int sys_execute(uint8_t *command) {
     uint32_t prev_kesp, length;
     int pid_ret;
     int ret;
+    
+    // bad input
+    if (command == NULL) {
+        printf("ERROR in sys_execute: command NULL pointer\n");
+        return -1;
+    }
+
     process = create_process();
     if (process==NULL) return -1; // Raise Error
     // Information Setting
@@ -183,6 +199,10 @@ int sys_execute(uint8_t *command) {
  * Side effect: the process is deleted
  */
 pcb_t* delete_process(pcb_t* pcb) {
+    if (pcb == NULL) {
+        printf("ERROR in delete_process: pcb NULL pointer\n");
+        return NULL;
+    }
     pcb->present = 0;
     n_present_pcb -= 1;
     return pcb->parent;
@@ -222,6 +242,6 @@ int32_t system_halt(int32_t status) {
         : "cc", "memory"                                                               \
     );
 
-    printf("in system_halt: never should be here!");
+    printf("in system_halt: never should be here!\n");
     return -1;
 }

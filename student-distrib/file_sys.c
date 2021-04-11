@@ -79,7 +79,7 @@ int32_t init_file_arr(file_arr_t *file_arr) {
     int i;
 
     if (file_arr == NULL) {
-        printf("ERROR in init_file_arr: file_arr NULL pointer");
+        printf("ERROR in init_file_arr: file_arr NULL pointer\n");
         return -1;
     }
 
@@ -110,7 +110,7 @@ int32_t close_all_files(file_arr_t* file_arr) {
     int i;
 
     if (file_arr == NULL) {
-        printf("ERROR in close_all_files: file_arr NULL pointer");
+        printf("ERROR in close_all_files: file_arr NULL pointer\n");
         return -1;
     }
 
@@ -139,7 +139,7 @@ int32_t read_dentry_by_name (const uint8_t *fname, dentry_t *dentry) {
     int fname_len;
 
     if (dentry == NULL) {
-        printf("ERROR in read_dentry_by_inode: dentry NULL pointer");
+        printf("ERROR in read_dentry_by_inode: dentry NULL pointer\n");
         return -1;
     }
 
@@ -173,7 +173,7 @@ int32_t read_dentry_by_index(uint32_t index, dentry_t *dentry) {
     // bad input check
     if ((index >= N_DENTRY_LIMIT) || (index >= bblock_ptr->n_dentries)) return -1;
     if (dentry == NULL) {
-        printf("ERROR in read_dentry_by_inode: dentry NULL pointer");
+        printf("ERROR in read_dentry_by_inode: dentry NULL pointer\n");
         return -1;
     }
     *dentry = bblock_ptr->dentries[index];
@@ -203,7 +203,7 @@ int32_t read_data(uint32_t inode, uint32_t offset, uint8_t *buf, uint32_t bufsiz
     if (inode >= bblock_ptr->n_inodes) return -1;
 
     if (buf == NULL) {
-        printf("ERROR in read_data: buf NULL pointer");
+        printf("ERROR in read_data: buf NULL pointer\n");
         return -1;
     }
 
@@ -248,7 +248,7 @@ int32_t read_data(uint32_t inode, uint32_t offset, uint8_t *buf, uint32_t bufsiz
 int32_t read_dentry_by_inode(uint32_t inode, dentry_t *dentry) {
     int i;
     if (dentry == NULL) {
-        printf("ERROR in read_dentry_by_inode: dentry NULL pointer");
+        printf("ERROR in read_dentry_by_inode: dentry NULL pointer\n");
         return -1;
     }
     // iterate all the directory entries
@@ -270,7 +270,7 @@ int32_t read_dentry_by_inode(uint32_t inode, dentry_t *dentry) {
  */
 int32_t get_file_length(dentry_t *dentry) {
     if (dentry == NULL) {
-        printf("ERROR in get_file_length: dentry NULL pointer");
+        printf("ERROR in get_file_length: dentry NULL pointer\n");
         return -1;
     }
     
@@ -287,7 +287,7 @@ int32_t get_file_length(dentry_t *dentry) {
 int32_t allocate_fd(pcb_t *cur_pcb) {
     int i;
     if (cur_pcb == NULL) {
-        printf("ERROR in allocate_fd: cur_pcb NULL pointer");
+        printf("ERROR in allocate_fd: cur_pcb NULL pointer\n");
         return -1;
     }
     if (cur_pcb->file_arr.n_opend_files >= N_FILE_LIMIT) return -1;
@@ -571,12 +571,12 @@ int32_t sys_open(const uint8_t *f_name) {
     cur_pcb = get_cur_process();
 
     if (cur_pcb->file_arr.n_opend_files >= N_FILE_LIMIT) {
-        printf("ERROR [SYS FILE] in sys_open: cannot OPEN file [%s] because the max number of files is reached", f_name);
+        printf("ERROR [SYS FILE] in sys_open: cannot OPEN file [%s] because the max number of files is reached\n", f_name);
         return -1;
     }
 
     if (f_name == NULL) {
-        printf("ERROR [SYS FILE] in sys_open: f_name NULL pointer");
+        printf("ERROR [SYS FILE] in sys_open: f_name NULL pointer\n");
         return -1;
     }
 
@@ -659,11 +659,11 @@ int32_t sys_read(int32_t fd, void *buf, int32_t bufsize) {
         return -1;
     }
     if (buf == NULL) {
-        printf("ERROR [SYS FILE] in sys_read: read buffer NULL pointer");
+        printf("ERROR [SYS FILE] in sys_read: read buffer NULL pointer\n");
         return -1;
     }
     if (bufsize < 0) {
-        printf("ERROR [SYS FILE] in sys_read: read buffer size should be non-negative");
+        printf("ERROR [SYS FILE] in sys_read: read buffer size should be non-negative\n");
         return -1;
     }
     if (cur_pcb->file_arr.files[fd].flags == AVAILABLE) {
@@ -672,7 +672,7 @@ int32_t sys_read(int32_t fd, void *buf, int32_t bufsize) {
     }
     // stdout is write-only
     if (fd == 1) {
-        printf("ERROR [SYS FILE] in sys_read: stdout is write-only");
+        printf("ERROR [SYS FILE] in sys_read: stdout is write-only\n");
         return -1;
     }
 
@@ -701,11 +701,11 @@ int32_t sys_write(int32_t fd, const void *buf, int32_t bufsize) {
         return -1;
     }
     if (buf == NULL) {
-        printf("ERROR [SYS FILE] in sys_write: write buffer NULL pointer");
+        printf("ERROR [SYS FILE] in sys_write: write buffer NULL pointer\n");
         return -1;
     }
     if (bufsize < 0) {
-        printf("ERROR [SYS FILE] in sys_write: write buffer size should be non-negative");
+        printf("ERROR [SYS FILE] in sys_write: write buffer size should be non-negative\n");
         return -1;
     }
     if (cur_pcb->file_arr.files[fd].flags == AVAILABLE) {

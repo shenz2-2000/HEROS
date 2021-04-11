@@ -44,7 +44,10 @@ int set_page_for_task(uint8_t* task_file_name, uint32_t* eip){
     dentry_t task_dentry;
 
     // sanity check
-    if(eip == NULL || task_file_name == NULL) return -1;
+    if(eip == NULL || task_file_name == NULL) {
+        printf("ERROR in set_page_for_task: task_file_name or eip NULL pointer\n");
+        return -1;
+    } 
 
     // potential initialization
     if(page_in_use == 0){
@@ -126,7 +129,10 @@ int get_eip(dentry_t* task_dentry_ptr){
     int return_val;
 
     // NULL pointer
-    if(task_dentry_ptr == NULL) return -1;
+    if(task_dentry_ptr == NULL) {
+        printf("ERROR in get_eip: task_dentry_ptr NULL pointer\n");
+        return -1;
+    } 
 
     // read fail
     if( (read_data(task_dentry_ptr->inode_idx, FIRST_INSTRUCTION, (uint8_t*) &return_val, 4)) != 4) return -1;
@@ -144,7 +150,10 @@ int get_eip(dentry_t* task_dentry_ptr){
 
 int load_private_code(dentry_t * task_dentry_ptr){
 
-    if(task_dentry_ptr == NULL) return -1;
+    if(task_dentry_ptr == NULL) {
+        printf("ERROR in get_eip: load_private_code NULL pointer\n");
+        return -1;
+    } 
 
     // variable declaration
     int i;
@@ -175,6 +184,12 @@ int load_private_code(dentry_t * task_dentry_ptr){
 
 int executable_check(dentry_t* task_dentry_ptr){
     uint8_t temp[ELF_LENGTH];
+
+    if(task_dentry_ptr == NULL) {
+        printf("ERROR in get_eip: executable_check NULL pointer\n");
+        return -1;
+    } 
+
     read_data(task_dentry_ptr->inode_idx,0,temp,ELF_LENGTH);
 
     // four bad cases
