@@ -1,17 +1,18 @@
 boot.o: boot.S multiboot.h x86_desc.h types.h
 x86_desc.o: x86_desc.S x86_desc.h types.h
 file_sys.o: file_sys.c file_sys.h types.h multiboot.h lib.h terminal.h \
-  rtc.h
+  rtc.h process.h x86_desc.h
 i8259.o: i8259.c i8259.h types.h lib.h
 IDT_initialization.o: IDT_initialization.c multiboot.h types.h x86_desc.h \
   lib.h file_sys.h link.h process.h
 kernel.o: kernel.c multiboot.h types.h x86_desc.h lib.h i8259.h debug.h \
-  tests.h rtc.h terminal.h file_sys.h
+  tests.h rtc.h terminal.h file_sys.h process.h
 lib.o: lib.c lib.h types.h
 page_lib.o: page_lib.c page_lib.h x86_desc.h types.h file_sys.h \
   multiboot.h
 paging.o: paging.c x86_desc.h types.h
-process.o: process.c process.h file_sys.h types.h multiboot.h lib.h
+process.o: process.c process.h file_sys.h types.h multiboot.h x86_desc.h \
+  page_lib.h lib.h
 rtc.o: rtc.c rtc.h types.h lib.h
 terminal.o: terminal.c multiboot.h types.h x86_desc.h lib.h i8259.h \
   debug.h tests.h rtc.h terminal.h

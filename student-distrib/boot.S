@@ -461,7 +461,7 @@ sys_call_linkage:
 
 invalid_sys_call:
 
-           # TODO: what should we do here?
+           call *sys_jump_table
 
 sys_call_finish:
            # --------------restore information--------------

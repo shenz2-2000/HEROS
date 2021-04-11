@@ -685,6 +685,22 @@ int32_t sys_read(int32_t fd, void *buf, int32_t bufsize) {
 }
 
 /**
+ * invalid_sys_call
+ * Description: for invalid system call number
+ * Input: None
+ * Output: None
+ * Side effect: None
+ */
+
+void invalid_sys_call(){
+     printf("The system call is invalid!!!! Please check the call number!!! \n");
+}
+
+
+
+
+
+/**
  * sys_write
  * Description: system call: write to a file (NOTE: read-only file system!)
  * Input: fd - the file descriptor

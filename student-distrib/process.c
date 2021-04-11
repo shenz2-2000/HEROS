@@ -6,6 +6,16 @@
 pcb_t* pcb_ptrs[N_PCB_LIMIT];
 int32_t n_present_pcb;
 
+//TODO
+#define halt_backtrack(old_esp, ret) asm volatile ("                                        \
+    movl %0, %%esp  /* load back old ESP */                                      \n\
+    /* EAX store the return status */                                            \n\
+    ret  /* on the old kernel stack, return address is on the top of the stack */" \
+    :                                                                              \
+    : "r" (old_esp)   , "a" (ret)                                                  \
+    : "cc", "memory"                                                               \
+)
+
 /**
  * process_init
  * Description: Initialize the process array system
@@ -213,14 +223,17 @@ int32_t system_halt(int32_t status) {
     restore_paging(get_cur_process()->pid, parent->pid);  // restore parent paging
     tss.esp0 = parent->k_esp;  // set tss to parent's kernel stack to make sure system calls use correct stack
 
+    uint32_t temp = parent->k_esp;
+    halt_backtrack(parent->k_esp,status);
+
     // load esp and return
-    asm volatile ("                                                                    \
-        movl %0, %%esp  /* load old ESP */                                           \n\
-        ret  /* now it's equivalent to jump execute return */"                          \
-        :                                                                              \
-        : "r" (parent->k_esp)   , "a" (status)                                         \
-        : "cc", "memory"                                                               \
-    );
+//    asm volatile ("                                                                    \
+//        movl %0, %%esp  /* load old ESP */                                           \n\
+//        ret  /* now it's equivalent to jump execute return */"                          \
+//        :                                                                              \
+//        : "r" (temp)   , "a" (status)                                         \
+//        : "cc", "memory"                                                               \
+//    );
 
     printf("in system_halt: never should be here!");
     return -1;
