@@ -5,7 +5,7 @@
 #include "page_lib.h"
 #include "x86_desc.h"
 #include "file_sys.h"
-
+#include "lib.h"
 // Page control structure
 static uint32_t page_in_use = 0;
 static uint32_t page_id_center[MAX_PAGE] = {0};

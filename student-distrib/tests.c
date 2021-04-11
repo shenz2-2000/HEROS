@@ -4,6 +4,7 @@
 #include "terminal.h"
 #include "rtc.h"
 #include "file_sys.h"
+#include "process.h"
 
 #define PASS 1
 #define FAIL 0
@@ -607,6 +608,7 @@ int system_call_test() {
     return PASS;
 }
 
+/* Checkpoint 3 tests */
 
 /* fs_err_test
  *
@@ -651,6 +653,18 @@ long fs_err_test() {
     }
 
     return result;
+
+int shell_test() {
+    TEST_HEADER;
+    /* execute shell */
+    printf("Now Executing non-execuatable file:\n");
+    if (sys_execute((uint8_t *) "frame0.txt")!=-1) {
+        printf("Return value is wrong!\n");
+        return FAIL;
+    } else printf("Success\n");
+    printf("Execute Shell\n");
+    sys_execute((uint8_t *) "shell");
+    return PASS;
 }
 
 /* Checkpoint 4 tests */
@@ -668,6 +682,5 @@ void launch_tests(){
 //    TEST_OUTPUT("terminal_test", terminal_test());
 //     TEST_OUTPUT("rtc_test2", rtc_test2());
 //     TEST_OUTPUT("file_system_test", file_system_test());
-    // TEST_OUTPUT("system_call_test", system_call_test());
-    TEST_OUTPUT("fs_err_test", fs_err_test());
+    TEST_OUTPUT("shell_test", shell_test());
 }
