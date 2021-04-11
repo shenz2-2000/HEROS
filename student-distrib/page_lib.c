@@ -108,7 +108,7 @@ void set_private_page(int32_t pid){
     cur_entry.reserved = (cur_PDE >> 13) & 0x000001FF;
     cur_entry.Base_address = (cur_PDE >> 22);
 
-    page_directory[PRIVATE_PAGE_VA] = cur_entry;
+    *(page_directory + PRIVATE_PAGE_VA) = cur_entry;
 
       // flush the CR3 register
       flush_tlb();
@@ -205,7 +205,12 @@ int get_new_page_id(){
     return -1;
 }
 
-
+/* restore_paging
+ * Description: restore parent paging, and remove the pid
+ * Inputs: child_id - page id of the current process
+ *         parent_id - page id of its parent id
+ * Return Value: -1 on failure and 0 on success
+ * Side effect: None*/
 int restore_paging(const int child_id, const int parent_id) {
 
     // Check arguments

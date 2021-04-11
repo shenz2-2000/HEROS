@@ -10,7 +10,7 @@
 
 
 #define PDE_IDX         128
-#define PRIVATE_PAGE_VA 0x08000000
+#define PRIVATE_PAGE_VA 32
 #define PDE_MASK        0x00000087
 #define CODE_BASE_VA    0x08048000
 #define ELF_LENGTH      4

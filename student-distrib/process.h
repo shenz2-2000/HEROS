@@ -9,17 +9,14 @@
 #define TASK_KSTK_SIZE_IN_B 8192
 #define TASK_KSTK_BOTTOM 0x800000    
 #define TASK_KSTK_PCB_ADDR_MASK 0xFFFFE000
-
-
+#define US_STARTING  (0x8400000 - 1)
 typedef struct pcb_t pcb_t;
 struct pcb_t {
     uint8_t present;
     pcb_t* parent;
-    
     uint8_t* name;
     uint8_t* args;
     uint32_t k_esp;
-
     file_arr_t file_arr;
     uint8_t pid;
 };
@@ -35,6 +32,7 @@ pcb_t* create_process();
 pcb_t* delete_process(pcb_t* pcb);
 
 
-int32_t system_halt(int32_t status);
+extern int32_t system_halt(int32_t status);
+extern int sys_execute(uint8_t *command);
 
 #endif

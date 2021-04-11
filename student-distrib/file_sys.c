@@ -32,7 +32,7 @@ int32_t file_sys_init(module_t *f_sys_mod) {
     // local var
     // module_t f_sys_mod;
     // f_sys_mod = *f_sys_img;
-    int i;
+    // int i;
     pcb_t *cur_pcb;
 
     // init the block pointers
@@ -624,6 +624,10 @@ int32_t sys_close(int32_t fd) {
     }
     if (fd == 0) {printf("ERROR [FILE]: cannot CLOSE stdin\n"); return -1;}
     if (fd == 1) {printf("ERROR [FILE]: cannot CLOSE stdout\n"); return -1;}
+
+    // get the current process
+    cur_pcb = get_cur_process();
+
     if (cur_pcb->file_arr.files[fd].flags == AVAILABLE) {
         printf("WARNING [FILE]: cannot CLOSE a file that is not opened. fd: %d\n", fd);
         return 0;   // not a serious error
