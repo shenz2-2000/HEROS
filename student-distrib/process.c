@@ -6,16 +6,6 @@
 pcb_t* pcb_ptrs[N_PCB_LIMIT];
 int32_t n_present_pcb;
 
-//TODO
-#define halt_backtrack(old_esp, ret) asm volatile ("                                        \
-    movl %0, %%esp  /* load back old ESP */                                      \n\
-    /* EAX store the return status */                                            \n\
-    ret  /* on the old kernel stack, return address is on the top of the stack */" \
-    :                                                                              \
-    : "r" (old_esp)   , "a" (ret)                                                  \
-    : "cc", "memory"                                                               \
-)
-
 /**
  * process_init
  * Description: Initialize the process array system
@@ -125,7 +115,7 @@ int sys_execute(uint8_t *command) {
     uint32_t prev_kesp, length;
     int pid_ret;
     int ret;
-    
+
     // bad input
     if (command == NULL) {
         printf("ERROR in sys_execute: command NULL pointer\n");
@@ -236,6 +226,8 @@ int32_t system_halt(int32_t status) {
     }
     if (get_cur_process()->parent == NULL) {
         //TODO: if the last program has been halt, don't know if we need to consider this
+        prinf("In system_halt: cannot halt the base shell");
+        return -1;
     }
 
     close_all_files(&get_cur_process()->file_arr);  // close FDs
@@ -244,17 +236,16 @@ int32_t system_halt(int32_t status) {
     tss.esp0 = parent->k_esp;  // set tss to parent's kernel stack to make sure system calls use correct stack
 
     uint32_t temp = parent->k_esp;
-    halt_backtrack(parent->k_esp,status);
 
     // load esp and return
-//    asm volatile ("                                                                    \
-//        movl %0, %%esp  /* load old ESP */                                           \n\
-//        ret  /* now it's equivalent to jump execute return */"                          \
-//        :                                                                              \
-//        : "r" (temp)   , "a" (status)                                         \
-//        : "cc", "memory"                                                               \
-//    );
+    asm volatile ("                                                                    \
+        movl %0, %%esp  /* load old ESP */                                           \n\
+        ret  /* now it's equivalent to jump execute return */"                          \
+        :                                                                              \
+        : "r" (temp)   , "a" (status)                                         \
+        : "cc", "memory"                                                               \
+    );
 
-    printf("in system_halt: never should be here!\n");
+    printf("In system_halt: this function should never return.\n");
     return -1;
 }
