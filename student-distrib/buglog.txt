@@ -83,3 +83,10 @@
              a NULL pointer then print error messages and return -1. However, not all commands have arguments. Some commands like "ls" are
              without additional arguments. This sanity check results in error messages in every command input.
     * FIX  - delete the sanity check in parse_arg function. The sanity check should be left to the user program.
+
+    * BUG6 - in page_lib.c, when we setup the page directory entry for new process, we set it at the 128MB entry of page directory at first. That
+             is an error since actually we only need to consider the first 10 bits, that is, 32. As a result, a
+             page exception is raised.
+    * FIX  - Set 32th entry instead of 128MB.
+
+
