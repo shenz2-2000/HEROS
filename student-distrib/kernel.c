@@ -39,6 +39,7 @@ void idt_init();
  */
 void naive_exception_handler(uint32_t num){
     // check whether input is valid
+    int i = 0;
     cli();
     if(num >= 20){
         printf("------------------------------------------------\n");
@@ -54,7 +55,10 @@ void naive_exception_handler(uint32_t num){
         // shut the screen into blue
         set_blue_screen();
     }
-    while(1){}
+//    while(1){}
+    while(i < 1000000) i++;
+
+    system_halt(256);
     sti();
 }
 
