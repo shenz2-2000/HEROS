@@ -158,6 +158,9 @@ ASMLINKAGE int32_t close_sys_call(int32_t fd){
 
 extern int sys_execute(uint8_t *command);
 
+ASMLINKAGE void dummy_sys_call(){
+    return invalid_sys_call();
+}
 
 ASMLINKAGE int32_t write_sys_call(int32_t fd, const void* buf, int32_t nbytes){
     return sys_write(fd,buf,nbytes);
