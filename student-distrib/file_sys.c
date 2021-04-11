@@ -32,7 +32,7 @@ int32_t file_sys_init(module_t *f_sys_mod) {
     // local var
     // module_t f_sys_mod;
     // f_sys_mod = *f_sys_img;
-    int i;
+    // int i;
     pcb_t *cur_pcb;
 
     // init the block pointers

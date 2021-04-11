@@ -23,6 +23,34 @@ void process_init() {
 }
 
 /**
+ * create_process
+ * Description: create a new pcb and return the pcb pointer
+ * Input: None
+ * Output: the pointer to the new pcb
+ * Side effect: everything in the pcb is not initialized
+ */
+pcb_t* create_process() {
+    int i;
+
+    if (n_present_pcb >= N_PCB_LIMIT) {
+        printf("ERROR in create_process: number of process limit reached");
+        return NULL;
+    }
+    n_present_pcb += 1;
+
+    for (i = 0; i < N_PCB_LIMIT; i++) {
+        if (!(pcb_ptrs[i]->present)) {
+            pcb_ptrs[i]->present = 1;
+            return pcb_ptrs[i];
+        }
+    }
+
+    printf("ERROR in create_process: somethings wrong");
+    return NULL;
+}
+
+
+/**
  * get_cur_process
  * Description: obtain the current running process
  * Input: None
@@ -50,10 +78,10 @@ pcb_t* get_cur_process() {
  *         command -- name of execuatable command 
  * Side effect: None
  */
-int parse_args(char *command, char **args){
+int parse_args(uint8_t *command, uint8_t **args){
     // Possible to have no arguments
-    *arg = NULL;
-    while(*command !=\'0') {
+    *args = NULL;
+    while(*command !='\0') {
         if (*command == ' ') {
             *command = '\0'; // End here
             *args = command + 1;
@@ -64,9 +92,10 @@ int parse_args(char *command, char **args){
     return 0;
 }
 
-int execute_launch(uint32_t prev_kesp, uint32_t esp_nxt, uint32_t eip_nxt) {
+int launch_program(uint32_t prev_kesp, uint32_t esp_nxt, uint32_t eip_nxt) {
     int ret;
-    asm volatile ("pushfl                                                           \n\
+    asm volatile ("                                                                 \
+    pushfl                                                                          \n\
     pushl %%ebp                                                                     \n\
     pushl $1f       /* return to label 1 for continue execute */                    \n\
     movl %%esp, %0                                                                  \n\
@@ -79,13 +108,12 @@ int execute_launch(uint32_t prev_kesp, uint32_t esp_nxt, uint32_t eip_nxt) {
     iret                                                                            \n\
 1:  popl %%ebp                                                                      \n\
     movl %%eax, %1                                                                  \n\
-    popfl                                                                             \
+    popfl      "                                                                       \
     : "=m" (prev_kesp), /* must write to memory*/      \
       "=m" (ret)                                                                      \
     : "rm" (eip_nxt), "rm" (esp_nxt)                                                  \
     : "cc", "memory"                                                                  \
-)
-
+);
     return ret;
 }
 /**
@@ -96,7 +124,7 @@ int execute_launch(uint32_t prev_kesp, uint32_t esp_nxt, uint32_t eip_nxt) {
  * Side effect: Run the new program with the command
  */
 
-int sys_execute(char *command) {
+int sys_execute(uint8_t *command) {
     pcb_t *process;
     int32_t eip;
     int length, ret;
@@ -108,15 +136,15 @@ int sys_execute(char *command) {
     parse_args(command, &(process->args));
     process->name = command;
     // move name and argument to new program's PCB
-    length = strlen(process -> name);
+    length = strlen((int8_t *)process -> name);
     process->k_esp-=length;
     process->name=(uint8_t *)strcpy((int8_t *)process->k_esp, (int8_t *) process->name);
     if (process->args!=NULL) {
-        length = strlen(process -> args);
+        length = strlen((int8_t *)process -> args);
         process->k_esp-=length;
         process->args=(uint8_t *)strcpy((int8_t *)process->k_esp, (int8_t *) process->args);
     } 
-    process->pid = set_up_memory_for_task(command, &eip);
+    process->pid = set_page_for_task(command, (uint32_t *)&eip);
     if (process->pid) {
         delete_process(process);
         return -1;
