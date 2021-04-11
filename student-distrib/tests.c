@@ -610,14 +610,24 @@ int system_call_test() {
 
 
 /* Checkpoint 3 tests */
+/* shell_test
+ *
+ * Test for the sys_execute
+ * Inputs: None
+ * Outputs: PASS/FAIL
+ * Side Effects: None
+ * Coverage: system call execute
+ * Files: 
+ */
 int shell_test() {
     TEST_HEADER;
-    /* execute shell */
+    /* non-execuatable file */
     printf("Now Executing non-execuatable file:\n");
     if (sys_execute((uint8_t *) "frame0.txt")!=-1) {
         printf("Return value is wrong!\n");
         return FAIL;
     } else printf("Success\n");
+    /* execute shell */
     printf("Execute Shell\n");
     sys_execute((uint8_t *) "shell");
     return PASS;
