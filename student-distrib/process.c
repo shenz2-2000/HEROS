@@ -145,7 +145,7 @@ int sys_execute(uint8_t *command) {
         process->args=(uint8_t *)strcpy((int8_t *)process->k_esp, (int8_t *) process->args);
     } 
     process->pid = set_page_for_task(command, (uint32_t *)&eip);
-    if (process->pid) {
+    if (process->pid < 0) {
         delete_process(process);
         return -1;
     }
@@ -153,7 +153,7 @@ int sys_execute(uint8_t *command) {
     // Set up tss to make sure system call don't go wrong
     tss.ss0 = KERNEL_DS;
     tss.esp0 = process->k_esp;
-    if (process->parent==NULL) ret = launch_program(NULL, US_STARTING, eip);
+    if (process->parent==NULL) ret = launch_program(length, US_STARTING, eip);
     else ret = launch_program(get_cur_process()->k_esp, US_STARTING, eip);
     return ret;
 }
@@ -205,5 +205,6 @@ int32_t system_halt(int32_t status) {
         : "cc", "memory"                                                               \
     );
 
+    printf("in system_halt: never should be here!");
     return -1;
 }

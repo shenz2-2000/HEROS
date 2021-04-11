@@ -139,7 +139,6 @@ int32_t read_dentry_by_name (const uint8_t *fname, dentry_t *dentry) {
     int fname_len;
 
     // bad input check
-    printf("in read_dentry: &fname: %d\n", fname);
     fname_len = strlen((int8_t*)fname);
     if ((fname_len > F_NAME_LIMIT) || (fname_len == 0)) return -1;
 
@@ -598,6 +597,10 @@ int32_t sys_close(int32_t fd) {
     }
     if (fd == 0) {printf("ERROR [FILE]: cannot CLOSE stdin\n"); return -1;}
     if (fd == 1) {printf("ERROR [FILE]: cannot CLOSE stdout\n"); return -1;}
+
+    // get the current process
+    cur_pcb = get_cur_process();
+
     if (cur_pcb->file_arr.files[fd].flags == AVAILABLE) {
         printf("WARNING [FILE]: cannot CLOSE a file that is not opened. fd: %d\n", fd);
         return 0;   // not a serious error

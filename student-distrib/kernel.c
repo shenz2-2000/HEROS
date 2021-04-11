@@ -11,6 +11,7 @@
 #include "rtc.h"
 #include "terminal.h"
 #include "file_sys.h"
+#include "process.h"
 #define RUN_TESTS
 
 /* Function Declaration */
@@ -228,6 +229,13 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Init paging */
     fill_page();
     init_page_register();
+
+    /* Init process pointer */
+    process_init();
+
+    /* execute shell */
+    sys_execute((uint8_t *) "shell");
+
 
     /* Enable interrupts */
 

@@ -155,18 +155,21 @@ ASMLINKAGE int32_t close_sys_call(int32_t fd){
  * Return Value: ret: whether the write is successful
  */
 
+
+extern int sys_execute(uint8_t *command);
+
+
 ASMLINKAGE int32_t write_sys_call(int32_t fd, const void* buf, int32_t nbytes){
     return sys_write(fd,buf,nbytes);
 }
 
 
-
-ASMLINKAGE int32_t halt_sys_call(int32_t exit_code){
-    return system_halt(exit_code);
+ASMLINKAGE int32_t halt_sys_call(int8_t status){
+    return system_halt((int32_t)status);
 }
 
-ASMLINKAGE void execute_sys_call(int32_t fd, const void* buf, int32_t nbytes){
-    return;
+ASMLINKAGE int32_t execute_sys_call(const uint8_t* command){
+    return sys_execute(command);
 }
 
 ASMLINKAGE void get_args_sys_call(int32_t fd, const void* buf, int32_t nbytes){

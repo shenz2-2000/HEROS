@@ -108,7 +108,7 @@ void set_private_page(int32_t pid){
     cur_entry.reserved = (cur_PDE >> 13) & 0x000001FF;
     cur_entry.Base_address = (cur_PDE >> 22);
 
-    page_directory[PRIVATE_PAGE_VA] = cur_entry;
+    *(page_directory + PRIVATE_PAGE_VA) = cur_entry;
 
       // flush the CR3 register
       flush_tlb();

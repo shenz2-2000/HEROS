@@ -32,6 +32,7 @@ pcb_t* create_process();
 pcb_t* delete_process(pcb_t* pcb);
 
 
-int32_t system_halt(int32_t status);
+extern int32_t system_halt(int32_t status);
+extern int sys_execute(uint8_t *command);
 
 #endif
