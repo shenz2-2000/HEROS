@@ -92,30 +92,6 @@ int parse_args(uint8_t *command, uint8_t **args){
     return 0;
 }
 
-int launch_program(uint32_t prev_kesp, uint32_t esp_nxt, uint32_t eip_nxt) {
-    int ret;
-    asm volatile ("                                                                 \
-    pushfl                                                                          \n\
-    pushl %%ebp                                                                     \n\
-    pushl $1f       /* return to label 1 for continue execute */                    \n\
-    movl %%esp, %0                                                                  \n\
-    /*IRET Preparation*/                                                            \n\
-    pushl $0x002B   /* USER_DS */                                                   \n\
-    pushl %3                                                                        \n\
-    pushf                                                                           \n\
-    pushl $0x0023   /* USER_CS  */                                                  \n\
-    pushl %2                                                                        \n\
-    iret                                                                            \n\
-1:  popl %%ebp                                                                      \n\
-    movl %%eax, %1                                                                  \n\
-    popfl      "                                                                       \
-    : "=m" (prev_kesp), /* must write to memory*/      \
-      "=m" (ret)                                                                      \
-    : "rm" (eip_nxt), "rm" (esp_nxt)                                                  \
-    : "cc", "memory"                                                                  \
-);
-    return ret;
-}
 /**
  * sys_execute
  * Description: execute the command
@@ -127,7 +103,9 @@ int launch_program(uint32_t prev_kesp, uint32_t esp_nxt, uint32_t eip_nxt) {
 int sys_execute(uint8_t *command) {
     pcb_t *process;
     int32_t eip;
-    int length, ret;
+    uint32_t prev_kesp, length;
+    int pid_ret;
+    int ret;
     process = create_process();
     if (process==NULL) return -1; // Raise Error
     // Information Setting
@@ -144,17 +122,56 @@ int sys_execute(uint8_t *command) {
         process->k_esp-=length;
         process->args=(uint8_t *)strcpy((int8_t *)process->k_esp, (int8_t *) process->args);
     } 
-    process->pid = set_page_for_task(command, (uint32_t *)&eip);
-    if (process->pid < 0) {
+    pid_ret = set_page_for_task(command, (uint32_t *)&eip);
+    if (pid_ret < 0) {
         delete_process(process);
         return -1;
     }
+    process->pid = pid_ret;
     init_file_arr(&(process->file_arr));
     // Set up tss to make sure system call don't go wrong
     tss.ss0 = KERNEL_DS;
     tss.esp0 = process->k_esp;
-    if (process->parent==NULL) ret = launch_program(length, US_STARTING, eip);
-    else ret = launch_program(get_cur_process()->k_esp, US_STARTING, eip);
+
+    if (process->parent==NULL) asm volatile ("                                                                 \
+    pushfl                                                                          \n\
+    pushl %%ebp                                                                     \n\
+    pushl $1f       /* return to label 1 for continue execute */                    \n\
+    movl %%esp, %0                                                                  \n\
+    /*IRET Preparation*/                                                            \n\
+    pushl $0x002B   /* USER_DS */                                                   \n\
+    pushl %3                                                                        \n\
+    pushf                                                                           \n\
+    pushl $0x0023   /* USER_CS  */                                                  \n\
+    pushl %2                                                                        \n\
+    iret                                                                            \n\
+1:  popl %%ebp                                                                      \n\
+    movl %%eax, %1                                                                  \n\
+    popfl      "                                                                       \
+    : "=m" (length), /* must write to memory*/      \
+      "=m" (ret)                                                                      \
+    : "rm" (eip), "rm" (US_STARTING)                                                  \
+    : "cc", "memory"                                                                  \
+    ); else asm volatile ("                                                                 \
+    pushfl                                                                          \n\
+    pushl %%ebp                                                                     \n\
+    pushl $1f       /* return to label 1 for continue execute */                    \n\
+    movl %%esp, %0                                                                  \n\
+    /*IRET Preparation*/                                                            \n\
+    pushl $0x002B   /* USER_DS */                                                   \n\
+    pushl %3                                                                        \n\
+    pushf                                                                           \n\
+    pushl $0x0023   /* USER_CS  */                                                  \n\
+    pushl %2                                                                        \n\
+    iret                                                                            \n\
+1:  popl %%ebp                                                                      \n\
+    movl %%eax, %1                                                                  \n\
+    popfl      "                                                                       \
+    : "=m" (get_cur_process()->k_esp), /* must write to memory*/      \
+      "=m" (ret)                                                                      \
+    : "rm" (eip), "rm" (US_STARTING)                                                  \
+    : "cc", "memory"                                                                  \
+    );
     return ret;
 }
 
