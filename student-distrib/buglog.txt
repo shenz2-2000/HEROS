@@ -74,3 +74,12 @@
     * BUG3 - in process.c, at first I didn't handle the case when the user is trying to exit the base shell.
            - then I check the condition and force the halt of base shell (last process) to be invalid
            - however, the main() of shell would return on entering exit, therefore I instead init a new shell when the base shell is halted. 
+
+    * BUG4 - in file_sys.c, originally we mistakenly thought that the file struct in the file array is the process control block (not
+             reading the document carefully), and the process struct is built wrongly.
+    * FIX  - a correct structure of process control block and file struct is constructed.
+
+    * BUG5 - when writing sanity checks, we check the validity of the "**args" argument sent to the parse_args function. If the pointer is 
+             a NULL pointer then print error messages and return -1. However, not all commands have arguments. Some commands like "ls" are
+             without additional arguments. This sanity check results in error messages in every command input.
+    * FIX  - delete the sanity check in parse_arg function. The sanity check should be left to the user program.

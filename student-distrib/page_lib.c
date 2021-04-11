@@ -19,7 +19,7 @@ static uint32_t page_id_center[MAX_PAGE] = {0};
 
 void flush_tlb() {
     asm volatile("         \n\
-    movl %%cr3, %%eax      \n\
+    movl %%cr3, %%eax      \n\  // reloading the cr3 automatically flush tlb
     movl %%eax, %%cr3      \n\
     "
     :

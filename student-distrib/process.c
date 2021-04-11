@@ -146,7 +146,7 @@ int sys_execute(uint8_t *command) {
     tss.ss0 = KERNEL_DS;
     tss.esp0 = process->k_esp;
 
-    if (process->parent==NULL) asm volatile ("                                                                 \
+    if (process->parent==NULL) asm volatile ("                                        \
     pushfl                                                                          \n\
     pushl %%ebp                                                                     \n\
     pushl $1f       /* return to label 1 for continue execute */                    \n\
@@ -165,7 +165,7 @@ int sys_execute(uint8_t *command) {
       "=m" (ret)                                                                      \
     : "rm" (eip), "rm" (US_STARTING)                                                  \
     : "cc", "memory"                                                                  \
-    ); else asm volatile ("                                                                 \
+    ); else asm volatile ("                                                           \
     pushfl                                                                          \n\
     pushl %%ebp                                                                     \n\
     pushl $1f       /* return to label 1 for continue execute */                    \n\
@@ -244,7 +244,7 @@ int32_t system_halt(int32_t status) {
     // load esp and return
     asm volatile ("                                                                    \
         movl %0, %%esp  /* load old ESP */                                           \n\
-        ret  /* now it's equivalent to jump execute return */"                          \
+        ret  /* now it's equivalent to jump execute return */"                         \
         :                                                                              \
         : "r" (parent->k_esp)   , "a" (status)                                         \
         : "cc", "memory"                                                               \
