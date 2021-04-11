@@ -619,7 +619,7 @@ int32_t sys_close(int32_t fd) {
     pcb_t *cur_pcb;
 
     if (fd < 0 || fd > N_FILE_LIMIT) {
-        printf("ERROR [FILE]: fd overflow\n");
+        printf("ERROR [SYS FILE] in sys_close: invalid fd\n");
         return -1;
     }
     if (fd == 0) {printf("ERROR [FILE]: cannot CLOSE stdin\n"); return -1;}
@@ -655,7 +655,7 @@ int32_t sys_read(int32_t fd, void *buf, int32_t bufsize) {
 
     // bad input checking
     if (fd < 0 || fd > N_FILE_LIMIT) {
-        printf("ERROR [SYS FILE] in sys_read: fd overflow\n");
+        printf("ERROR [SYS FILE] in sys_read: invalid fd\n");
         return -1;
     }
     if (buf == NULL) {
@@ -697,9 +697,6 @@ void invalid_sys_call(){
 }
 
 
-
-
-
 /**
  * sys_write
  * Description: system call: write to a file (NOTE: read-only file system!)
@@ -713,7 +710,7 @@ int32_t sys_write(int32_t fd, const void *buf, int32_t bufsize) {
     pcb_t *cur_pcb = get_cur_process();
 
     if (fd < 0 || fd > N_FILE_LIMIT) {
-        printf("ERROR [SYS FILE] in sys_write: fd overflow\n");
+        printf("ERROR [SYS FILE] in sys_write: invalid fd\n");
         return -1;
     }
     if (buf == NULL) {

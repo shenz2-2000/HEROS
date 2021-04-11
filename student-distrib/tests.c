@@ -624,6 +624,10 @@ long fs_err_test() {
     long result = PASS;
     int32_t ret;
     uint8_t buf[32];
+    int32_t fd;
+
+    const char *valid_test_file[] = {"frame0.txt", "frame1.txt", "grep", "ls", 
+                     "fish", "verylargetextwithverylongname.tx"};
 
     printf("Try passing error fds to fs syscalls...\n");
     if (-1 != (ret = read(-1, buf, 31))) {
@@ -647,6 +651,23 @@ long fs_err_test() {
         result = FAIL;
     }
     if (-1 != (ret = close(99999999))) {
+        printf("close error return value %d\n", ret);
+        result = FAIL;
+    }
+
+    printf("\nTry passing NULL buffers to fs syscalls...\n");
+
+    fd = open((uint8_t *) valid_test_file[0]);
+
+    if (-1 != (ret = read(fd, NULL, 31))) {
+        printf("read error return value %d\n", ret);
+        result = FAIL;
+    }
+    if (-1 != (ret = write(fd, NULL, 31))) {
+        printf("write error return value %d\n", ret);
+        result = FAIL;
+    }
+    if (0 != (ret = close(fd))) {
         printf("close error return value %d\n", ret);
         result = FAIL;
     }
@@ -691,5 +712,6 @@ void launch_tests(){
 //    TEST_OUTPUT("terminal_test", terminal_test());
 //     TEST_OUTPUT("rtc_test2", rtc_test2());
 //     TEST_OUTPUT("file_system_test", file_system_test());
-    TEST_OUTPUT("shell_test", shell_test());
+    // TEST_OUTPUT("shell_test", shell_test());
+    TEST_OUTPUT("fs_err_test", fs_err_test());
 }
