@@ -168,6 +168,7 @@ int32_t system_halt(int32_t status) {
     restore_paging(get_cur_process()->pid, parent->pid);  // restore parent paging
     tss.esp0 = parent->k_esp;  // set tss to parent's kernel stack to make sure system calls use correct stack
 
+    // load esp and return
     asm volatile ("                                                                    \
         movl %0, %%esp  /* load old ESP */                                           \n\
         ret  /* now it's equivalent to jump execute return */"                          \
