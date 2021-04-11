@@ -2,6 +2,7 @@
 #include "file_sys.h"
 #include "page_lib.h"
 #include "lib.h"
+#include "tests.h"
 
 pcb_t* pcb_ptrs[N_PCB_LIMIT];
 int32_t n_present_pcb;
@@ -226,6 +227,8 @@ int32_t system_halt(int32_t status) {
         close_all_files(&get_cur_process()->file_arr);  // close FDs
         delete_process(get_cur_process());
         restore_paging(get_cur_process()->pid, get_cur_process()->pid); // restore the current paging
+        // CHECK ALL FILES ARE CLEANED UP
+        file_closed_test();
         sys_execute((uint8_t *) "shell");
         return -1;
     }
@@ -234,6 +237,9 @@ int32_t system_halt(int32_t status) {
     pcb_t *parent = delete_process(get_cur_process());  // clear the pcb
     restore_paging(get_cur_process()->pid, parent->pid);  // restore parent paging
     tss.esp0 = parent->k_esp;  // set tss to parent's kernel stack to make sure system calls use correct stack
+
+    // CHECK ALL FILES ARE CLEANED UP
+    file_closed_test();
 
     // load esp and return
     asm volatile ("                                                                    \

@@ -2,6 +2,8 @@
 #define TESTS_H
 
 // test launcher
-void launch_tests();
+extern void launch_tests();
+extern void file_closed_test();
+//extern void file_closed_test();
 
 #endif /* TESTS_H */
