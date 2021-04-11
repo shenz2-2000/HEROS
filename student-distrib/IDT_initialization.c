@@ -171,7 +171,7 @@ ASMLINKAGE int32_t halt_sys_call(int8_t status){
     return system_halt((int32_t)status);
 }
 
-ASMLINKAGE int32_t execute_sys_call(const uint8_t* command){
+ASMLINKAGE int32_t execute_sys_call(uint8_t* command){
     return sys_execute(command);
 }
 
@@ -188,10 +188,6 @@ ASMLINKAGE void set_handler_sys_call(int32_t fd, const void* buf, int32_t nbytes
 }
 
 ASMLINKAGE void sig_return_sys_call(int32_t fd, const void* buf, int32_t nbytes){
-    return;
-}
-
-ASMLINKAGE void dummy_sys_call(int32_t fd, const void* buf, int32_t nbytes){
     return;
 }
 

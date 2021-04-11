@@ -84,10 +84,6 @@ int parse_args(uint8_t *command, uint8_t **args){
         printf("ERROR in parse_args: command NULL pointer\n");
         return -1;
     }
-    if (args == NULL || *args == NULL) {
-        printf("ERROR in parse_args: args NULL pointer\n");
-        return -1;
-    }
     // Possible to have no arguments
     *args = NULL;
     while(*command !='\0') {
@@ -112,7 +108,7 @@ int parse_args(uint8_t *command, uint8_t **args){
 int sys_execute(uint8_t *command) {
     pcb_t *process;
     int32_t eip;
-    uint32_t prev_kesp, length;
+    uint32_t length;
     int pid_ret;
     int ret;
 
@@ -226,7 +222,7 @@ int32_t system_halt(int32_t status) {
     }
     if (get_cur_process()->parent == NULL) {
         //TODO: if the last program has been halt, don't know if we need to consider this
-        prinf("In system_halt: cannot halt the base shell");
+        printf("In system_halt: cannot halt the base shell");
         return -1;
     }
 

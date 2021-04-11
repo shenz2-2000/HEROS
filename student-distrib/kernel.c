@@ -233,9 +233,6 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Init process pointer */
     process_init();
 
-    /* execute shell */
-    sys_execute((uint8_t *) "shell");
-
 
     /* Enable interrupts */
 
