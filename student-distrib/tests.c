@@ -5,6 +5,7 @@
 #include "rtc.h"
 #include "file_sys.h"
 #include "process.h"
+#include "sys_call.h"
 
 #define PASS 1
 #define FAIL 0
@@ -711,14 +712,15 @@ int shell_test() {
 void file_closed_test(){
     int i;
     pcb_t *cur_pcb = get_cur_process();
+    printf("Running file closing test... ");
     for(i = 2; i < N_FILE_LIMIT; i++){
         if(cur_pcb->file_arr.files[i].flags == OCCUPIED){
-            printf("NO, file is not cleaned up!!\n");
+            printf("There are files not closed\n");
             return;
         }
 //        printf("%d\n", cur_pcb->file_arr.files[i].flags);
     }
-     printf("YES, file is cleaned up!!\n");
+     printf("All files are closed\n");
     return;
 }
 
@@ -752,10 +754,8 @@ void invalid_sys_call_test(){
  */
 /* Test suite entry point */
 void launch_tests(){
-//    TEST_OUTPUT("terminal_test", terminal_test());
-//     TEST_OUTPUT("rtc_test2", rtc_test2());
 //     TEST_OUTPUT("file_system_test", file_system_test());
-//     TEST_OUTPUT("shell_test", shell_test());
+    TEST_OUTPUT("shell_test", shell_test());
 //    TEST_OUTPUT("fs_err_test", fs_err_test());
-//     invalid_sys_call_test();
+    // invalid_sys_call_test();
 }

@@ -4,6 +4,7 @@
 #include "terminal.h"
 #include "rtc.h"
 #include "process.h"
+#include "sys_call.h"
 
 /* global var */
 // block discription
@@ -477,7 +478,7 @@ int32_t dir_read(int32_t fd, void *buf, int32_t bufsize){
     strncpy(buf, (int8_t *) (bblock_ptr->dentries[cur_pos].f_name), bufsize);
     cur_pcb->file_arr.files[fd].f_pos = cur_pos;
 
-    return 0;   // as said in doc, always return 0
+    return bufsize;
 
 }
 
@@ -553,182 +554,4 @@ int32_t file_rtc_read(int32_t fd, void *buf, int32_t bufsize) {
 int32_t file_rtc_write(int32_t fd, const void *buf, int32_t bufsize) {
     return rtc_write(fd, buf, bufsize);
 }
-
-//-------------------------------------SYSTEM CALL-----------------------------------
-
-/**
- * sys_open
- * Description: system call: open a file
- * Input: f_name - file name
- * Output: the allocated fd
- * Side effect: the file is in use
- */
-int32_t sys_open(const uint8_t *f_name) {
-    dentry_t dentry;
-    int32_t fd = -1;
-    pcb_t *cur_pcb;
-
-    // For error test, we can return back to shell!
-//    int i = 1;
-//    i = i / 0;
-    cur_pcb = get_cur_process();
-
-    if (cur_pcb->file_arr.n_opend_files >= N_FILE_LIMIT) {
-        printf("ERROR [SYS FILE] in sys_open: cannot OPEN file [%s] because the max number of files is reached\n", f_name);
-        return -1;
-    }
-
-    if (f_name == NULL) {
-        printf("ERROR [SYS FILE] in sys_open: f_name NULL pointer\n");
-        return -1;
-    }
-
-    // obtain the dentry to know the file type
-    if (read_dentry_by_name(f_name, &dentry) == -1) {
-        printf("WARNING [SYS FILE] in sys_open: cannot OPEN file with name: [%s]\n", f_name);
-        return -1;
-    }
-
-    // invoke the different open op according to file type
-    switch (dentry.f_type) {
-        case 0: {   // RTC file
-            fd = file_rtc_open(f_name);
-            break;
-        }
-        case 1: {   // directory file
-            fd = dir_open(f_name);
-            break;
-        }
-        case 2: {   // regulary file
-            fd = file_open(f_name);
-            break;
-        }
-    }
-
-    cur_pcb->file_arr.n_opend_files++;
-
-    return fd;
-}
-
-/**
- * sys_close
- * Description: system call: close a file
- * Input: fd - the file descriptor
- * Output: 0 if success
- * Side effect: the file is not in use
- */
-int32_t sys_close(int32_t fd) {
-    int32_t ret;
-    pcb_t *cur_pcb;
-
-    if (fd < 0 || fd > N_FILE_LIMIT) {
-        printf("ERROR [SYS FILE] in sys_close: invalid fd\n");
-        return -1;
-    }
-    if (fd == 0) {printf("ERROR [FILE]: cannot CLOSE stdin\n"); return -1;}
-    if (fd == 1) {printf("ERROR [FILE]: cannot CLOSE stdout\n"); return -1;}
-
-    // get the current process
-    cur_pcb = get_cur_process();
-
-    if (cur_pcb->file_arr.files[fd].flags == AVAILABLE) {
-        printf("WARNING [FILE]: cannot CLOSE a file that is not opened. fd: %d\n", fd);
-        return 0;   // not a serious error
-    }
-
-    ret = cur_pcb->file_arr.files[fd].f_op->close(fd);
-
-    cur_pcb->file_arr.files[fd].flags = AVAILABLE;  // empty the block
-    cur_pcb->file_arr.n_opend_files--;
-
-    return ret;
-}
-
-/**
- * sys_read
- * Description: system call: get the content of a file
- * Input: fd - the file descriptor
-          buf - the buffer
-          bufsize - the number of bytes of a buffer
- * Output: 0 if success
- * Side effect: the buffer will be filled
- */
-int32_t sys_read(int32_t fd, void *buf, int32_t bufsize) {
-    pcb_t *cur_pcb = get_cur_process();
-
-    // bad input checking
-    if (fd < 0 || fd > N_FILE_LIMIT) {
-        printf("ERROR [SYS FILE] in sys_read: invalid fd\n");
-        return -1;
-    }
-    if (buf == NULL) {
-        printf("ERROR [SYS FILE] in sys_read: read buffer NULL pointer\n");
-        return -1;
-    }
-    if (bufsize < 0) {
-        printf("ERROR [SYS FILE] in sys_read: read buffer size should be non-negative\n");
-        return -1;
-    }
-    if (cur_pcb->file_arr.files[fd].flags == AVAILABLE) {
-        printf("WARNING [SYS FILE] in sys_read: cannot READ a file that is not opened. fd: %d\n", fd);
-        return 0;   // not a serious error
-    }
-    // stdout is write-only
-    if (fd == 1) {
-        printf("ERROR [SYS FILE] in sys_read: stdout is write-only\n");
-        return -1;
-    }
-
-    /* for debug */
-    // dentry_t dentry;
-    // read_dentry_by_inode(file_arr[fd].inode_idx, &dentry);
-    // printf("In file_test: Now the file type is %d\n", dentry.f_type);
-
-    return cur_pcb->file_arr.files[fd].f_op->read(fd, buf, bufsize);
-}
-
-/**
- * invalid_sys_call
- * Description: for invalid system call number
- * Input: None
- * Output: None
- * Side effect: None
- */
-
-void invalid_sys_call(){
-     printf("The system call is invalid!!!! Please check the call number!!! \n");
-}
-
-
-/**
- * sys_write
- * Description: system call: write to a file (NOTE: read-only file system!)
- * Input: fd - the file descriptor
-          buf - the buffer
-          bufsize - the number of bytes of a buffer
- * Output: -1: fail
- * Side effect: an error will be promped
- */
-int32_t sys_write(int32_t fd, const void *buf, int32_t bufsize) {
-    pcb_t *cur_pcb = get_cur_process();
-
-    if (fd < 0 || fd > N_FILE_LIMIT) {
-        printf("ERROR [SYS FILE] in sys_write: invalid fd\n");
-        return -1;
-    }
-    if (buf == NULL) {
-        printf("ERROR [SYS FILE] in sys_write: write buffer NULL pointer\n");
-        return -1;
-    }
-    if (bufsize < 0) {
-        printf("ERROR [SYS FILE] in sys_write: write buffer size should be non-negative\n");
-        return -1;
-    }
-    if (cur_pcb->file_arr.files[fd].flags == AVAILABLE) {
-        printf("WARNING [SYS FILE] in sys_write: the file is not opened. fd: %d\n", fd);
-        return 0;   // not a serious error
-    }
-    return cur_pcb->file_arr.files[fd].f_op->write(fd, buf, bufsize);
-}
-
 

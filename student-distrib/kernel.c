@@ -12,6 +12,7 @@
 #include "terminal.h"
 #include "file_sys.h"
 #include "process.h"
+#include "sys_call.h"
 #define RUN_TESTS
 
 /* Function Declaration */
@@ -240,6 +241,8 @@ void entry(unsigned long magic, unsigned long addr) {
 
     /* Enable interrupts */
 
+    /* execute shell */
+    // sys_execute((uint8_t *) "shell");
 
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close

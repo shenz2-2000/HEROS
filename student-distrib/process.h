@@ -30,9 +30,6 @@ void process_init();
 pcb_t* get_cur_process();
 pcb_t* create_process();
 pcb_t* delete_process(pcb_t* pcb);
-
-
-extern int32_t system_halt(int32_t status);
-extern int sys_execute(uint8_t *command);
+int32_t get_n_present_pcb();
 
 #endif
