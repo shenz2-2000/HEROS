@@ -477,7 +477,7 @@ int32_t dir_read(int32_t fd, void *buf, int32_t bufsize){
     strncpy(buf, (int8_t *) (bblock_ptr->dentries[cur_pos].f_name), bufsize);
     cur_pcb->file_arr.files[fd].f_pos = cur_pos;
 
-    return bufsize;
+    return 0;   // as said in doc, always return 0
 
 }
 
