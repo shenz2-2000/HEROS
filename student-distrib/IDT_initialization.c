@@ -7,6 +7,7 @@
 #include "file_sys.h"
 #include "link.h"
 #include "process.h"
+#include "sys_call.h"
 
 /* Declaration of constant in interrupt */
 
