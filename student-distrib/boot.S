@@ -398,6 +398,7 @@ exception_handler_19:
  *   RETURN VALUE: none
  *   SIDE EFFECTS: jump to the corresponding interrupt handler
  */
+
  .globl interrupt_entry_1
 interrupt_entry_1:
     SAVE_ALL_REGS

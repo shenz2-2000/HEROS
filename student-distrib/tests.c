@@ -700,6 +700,14 @@ int shell_test() {
 /* Checkpoint 4 tests */
 /* Checkpoint 5 tests */
 
+/* file_closed_test
+ *
+ * test whether files are closed in the end of process
+ * Inputs: None
+ * Outputs: None
+ * Side Effects: None
+ */
+
 void file_closed_test(){
     int i;
     pcb_t *cur_pcb = get_cur_process();
@@ -714,6 +722,28 @@ void file_closed_test(){
     return;
 }
 
+/* invalid_sys_call_test
+ *
+ * Inputs: None
+ * Outputs: None
+ * Side Effects: None
+ */
+
+void invalid_sys_call_test(){
+    TEST_HEADER;
+
+    // asm volatile
+    asm volatile("       \n\
+    movl $0, %%eax      \n\
+    INT $0x80            \n\
+    "
+    :
+    :
+    :"cc", "memory", "eax");
+}
+
+
+
 /* launch_tests
  *
  * Inputs: None
@@ -725,6 +755,7 @@ void launch_tests(){
 //    TEST_OUTPUT("terminal_test", terminal_test());
 //     TEST_OUTPUT("rtc_test2", rtc_test2());
 //     TEST_OUTPUT("file_system_test", file_system_test());
-     TEST_OUTPUT("shell_test", shell_test());
+//     TEST_OUTPUT("shell_test", shell_test());
 //    TEST_OUTPUT("fs_err_test", fs_err_test());
+//     invalid_sys_call_test();
 }
