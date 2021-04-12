@@ -567,8 +567,10 @@ int32_t sys_open(const uint8_t *f_name) {
     dentry_t dentry;
     int32_t fd = -1;
     pcb_t *cur_pcb;
-    int i = 1;
-    i = i / 0;
+
+    // For error test, we can return back to shell!
+//    int i = 1;
+//    i = i / 0;
     cur_pcb = get_cur_process();
 
     if (cur_pcb->file_arr.n_opend_files >= N_FILE_LIMIT) {
