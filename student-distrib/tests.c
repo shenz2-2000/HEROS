@@ -752,10 +752,10 @@ void invalid_sys_call_test(){
  */
 /* Test suite entry point */
 void launch_tests(){
-//    TEST_OUTPUT("terminal_test", terminal_test());
+//     TEST_OUTPUT("terminal_test", terminal_test());
 //     TEST_OUTPUT("rtc_test2", rtc_test2());
 //     TEST_OUTPUT("file_system_test", file_system_test());
-//     TEST_OUTPUT("shell_test", shell_test());
-//    TEST_OUTPUT("fs_err_test", fs_err_test());
+       TEST_OUTPUT("shell_test", shell_test());
+//     TEST_OUTPUT("fs_err_test", fs_err_test());
 //     invalid_sys_call_test();
 }
