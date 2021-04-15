@@ -389,3 +389,29 @@ int sys_vidmap(uint8_t** screen_start){
 
     return 0;
 }
+
+/**
+ * sys_get_args
+ * Description: get args to user
+ * Input: buf -- user buffer
+ *        nbytes -- num of byte
+ * Output: 0 - if success
+ *        -1 - if fail
+ * Side effect: None
+ */
+
+int32_t sys_get_args(uint8_t *buf, int32_t nbytes){
+
+    // sanity check
+    if(buf == NULL || nbytes < 0) return -1;
+
+    uint8_t* cur_arg = get_cur_process()->args;
+
+    // check arg is correct
+    if(cur_arg == NULL || (strlen((int8_t *) cur_arg) > nbytes)) return -1;
+
+    // copy the arg, change to int8_t to meet the requirement of strnpy
+    strncpy((int8_t *) buf, (int8_t *) cur_arg, nbytes);
+
+    return 0;
+}

@@ -12,5 +12,6 @@ void invalid_sys_call();
 int parse_args(uint8_t *command, uint8_t **args);
 int32_t system_halt(int32_t status);
 int32_t sys_execute(uint8_t *command);
+int32_t sys_get_args(uint8_t *buf, int32_t nbytes);
 
 #endif

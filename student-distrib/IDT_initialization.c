@@ -177,8 +177,8 @@ ASMLINKAGE int32_t execute_sys_call(uint8_t* command){
     return sys_execute(command);
 }
 
-ASMLINKAGE void get_args_sys_call(int32_t fd, const void* buf, int32_t nbytes){
-    return;
+ASMLINKAGE int32_t get_args_sys_call(uint8_t *buf, int32_t nbytes){
+    return sys_get_args(buf,nbytes);
 }
 
 ASMLINKAGE int32_t vidmap_sys_call(uint8_t ** screen_start){
