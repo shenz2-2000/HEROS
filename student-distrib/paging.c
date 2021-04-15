@@ -103,5 +103,41 @@ void fill_page(){
             continue;
         }
     }
+
+
+    // --------------------------Fill the kernel Page Table--------------------
+    for(i = 0; i < PAGE_TABLE_SIZE; i++){
+        // points to the start of vedio memory
+        if(i == VIDEO_MEMORY_INDEX){
+            video_page_table0[i].P = 1;
+            video_page_table0[i].RW = 1;
+            video_page_table0[i].US = 1;
+            video_page_table0[i].PWT = 0;
+            video_page_table0[i].PCD = 0;
+            video_page_table0[i].A = 0;
+            video_page_table0[i].D = 0;
+            video_page_table0[i].PAT = 0;
+            video_page_table0[i].G = 0;
+            video_page_table0[i].AVAIAL = 0;
+            video_page_table0[i].Base_address = VIDEO_MEMORY_INDEX;
+            continue;
+        }
+
+            // else, just filled with 0
+        else{
+            video_page_table0[i].P = 0;
+            video_page_table0[i].RW = 0;
+            video_page_table0[i].US = 0;
+            video_page_table0[i].PWT = 0;
+            video_page_table0[i].PCD = 0;
+            video_page_table0[i].A = 0;
+            video_page_table0[i].D = 0;
+            video_page_table0[i].PAT = 0;
+            video_page_table0[i].G = 0;
+            video_page_table0[i].AVAIAL = 0;
+            video_page_table0[i].Base_address = 0;
+            continue;
+        }
+    }
 }
 

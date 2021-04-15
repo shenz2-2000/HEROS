@@ -8,6 +8,7 @@
 #include "link.h"
 #include "process.h"
 #include "sys_call.h"
+#include "page_lib.h"
 
 /* Declaration of constant in interrupt */
 
@@ -180,8 +181,8 @@ ASMLINKAGE void get_args_sys_call(int32_t fd, const void* buf, int32_t nbytes){
     return;
 }
 
-ASMLINKAGE void vidmap_sys_call(int32_t fd, const void* buf, int32_t nbytes){
-    return;
+ASMLINKAGE int32_t vidmap_sys_call(uint8_t ** screen_start){
+    return sys_vidmap(screen_start);
 }
 
 ASMLINKAGE void set_handler_sys_call(int32_t fd, const void* buf, int32_t nbytes){

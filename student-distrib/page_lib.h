@@ -16,6 +16,9 @@
 #define ELF_LENGTH      4
 #define FIRST_INSTRUCTION 24
 #define MAX_PAGE 2
+#define USER_VA_START 0x08000000
+#define USER_VA_END   0x08400000
+#define VM_INDEX      0xB8000
 
 
 // tool functions
@@ -26,6 +29,9 @@ extern int load_private_code(dentry_t * task_dentry_ptr);
 extern int executable_check(dentry_t * task_dentry_ptr);
 extern int set_page_for_task(uint8_t* task_file_name, uint32_t* eip);
 extern int get_new_page_id();
+extern void set_video_memory();
+extern void clear_video_memory();
+extern int sys_vidmap(uint8_t** screen_start);
 
 int restore_paging(const int child_id, const int parent_id);
 

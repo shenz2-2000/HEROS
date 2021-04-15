@@ -244,7 +244,11 @@ int32_t sys_execute(uint8_t *command) {
         length = strlen((int8_t *)process -> args);
         process->k_esp-=length;
         process->args=(uint8_t *)strcpy((int8_t *)process->k_esp, (int8_t *) process->args);
-    } 
+    }
+
+//    // set video memory for the current process
+//    set_video_memory();
+
     pid_ret = set_page_for_task(command, (uint32_t *)&eip);
     if (pid_ret < 0) {
         delete_process(process);
@@ -311,6 +315,10 @@ int32_t system_halt(int32_t status) {
 
     // condition check
     if (get_n_present_pcb() == 0) {   // not in a process
+
+        // clear page directory for video memory
+        clear_video_memory();
+
         return -1;
     }
     if (get_cur_process()->parent == NULL) {
@@ -321,6 +329,10 @@ int32_t system_halt(int32_t status) {
         restore_paging(get_cur_process()->pid, get_cur_process()->pid); // restore the current paging
         // CHECK ALL FILES ARE CLEANED UP
         file_closed_test();
+
+        // clear page directory for video memory
+        clear_video_memory();
+
         sys_execute((uint8_t *) "shell");
         return -1;
     }
@@ -329,6 +341,9 @@ int32_t system_halt(int32_t status) {
     pcb_t *parent = delete_process(get_cur_process());  // clear the pcb
     restore_paging(get_cur_process()->pid, parent->pid);  // restore parent paging
     tss.esp0 = parent->k_esp;  // set tss to parent's kernel stack to make sure system calls use correct stack
+
+    // clear page directory for video memory
+    clear_video_memory();
 
 #if FILE_CLOSED_TEST
     file_closed_test(); // CHECK ALL FILES ARE CLEANED UP
@@ -345,4 +360,32 @@ int32_t system_halt(int32_t status) {
 
     printf("In system_halt: this function should never return.\n");
     return -1;
+}
+
+
+/**
+ * sys_vidmap
+ * Description: send pointer to vm to user
+ * Input: screen_start -- a virtual address in user region, contain a pointer to vm
+ * Output: 0 - if success
+ *        -1 - if fail
+ * Side effect: modify the page directory
+ */
+
+int sys_vidmap(uint8_t** screen_start){
+
+    int check_address = (int) screen_start;
+
+    // check whether screen_start is in user region (virtual 128MB to 132 MB)
+    if( (check_address < USER_VA_START) || (check_address >= USER_VA_END) ){
+        printf("The screen start virtual address when you call vidmap is invalid!!\n");
+        return -1;
+    }
+
+    // setup the video memory in PD
+    set_video_memory();
+
+    *screen_start = (uint8_t*)(USER_VA_END + VM_INDEX);
+
+    return 0;
 }

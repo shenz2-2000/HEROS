@@ -136,5 +136,13 @@ page_table0:
       .endr
 page_table0_bottom:
 
+.align ALIGN_4K
+.globl video_page_table0
+video_page_table0:
+      .rept PAGE_TABLE_SIZE
+      .long 0
+      .endr
+video_page_table0_bottom:
+
 page_table_bottom:
 

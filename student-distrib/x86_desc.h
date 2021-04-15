@@ -246,9 +246,9 @@ typedef union idt_desc_t {
 
 // self-defined PDE
 typedef struct {
-    uint32_t P : 1;
-    uint32_t RW : 1;
-    uint32_t US : 1;
+    uint32_t P : 1;     // 0:unpresent 1:present
+    uint32_t RW : 1;    // 0:read-only 1: r/w
+    uint32_t US : 1;    // 0:super     1: user
     uint32_t PWT: 1;
     uint32_t PCD: 1;
     uint32_t A : 1;
@@ -281,6 +281,7 @@ typedef struct {
 // pointers defined in x86_desc.S
 extern PDE page_directory[PAGE_DIRECTORY_SIZE] __attribute__ ((aligned (ALIGN_4K)));
 extern PTE page_table0[PAGE_TABLE_SIZE]__attribute__ ((aligned (ALIGN_4K)));
+extern PTE video_page_table0[PAGE_TABLE_SIZE]__attribute__ ((aligned (ALIGN_4K)));
 
 /* The IDT itself (declared in x86_desc.S */
 extern idt_desc_t idt[NUM_VEC];
