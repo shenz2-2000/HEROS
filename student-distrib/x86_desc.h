@@ -8,7 +8,7 @@
 
 #include "types.h"
 
-#define MAXIMUM_SYS_CALL_NUM 11
+#define MAXIMUM_SYS_CALL_NUM 12
 
 
 /* Segment selector values */

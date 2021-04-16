@@ -193,21 +193,10 @@ ASMLINKAGE void sig_return_sys_call(int32_t fd, const void* buf, int32_t nbytes)
     return;
 }
 
+ASMLINKAGE int32_t play_sound_sys_call(uint32_t nFrequence) {
+    return sys_play_sound(nFrequence);
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ASMLINKAGE int32_t nosound_sys_call() {
+    return sys_nosound();
+}

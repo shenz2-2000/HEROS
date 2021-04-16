@@ -454,7 +454,7 @@ sys_call_linkage:
 
            # ----------------check sanity-----------------
            cmpl $MAXIMUM_SYS_CALL_NUM, %eax
-           jae  invalid_sys_call
+           ja  invalid_sys_call
 
            # ----------------jump to real func------------
            call *sys_jump_table(,%eax,4)
@@ -481,6 +481,8 @@ sys_jump_table:
           .long vidmap_sys_call
           .long set_handler_sys_call
           .long sig_return_sys_call
+          .long play_sound_sys_call
+          .long nosound_sys_call
 
 
 /**
