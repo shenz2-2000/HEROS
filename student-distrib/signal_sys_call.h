@@ -49,8 +49,8 @@ extern int32_t sys_sigreturn(void);
 
 // Signal Functions
 
-extern int32_t signal_send(int32_t signal);
-extern int32_t signal_block(int32_t signal);
-extern int32_t signal_unblock(int32_t signal);
-extern void signal_init(); // Initilize signal system
+extern int32_t signal_send(int32_t signum);
+extern int32_t signal_mask(int32_t signum);
+extern int32_t signal_unmask(int32_t signum);
+extern void signal_init(); // Initilize signal system and should be run on boot
 extern  int32_t task_signal_init(signal_t* signal_array); // init signal content
