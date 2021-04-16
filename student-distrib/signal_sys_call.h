@@ -8,12 +8,14 @@
 #endif //FAKE_SIGNAL_SYS_CALL_H
 
 #define SIGNAL_NUM 5
+typedef int32_t (*signal_handler)(void);
 typedef struct signal_t {
     uint32_t signal_pending;
     uint32_t signal_masked;
     uint32_t previous_masked;
     uint32_t alarm_time; // Used for alarm
-} signal_struct_t[SIGNAL_NUM];
+    signal_handler sig[SIGNAL_NUM]; // Store the signal handle
+} signal_struct_t;
 
 // Two System Calls
 int32_t sys_set_handler(int32_t signum, void* handler_address);
