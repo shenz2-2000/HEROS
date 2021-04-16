@@ -750,7 +750,27 @@ void invalid_sys_call_test(){
 int play_sound_test() {
     TEST_HEADER;
 
-    gensound(1047, 3000);
+    long ret;
+
+    // gensound(1047, 3000);
+
+    // sys_play_sound(1047);
+    asm volatile ("INT $0x80"
+    : "=a" (ret)
+    : "a" (0x0B), "b" (1047)
+    : "memory", "cc");
+
+    printf("begin the sound:\n");
+
+    sleep(3000);
+
+    // printf("stop the sound\n");
+    asm volatile ("INT $0x80"
+    : "=a" (ret)
+    : "a" (0x0C)
+    : "memory", "cc");
+
+    sys_nosound();
 
     return PASS;
 }
