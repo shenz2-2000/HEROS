@@ -403,7 +403,6 @@ int sys_vidmap(uint8_t** screen_start){
  *        -1 - if fail
  * Side effect: None
  */
-
 int32_t sys_get_args(uint8_t *buf, int32_t nbytes){
 
     // sanity check
@@ -417,5 +416,48 @@ int32_t sys_get_args(uint8_t *buf, int32_t nbytes){
     // copy the arg, change to int8_t to meet the requirement of strnpy
     strncpy((int8_t *) buf, (int8_t *) cur_arg, nbytes);
 
+    return 0;
+}
+
+/**
+ * sys_play_sound
+ * Description: Play sound using built in speaker
+ * Input: nFrequence -- number of frequence
+ * Output: always 0
+ * Side effect: make sound
+ */
+/* reference: https://wiki.osdev.org/PC_Speaker */
+/* NOTE: all the magic numbers are provided on the net and without any explanation */
+int32_t sys_play_sound(uint32_t nFrequence) {
+    uint32_t divide;
+    uint8_t temp;
+
+    // Set the PIT to the desired frequency
+    divide = 1193180 / nFrequence; 
+    outb(0x43, 0xb6);
+    outb(0x42, (uint8_t) (divide));
+    outb(ox42, (uint8_t) (divide >> 8));
+
+    // play the sound using the PC speaker
+    temp = inb(0x61);
+    if (temp != (temp | 3)) {
+        outb(0x61, temp | 3);
+    }
+
+    return 0;
+}
+
+/**
+ * sys_nosound
+ * Description: stop the sound
+ * Input: None
+ * Output: always 0
+ * Side effect: stop sound
+ */
+/* reference: https://wiki.osdev.org/PC_Speaker */
+/* NOTE: all the magic numbers are provided on the net and without any explanation */
+int32_t sys_nosound() {
+    uint8_t temp = inb(0x61) & 0xFC;
+    outb(0x61, temp);
     return 0;
 }
