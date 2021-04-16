@@ -640,7 +640,6 @@ int32_t open(const uint8_t* filename) {
  * Inputs: fd : the file we want to close
  * Return Value: ret: whether the close is successful
  */
-
 int32_t close(int32_t fd) {
     long ret;
     asm volatile ("INT $0x80"
@@ -648,4 +647,33 @@ int32_t close(int32_t fd) {
     : "a" (0x06), "b" (fd)
     : "memory", "cc");
     return ret;
+}
+
+/* sleep
+ * Description: it sleep for roughly a certain time
+ * Inputs: time_in_ms - duration in ms unit
+ * Return Value: ret: 0 if success, -1 if fail
+ */
+int32_t sleep(uint32_t time_in_ms) {
+    int32_t fd;
+    int32_t *buf;
+    int32_t freq;
+    int32_t i;
+
+    if (time_in_ms == 0) return 0;
+
+    // open a rtc file
+    fd = open((uint8_t*) "rtc");
+    if (fd == -1) return -1;
+    // set the frequence to 1024 (close to 1000)
+    freq = 1024;
+    if (write(fd, &freq, 4) == -1) return -1;
+    // loop
+    for (i = 0; i < time_in_ms; ++i) {
+        read(fd, buf, 1);
+    }
+
+    close(fd);
+
+    return 0;
 }

@@ -117,8 +117,8 @@ int32_t sys_read(int32_t fd, void *buf, int32_t bufsize) {
         printf("ERROR [SYS FILE] in sys_read: read buffer NULL pointer\n");
         return -1;
     }
-    if (bufsize < 0) {
-        printf("ERROR [SYS FILE] in sys_read: read buffer size should be non-negative\n");
+    if (bufsize <= 0) {
+        printf("ERROR [SYS FILE] in sys_read: read buffer size should be positive\n");
         return -1;
     }
     if (cur_pcb->file_arr.files[fd].flags == AVAILABLE) {
@@ -434,14 +434,14 @@ int32_t sys_play_sound(uint32_t nFrequence) {
 
     // Set the PIT to the desired frequency
     divide = 1193180 / nFrequence; 
-    outb(0x43, 0xb6);
-    outb(0x42, (uint8_t) (divide));
-    outb(ox42, (uint8_t) (divide >> 8));
+    outb(0xb6, 0x43);
+    outb((uint8_t) (divide), 0x42);
+    outb((uint8_t) (divide >> 8), 0x42);
 
     // play the sound using the PC speaker
     temp = inb(0x61);
     if (temp != (temp | 3)) {
-        outb(0x61, temp | 3);
+        outb(temp | 3, 0x61);
     }
 
     return 0;
@@ -458,6 +458,6 @@ int32_t sys_play_sound(uint32_t nFrequence) {
 /* NOTE: all the magic numbers are provided on the net and without any explanation */
 int32_t sys_nosound() {
     uint8_t temp = inb(0x61) & 0xFC;
-    outb(0x61, temp);
+    outb(temp, 0x61);
     return 0;
 }

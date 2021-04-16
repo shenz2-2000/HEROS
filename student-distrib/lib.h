@@ -43,7 +43,8 @@ int32_t close(int32_t fd);
 int32_t read(int32_t fd, void* buf, int32_t nbytes);
 int32_t write(int32_t fd, const void* buf, int32_t nbytes);
 
-
+// utils
+int32_t sleep(uint32_t time_in_ms);
 
 // cursor function
 void update_cursor(int x, int y);
