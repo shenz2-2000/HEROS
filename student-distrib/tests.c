@@ -698,9 +698,6 @@ int shell_test() {
     return PASS;
 }
 
-/* Checkpoint 4 tests */
-/* Checkpoint 5 tests */
-
 /* file_closed_test
  *
  * test whether files are closed in the end of process
@@ -744,7 +741,26 @@ void invalid_sys_call_test(){
     :"cc", "memory", "eax");
 }
 
+/* Checkpoint 4 tests */
+/* Checkpoint 5 tests */
 
+/* Extra Point tests */
+
+int play_sound_test() {
+    TEST_HEADER;
+
+    sys_play_sound(1047);
+
+    printf("begin the sound:\n");
+
+    sleep(3000);
+
+    printf("stop the sound\n");
+
+    sys_nosound();
+
+    return PASS;
+}
 
 /* launch_tests
  *
@@ -755,7 +771,8 @@ void invalid_sys_call_test(){
 /* Test suite entry point */
 void launch_tests(){
 //     TEST_OUTPUT("file_system_test", file_system_test());
-    TEST_OUTPUT("shell_test", shell_test());
+    // TEST_OUTPUT("shell_test", shell_test());
 //    TEST_OUTPUT("fs_err_test", fs_err_test());
 //     invalid_sys_call_test();
+    TEST_OUTPUT("play_sound_test", play_sound_test());
 }
