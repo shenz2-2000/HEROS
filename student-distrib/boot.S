@@ -5,6 +5,7 @@
 
 #include "multiboot.h"
 #include "x86_desc.h"
+#include "signal_sys_call.h"
 
 .text
 
@@ -79,6 +80,42 @@ halt:
 	popl %ebp
 	popf
 .endm
+
+# for signal mechanism
+.macro SET_HW_CONTEXT
+    pushl $0
+    pushl $0x80
+    push  %fs
+    push  %es
+    push  %ds
+    pushl %eax
+    pushl %ebp
+    pushl %edi
+    pushl %esi
+    pushl %edx
+    pushl %ecx
+    pushl %ebx
+.endm
+
+
+.macro RESTORE_HW_CONTEXT
+    popl %ebx
+    popl %ecx
+    popl %edx
+    popl %esi
+    popl %edi
+    popl %ebp
+    popl %eax
+    pop  %ds
+    pop  %es
+    pop  %fs
+    addl $8, %esp
+.endm
+
+
+
+
+
 
 .macro SAVE_ALL_REGS_SYS
 	pushf
@@ -450,7 +487,7 @@ exception_handler_128:
 sys_call_linkage:
 
            # --------------save all registers--------------
-           SAVE_ALL_REGS_SYS
+           SET_HW_CONTEXT
 
            # ----------------check sanity-----------------
            cmpl $MAXIMUM_SYS_CALL_NUM, %eax
@@ -466,7 +503,9 @@ invalid_sys_call:
 
 sys_call_finish:
            # --------------restore information--------------
-           RESTORE_ALL_REGS_SYS
+           movl %eax, 24(%esp)
+           call check_signal
+           RESTORE_HW_CONTEXT
            IRET
 
 sys_jump_table:
