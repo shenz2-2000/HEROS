@@ -3,10 +3,58 @@
 //
 
 #include "signal_sys_call.h"
+#include "x86_desc.h"
 #include "process.h"
-#include "lib.h"
 
-signal_handler default_handler[SIGNAL_NUM]; // Store the default signal handler
+
+ASMLINKAGE void check_signal(hw_context hw){
+
+    pcb_t * cur_process;
+    int32_t signal_idx;
+    int32_t eflag;
+    uint32_t cur_signal;
+
+    // check whether we return to user-stack
+    if (hw.cs != USER_CS){
+        return;
+    }
+
+    // forbid interrupt
+    cli_and_save(eflag);
+
+    cur_process = get_cur_process();
+    cur_signal = (cur_process->signals.signal_pending) & ~(cur_process->signals.signal_masked);
+    if(cur_signal == 0) return;
+
+    for(signal_idx = 0; signal_idx < SIGNAL_NUM; signal_idx ++){
+        if(  ( (cur_signal >> signal_idx) & 0x00000001 )  == 1 ) break;
+    }
+
+    // reset the signals
+    cur_process->signals.previous_masked = cur_process->signals.signal_masked;
+    cur_process->signals.signal_pending = 0;
+    cur_process->signals.signal_masked = MASK_ALL;
+
+    if( cur_process->signals.sig[signal_idx] == default_handler[signal_idx] ) {
+        default_handler[signal_idx]();
+
+        //TODO: to be written
+        restore_mask();
+    }
+
+    else{
+
+        //TODO: to be written
+        user_handler();
+    }
+
+    restore_flags(eflag);
+
+
+
+
+
+}
 
 /*
  * sys_set_handler

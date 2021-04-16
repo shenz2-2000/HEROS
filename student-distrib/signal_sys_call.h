@@ -11,6 +11,8 @@
 #include "link.h"
 
 #define SIGNAL_NUM 5
+#define MASK_ALL 0xFFFFFFFF
+
 typedef int32_t (*signal_handler)(void);
 typedef struct signal_t {
     uint32_t signal_pending;
@@ -42,6 +44,7 @@ typedef struct struct_hw_context {
 }hw_context;
 
 
+signal_handler default_handler[SIGNAL_NUM];
 
 // Two System Calls
 int32_t sys_set_handler(int32_t signum, void* handler_address);
