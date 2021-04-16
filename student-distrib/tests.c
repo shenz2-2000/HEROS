@@ -6,6 +6,7 @@
 #include "file_sys.h"
 #include "process.h"
 #include "sys_call.h"
+#include "gensound.h"
 
 #define PASS 1
 #define FAIL 0
@@ -749,15 +750,7 @@ void invalid_sys_call_test(){
 int play_sound_test() {
     TEST_HEADER;
 
-    sys_play_sound(1047);
-
-    printf("begin the sound:\n");
-
-    sleep(3000);
-
-    printf("stop the sound\n");
-
-    sys_nosound();
+    gensound(1047, 3000);
 
     return PASS;
 }
