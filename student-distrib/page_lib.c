@@ -276,7 +276,7 @@ void set_video_memory(){
     flush_tlb();
 }
 
-/* set_video_memory
+/* clear_video_memory
  * Description: clear page directory for user manipulation
  * Inputs: None
  * Return Value: None
