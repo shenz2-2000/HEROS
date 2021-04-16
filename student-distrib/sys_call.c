@@ -3,7 +3,7 @@
 #include "lib.h"
 #include "page_lib.h"
 #include "tests.h"
-
+#include "signal_sys_call.h"
 #define FILE_CLOSED_TEST 1
 
 /**
@@ -256,6 +256,7 @@ int32_t sys_execute(uint8_t *command) {
     }
     process->pid = pid_ret;
     init_file_arr(&(process->file_arr));
+    task_signal_init(&(process->signals));
     // Set up tss to make sure system call don't go wrong
     tss.ss0 = KERNEL_DS;
     tss.esp0 = process->k_esp;

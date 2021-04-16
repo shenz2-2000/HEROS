@@ -127,3 +127,22 @@ int32_t signal_unmask(int32_t signum) {
     restore_flags(flags);
     return 0;
 }
+
+/*
+ * signal_restore_mask
+ *   DESCRIPTION: Restore previous mask
+ *   INPUTS: None
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: no
+ */
+
+void signal_restore_mask(void) {
+    // restore the previous mask
+    int32_t flags;
+    cli_and_save(flags);
+    get_cur_process()->signals.signal_masked = get_cur_process()->signals.previous_masked;
+    restore_flags(flags);
+}
+// Signal Handler Starts here:
+
