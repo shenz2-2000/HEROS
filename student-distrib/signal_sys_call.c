@@ -59,7 +59,7 @@ void restore_signal(){
     // clear IF
     cli_and_save(eflag_for_exec);
 
-    cur_process->signals.signal_masked = cur_process->signals.previous_masked;
+    get_cur_process()->signals.signal_masked = cur_process->signals.previous_masked;
 
     restore_flags(eflag_for_exec);
 }
@@ -89,23 +89,6 @@ int32_t sys_set_handler(int32_t signum, void* handler_address) {
     get_cur_process()->signals.sig[signum] = (handler_address==NULL)?default_handler[signum]:(signal_handler)handler_address;
     restore_flags(flags);
     return 0;
-}
-
-/*
- * signal_init
- *   DESCRIPTION: do the initialization for the default struct
- *   INPUTS: none
- *   OUTPUTS: none
- *   RETURN VALUE: none
- *   SIDE EFFECTS: initialize the signal struct
- */
-
-void signal_init() {
-    default_handler[0]=sig_div_zero_default;
-    default_handler[1]=sig_seg_default;
-    default_handler[2]=sig_interrupt_default;
-    default_handler[3]=sig_alarm_default;
-    default_handler[4]=sig_user1_default;
 }
 
 /*
@@ -262,4 +245,22 @@ int32_t sig_alarm_default() {
  */
 int32_t sig_user1_default() {
     return 0;
+}
+
+
+/*
+ * signal_init
+ *   DESCRIPTION: do the initialization for the default struct
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: initialize the signal struct
+ */
+
+void signal_init() {
+    default_handler[0]=sig_div_zero_default;
+    default_handler[1]=sig_seg_default;
+    default_handler[2]=sig_interrupt_default;
+    default_handler[3]=sig_alarm_default;
+    default_handler[4]=sig_user1_default;
 }

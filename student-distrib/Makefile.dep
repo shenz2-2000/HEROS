@@ -1,5 +1,4 @@
-boot.o: boot.S multiboot.h x86_desc.h types.h
-signal_helper_asm.o: signal_helper_asm.S
+boot.o: boot.S multiboot.h x86_desc.h types.h signal_sys_call.h
 x86_desc.o: x86_desc.S x86_desc.h types.h
 file_sys.o: file_sys.c file_sys.h types.h multiboot.h lib.h terminal.h \
   rtc.h process.h x86_desc.h signal_sys_call.h link.h sys_call.h

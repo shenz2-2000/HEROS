@@ -109,17 +109,6 @@ void init_IDT(){
 
 // Ten system calls
 
-//extern int32_t halt_sys_call(uint8_t status);
-//extern int32_t execute_sys_call(const uint8_t* command);
-//extern int32_t read_sys_call(int32_t fd, void* buf, int32_t nbytes);
-//extern int32_t write_sys_call(int32_t fd, const void* buf, int32_t nbytes);
-//extern int32_t open_sys_call(const uint8_t* filename);
-//extern int32_t close_sys_call(int32_t fd);
-//extern int32_t get_args_sys_call(uint8_t *buf, int32_t nbytes);
-//extern int32_t vidmap_sys_call(uint8_t ** screen_start);
-//extern int32_t set_handler_sys_call(int32_t signum, void* handler_address);
-//extern int32_t sig_return_sys_call(void);
-
 
 /* int32_t open_sys_call(const uint8_t* filename)
  * Inputs: filename : the file we want to open

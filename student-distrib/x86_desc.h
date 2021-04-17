@@ -7,6 +7,7 @@
 #define _X86_DESC_H
 
 #include "types.h"
+//#include "signal_sys_call.h"
 
 #define MAXIMUM_SYS_CALL_NUM 11
 
@@ -39,6 +40,8 @@
 
 
 #ifndef ASM
+
+
 
 // init IDT
 extern void init_IDT();

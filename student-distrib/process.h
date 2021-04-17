@@ -20,7 +20,7 @@ struct pcb_t {
     uint32_t k_esp;
     file_arr_t file_arr;
     uint8_t pid;
-    signal_struct_t signals;
+    signal_t signals;
 };
 
 typedef union task_kstack_t {

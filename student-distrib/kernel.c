@@ -54,7 +54,7 @@ void naive_exception_handler(hw_context hw){
     }
     else {
         printf("------------------------------------------------\n");
-        printf("WARNING! EXCEPTION %u HAPPENS!\n", num);
+        printf("WARNING! EXCEPTION %u HAPPENS!\n", hw.irq);
         printf("------------------------------------------------\n");
         // shut the screen into blue
         set_blue_screen();
