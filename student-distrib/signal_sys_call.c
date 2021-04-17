@@ -185,6 +185,7 @@ int32_t signal_unmask(int32_t signum) {
  */
 int32_t sig_div_zero_default() {
     int32_t flags;
+    printf("Successfully Get in\n");
     cli_and_save(flags);
     system_halt(256);
     restore_flags(flags);
