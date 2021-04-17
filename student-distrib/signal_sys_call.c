@@ -49,7 +49,7 @@ ASMLINKAGE void check_signal(hw_context hw){
     else{
         // now we need to setup the stack frame
         //TODO: to be written
-        user_handler_helper(cur_signal, cur_process->signals.currenthandler[signal_idx], &hw);
+        user_handler_helper(cur_signal, cur_process->signals.sig[signal_idx], &hw);
     }
 
     restore_flags(eflag);
