@@ -149,281 +149,281 @@ halt:
  */
 .globl exception_handler_0
 exception_handler_0:
-         # ----------------------push all registers--------------------
-         SAVE_ALL_REGS
+         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $0
+         pushl $0 /*push irq number*/
+         SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
-         addl $4, %esp
+         call check_signal
          # ---------------------restore all registers------------------
-         RESTORE_ALL_REGS
+         RESTORE_HW_CONTEXT
          IRET
 
 
 .globl exception_handler_1
 exception_handler_1:
-         # ----------------------push all registers--------------------
-         SAVE_ALL_REGS
+         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $1
+         pushl $1 /*push irq number*/
+         SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
-         addl $4, %esp
+         call check_signal
          # ---------------------restore all registers------------------
-         RESTORE_ALL_REGS
+         RESTORE_HW_CONTEXT
          IRET
 
 
 .globl exception_handler_2
 exception_handler_2:
-         # ----------------------push all registers--------------------
-         SAVE_ALL_REGS
+         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $2
+         pushl $2 /*push irq number*/
+         SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
-         addl $4, %esp
+         call check_signal
          # ---------------------restore all registers------------------
-         RESTORE_ALL_REGS
+         RESTORE_HW_CONTEXT
          IRET
 
 
 .globl exception_handler_3
 exception_handler_3:
-         # ----------------------push all registers--------------------
-         SAVE_ALL_REGS
+         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $3
+         pushl $3 /*push irq number*/
+         SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
-         addl $4, %esp
+         call check_signal
          # ---------------------restore all registers------------------
-         RESTORE_ALL_REGS
+         RESTORE_HW_CONTEXT
          IRET
 
 
 .globl exception_handler_4
 exception_handler_4:
-         # ----------------------push all registers--------------------
-         SAVE_ALL_REGS
+         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $4
+         pushl $4 /*push irq number*/
+         SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
-         addl $4, %esp
+         call check_signal
          # ---------------------restore all registers------------------
-         RESTORE_ALL_REGS
+         RESTORE_HW_CONTEXT
          IRET
 
 
 .globl exception_handler_5
 exception_handler_5:
-         # ----------------------push all registers--------------------
-         SAVE_ALL_REGS
+         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $5
+         pushl $5 /*push irq number*/
+         SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
-         addl $4, %esp
+         call check_signal
          # ---------------------restore all registers------------------
-         RESTORE_ALL_REGS
+         RESTORE_HW_CONTEXT
          IRET
 
 
 .globl exception_handler_6
 exception_handler_6:
-         # ----------------------push all registers--------------------
-         SAVE_ALL_REGS
+         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $6
+         pushl $6 /*push irq number*/
+         SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
-         addl $4, %esp
+         call check_signal
          # ---------------------restore all registers------------------
-         RESTORE_ALL_REGS
+         RESTORE_HW_CONTEXT
          IRET
 
 
 .globl exception_handler_7
 exception_handler_7:
-         # ----------------------push all registers--------------------
-         SAVE_ALL_REGS
+         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $7
+         pushl $7 /*push irq number*/
+         SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
-         addl $4, %esp
+         call check_signal
          # ---------------------restore all registers------------------
-         RESTORE_ALL_REGS
+         RESTORE_HW_CONTEXT
          IRET
 
 
 .globl exception_handler_8
 exception_handler_8:
-         # ----------------------push all registers--------------------
-         SAVE_ALL_REGS
+         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $8
+         pushl $8 /*push irq number*/
+         SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
-         addl $4, %esp
+         call check_signal
          # ---------------------restore all registers------------------
-         RESTORE_ALL_REGS
+         RESTORE_HW_CONTEXT
          IRET
 
 
 .globl exception_handler_9
 exception_handler_9:
-         # ----------------------push all registers--------------------
-         SAVE_ALL_REGS
+         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $9
+         pushl $9 /*push irq number*/
+         SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
-         addl $4, %esp
+         call check_signal
          # ---------------------restore all registers------------------
-         RESTORE_ALL_REGS
+         RESTORE_HW_CONTEXT
          IRET
 
 
 .globl exception_handler_10
 exception_handler_10:
-         # ----------------------push all registers--------------------
-         SAVE_ALL_REGS
+         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $10
+         pushl $1 /*push irq number*/
+         SET_HW_CONTEXT0
          # ---------------------call handler function------------------
          call naive_exception_handler
-         addl $4, %esp
+         call check_signal
          # ---------------------restore all registers------------------
-         RESTORE_ALL_REGS
+         RESTORE_HW_CONTEXT
          IRET
 
 
 .globl exception_handler_11
 exception_handler_11:
-         # ----------------------push all registers--------------------
-         SAVE_ALL_REGS
+         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $11
+         pushl $1 /*push irq number*/
+         SET_HW_CONTEXT1
          # ---------------------call handler function------------------
          call naive_exception_handler
-         addl $4, %esp
+         call check_signal
          # ---------------------restore all registers------------------
-         RESTORE_ALL_REGS
+         RESTORE_HW_CONTEXT
          IRET
 
 
 .globl exception_handler_12
 exception_handler_12:
-         # ----------------------push all registers--------------------
-         SAVE_ALL_REGS
+         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $12
+         pushl $1 /*push irq number*/
+         SET_HW_CONTEXT2
          # ---------------------call handler function------------------
          call naive_exception_handler
-         addl $4, %esp
+         call check_signal
          # ---------------------restore all registers------------------
-         RESTORE_ALL_REGS
+         RESTORE_HW_CONTEXT
          IRET
 
 
 .globl exception_handler_13
 exception_handler_13:
-         # ----------------------push all registers--------------------
-         SAVE_ALL_REGS
+         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $13
+         pushl $1 /*push irq number*/
+         SET_HW_CONTEXT3
          # ---------------------call handler function------------------
          call naive_exception_handler
-         addl $4, %esp
+         call check_signal
          # ---------------------restore all registers------------------
-         RESTORE_ALL_REGS
+         RESTORE_HW_CONTEXT
          IRET
 
 
 .globl exception_handler_14
 exception_handler_14:
-         # ----------------------push all registers--------------------
-         SAVE_ALL_REGS
+         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $14
+         pushl $1 /*push irq number*/
+         SET_HW_CONTEXT4
          # ---------------------call handler function------------------
          call naive_exception_handler
-         addl $4, %esp
+         call check_signal
          # ---------------------restore all registers------------------
-         RESTORE_ALL_REGS
+         RESTORE_HW_CONTEXT
          IRET
 
 
 .globl exception_handler_15
 exception_handler_15:
-         # ----------------------push all registers--------------------
-         SAVE_ALL_REGS
+         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $15
+         pushl $1 /*push irq number*/
+         SET_HW_CONTEXT5
          # ---------------------call handler function------------------
          call naive_exception_handler
-         addl $4, %esp
+         call check_signal
          # ---------------------restore all registers------------------
-         RESTORE_ALL_REGS
+         RESTORE_HW_CONTEXT
          IRET
 
 
 .globl exception_handler_16
 exception_handler_16:
-         # ----------------------push all registers--------------------
-         SAVE_ALL_REGS
+         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $16
+         pushl $1 /*push irq number*/
+         SET_HW_CONTEXT6
          # ---------------------call handler function------------------
          call naive_exception_handler
-         addl $4, %esp
+         call check_signal
          # ---------------------restore all registers------------------
-         RESTORE_ALL_REGS
+         RESTORE_HW_CONTEXT
          IRET
 
 
 .globl exception_handler_17
 exception_handler_17:
-         # ----------------------push all registers--------------------
-         SAVE_ALL_REGS
+         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $17
+         pushl $1 /*push irq number*/
+         SET_HW_CONTEXT7
          # ---------------------call handler function------------------
          call naive_exception_handler
-         addl $4, %esp
+         call check_signal
          # ---------------------restore all registers------------------
-         RESTORE_ALL_REGS
+         RESTORE_HW_CONTEXT
          IRET
 
 
 .globl exception_handler_18
 exception_handler_18:
-         # ----------------------push all registers--------------------
-         SAVE_ALL_REGS
+         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $18
+         pushl $1 /*push irq number*/
+         SET_HW_CONTEXT8
          # ---------------------call handler function------------------
          call naive_exception_handler
-         addl $4, %esp
+         call check_signal
          # ---------------------restore all registers------------------
-         RESTORE_ALL_REGS
+         RESTORE_HW_CONTEXT
          IRET
 
 
 .globl exception_handler_19
 exception_handler_19:
-         # ----------------------push all registers--------------------
-         SAVE_ALL_REGS
+         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $19
+         pushl $1 /*push irq number*/
+         SET_HW_CONTEXT9
          # ---------------------call handler function------------------
          call naive_exception_handler
-         addl $4, %esp
+         call check_signal
          # ---------------------restore all registers------------------
-         RESTORE_ALL_REGS
+         RESTORE_HW_CONTEXT
          IRET
 
 

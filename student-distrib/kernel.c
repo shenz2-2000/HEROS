@@ -27,6 +27,8 @@ void idt_init();
 #define IDT_ENTRY_KEYBOARD 0x21
 #define IDT_ENTRY_RTC 0x28
 #define IDT_SYSTEM_CALL 0x80
+#define EXCEPTION_HANDLE_TYPE 1
+// exception handle type: 0 to be directly halt, 1 to send signal
 
 /* Macros. */
 /* Check if the bit BIT in FLAGS is set. */
@@ -40,7 +42,7 @@ void idt_init();
  * Output: None.
  * Side effect: Print message on screen
  */
-void naive_exception_handler(uint32_t num){
+void naive_exception_handler(hw_context hw){
     // check whether input is valid
     int i = 0;
     cli();
@@ -59,9 +61,15 @@ void naive_exception_handler(uint32_t num){
         set_blue_screen();
     }
 //    while(1){}
-    while(i < 1000000) i++;
+#if (EXCEPTION_HANDLE_TYPE == 0)
+        while(i < 1000000) i++;
+        system_halt(256);
+#elif (EXCEPTION_HANDLE_TYPE == 1)
+        if (hw.irq == 0) signal_send(0);
+        else signal_send(1);
 
-    system_halt(256);
+#endif
+
     sti();
 }
 
