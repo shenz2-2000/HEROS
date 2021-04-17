@@ -12,7 +12,6 @@ ASMLINKAGE void check_signal(hw_context hw){
     pcb_t * cur_process;
     int32_t signal_idx;
     int32_t eflag;
-    int32_t eflag_for_exec;
     uint32_t cur_signal;
 
     // check whether we return to user-stack
@@ -38,27 +37,37 @@ ASMLINKAGE void check_signal(hw_context hw){
 
     if( cur_process->signals.sig[signal_idx] == default_handler[signal_idx] ) {
         default_handler[signal_idx]();
-
         // restore the mask
-        cli_and_save(eflag_for_exec);
-        cur_process->signals.signal_masked = cur_process->signals.previous_masked;
-        restore_flags(eflag_for_exec);
+        restore_signal();
 
     }
 
     else{
         // now we need to setup the stack frame
-        //TODO: to be written
         user_handler_helper(cur_signal, cur_process->signals.sig[signal_idx], &hw);
     }
 
     restore_flags(eflag);
 
-
-
-
-
 }
+
+
+
+void restore_signal(){
+    int32_t eflag_for_exec;
+
+    // clear IF
+    cli_and_save(eflag_for_exec);
+
+    cur_process->signals.signal_masked = cur_process->signals.previous_masked;
+
+    restore_flags(eflag_for_exec);
+}
+
+
+
+
+
 
 /*
  * sys_set_handler

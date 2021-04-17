@@ -24,6 +24,11 @@ jump_to_sigreturn_linkage:
 hw_context_ptr:
      .long 0
 
+user_hw_context_ptr:
+     .long 0
+kernel_hw_context_ptr:
+     .long 0
+
 signal_return_linkage:
      movl $10, %eax
      INT  $0x80
@@ -127,6 +132,52 @@ user_handler_helper:
 
 
 sys_sig_return:
+
+      # --------------------prepare for context copy-----------------
+
+      # get pointers to hw_context
+      movl 64(%esp), %edi
+      addl $4, %edi
+      movl %esp, %esi
+      addl $4, %esi
+
+      # store two hw_context pointers
+      movl %esi, kernel_hw_context_ptr
+      movl %edi, user_hw_context_ptr
+
+      # --------------------------context copy-----------------------
+
+      xorl %ebx, %ebx
+
+copy_loop:
+
+      movl  (%edi,%ebx,4), %ecx
+      movl  %ecx, (%esi,%ebx,4)
+      addl  $1,  %ebx
+      cmpl  $17, %ebx
+      jne   copy_loop
+
+      # -----------------------restore signal mask--------------------
+
+      pushl %ebx
+      pushl %ecx
+      pushl %eax
+
+      call restore_signal
+
+      popl  %eax
+      popl  %ecx
+      popl  %ebx
+
+      movl 24(%esi), %eax
+
+      ret
+
+
+
+
+
+
 
 
 

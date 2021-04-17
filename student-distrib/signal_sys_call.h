@@ -50,7 +50,7 @@ signal_handler default_handler[SIGNAL_NUM];
 int32_t sys_set_handler(int32_t signum, void* handler_address);
 extern int32_t sys_sigreturn(void);
 extern void user_handler_helper(int32_t cur_signal, signal_handler user_signal_handler, hw_context* cur_hw );
-
+extern void restore_signal(void);
 // Signal Functions
 
 extern int32_t signal_send(int32_t signum);
