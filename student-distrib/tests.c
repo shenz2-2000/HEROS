@@ -762,7 +762,7 @@ int play_sound_test() {
 
     printf("begin the sound:\n");
 
-    sleep(3000);
+    sleep(5000);
 
     printf("stop the sound\n");
 

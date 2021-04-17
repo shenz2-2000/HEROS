@@ -170,8 +170,19 @@ int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes) {
  */
 int32_t sleep(uint32_t time_in_ms) {
     int32_t fd, i;
+    double approx;
 
     if (time_in_ms == 0) return 0;
+
+    // manually adapt the time
+    /*
+     * NOTE: because of all kinds of delays and errors, the actual delayed time is not
+     * really the given one. This magic number 0.7 is a experimental value to fit this
+     * error. The range of this approximation is about 0-15 seconds (for more than 15 
+     * seconds, the real time delayed is shorter than the value given (even not linear)).
+     */
+    approx = (double) time_in_ms * 0.7;
+    time_in_ms = (uint32_t) approx;
 
     // open an rtc file
     fd = open((uint8_t*) "rtc");
