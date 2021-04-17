@@ -3,6 +3,7 @@
 
 #include "file_sys.h"
 #include "x86_desc.h"
+#include "signal_sys_call.h"
 
 #define N_PCB_LIMIT 2
 

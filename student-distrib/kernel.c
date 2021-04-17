@@ -44,9 +44,8 @@ void idt_init();
  */
 void naive_exception_handler(hw_context hw){
     // check whether input is valid
-    int i = 0;
     cli();
-    if(num >= 20){
+    if(hw.irq >= 20){
         printf("------------------------------------------------\n");
         printf("WARNING! The Input of Exception is invalid!!!!\n");
         printf("------------------------------------------------\n");

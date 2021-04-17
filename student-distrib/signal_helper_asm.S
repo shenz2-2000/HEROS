@@ -1,5 +1,3 @@
-#include "signal_sys_call.h"
-
 .globl user_handler_helper
 .globl sys_sig_return
 

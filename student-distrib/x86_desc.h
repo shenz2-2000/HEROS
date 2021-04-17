@@ -44,7 +44,7 @@
 extern void init_IDT();
 
 // two naive handlers
-extern void naive_exception_handler(uint32_t num);
+extern void naive_exception_handler(hw_context hw);
 extern void naive_system_call_handler(uint32_t num);
 
 // declaration of the filling function

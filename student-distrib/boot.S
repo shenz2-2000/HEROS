@@ -5,7 +5,6 @@
 
 #include "multiboot.h"
 #include "x86_desc.h"
-#include "signal_sys_call.h"
 
 .text
 
