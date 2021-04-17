@@ -13,6 +13,8 @@
 #include "file_sys.h"
 #include "process.h"
 #include "sys_call.h"
+#include "gensound.h"
+
 #define RUN_TESTS
 
 /* Function Declaration */
@@ -42,6 +44,8 @@ void naive_exception_handler(uint32_t num){
     // check whether input is valid
     int i = 0;
     cli();
+    // play exception sound
+    // play_song(1);
     if(num >= 20){
         printf("------------------------------------------------\n");
         printf("WARNING! The Input of Exception is invalid!!!!\n");
@@ -243,6 +247,9 @@ void entry(unsigned long magic, unsigned long addr) {
 
     /* execute shell */
     // sys_execute((uint8_t *) "shell");
+
+    /* play the boot music */
+    play_song(0);
 
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
