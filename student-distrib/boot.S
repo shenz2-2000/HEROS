@@ -290,7 +290,7 @@ exception_handler_10:
          pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
          pushl $1 /*push irq number*/
-         SET_HW_CONTEXT0
+         SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
          call check_signal
@@ -304,7 +304,7 @@ exception_handler_11:
          pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
          pushl $1 /*push irq number*/
-         SET_HW_CONTEXT1
+         SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
          call check_signal
@@ -318,7 +318,7 @@ exception_handler_12:
          pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
          pushl $1 /*push irq number*/
-         SET_HW_CONTEXT2
+         SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
          call check_signal
@@ -332,7 +332,7 @@ exception_handler_13:
          pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
          pushl $1 /*push irq number*/
-         SET_HW_CONTEXT3
+         SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
          call check_signal
@@ -346,7 +346,7 @@ exception_handler_14:
          pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
          pushl $1 /*push irq number*/
-         SET_HW_CONTEXT4
+         SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
          call check_signal
@@ -360,7 +360,7 @@ exception_handler_15:
          pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
          pushl $1 /*push irq number*/
-         SET_HW_CONTEXT5
+         SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
          call check_signal
@@ -374,7 +374,7 @@ exception_handler_16:
          pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
          pushl $1 /*push irq number*/
-         SET_HW_CONTEXT6
+         SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
          call check_signal
@@ -388,7 +388,7 @@ exception_handler_17:
          pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
          pushl $1 /*push irq number*/
-         SET_HW_CONTEXT7
+         SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
          call check_signal
@@ -402,7 +402,7 @@ exception_handler_18:
          pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
          pushl $1 /*push irq number*/
-         SET_HW_CONTEXT8
+         SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
          call check_signal
@@ -416,7 +416,7 @@ exception_handler_19:
          pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
          pushl $1 /*push irq number*/
-         SET_HW_CONTEXT9
+         SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
          call check_signal
