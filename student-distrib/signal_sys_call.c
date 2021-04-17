@@ -73,7 +73,7 @@ int32_t sys_set_handler(int32_t signum, void* handler_address) {
     // Set function pointer of signal handler corresponding to input para
     int32_t flags;
     cli_and_save(flags);
-    get_cur_process()->signals = (handler_address==NULL)?default_handler[signum]:handler_address;
+    get_cur_process()->signals.sig[signum] = (handler_address==NULL)?default_handler[signum]:(signal_handler)handler_address;
     restore_flags(flags);
     return 0;
 }
