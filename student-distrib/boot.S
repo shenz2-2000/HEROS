@@ -83,8 +83,6 @@ halt:
 
 # for signal mechanism
 .macro SET_HW_CONTEXT
-    pushl $0
-    pushl $0x80
     push  %fs
     push  %es
     push  %ds
@@ -485,7 +483,8 @@ exception_handler_128:
 
 .globl sys_call_linkage
 sys_call_linkage:
-
+           pushl $0         /*push dummy*/
+           pushl $0x80      /*push vector number*/
            # --------------save all registers--------------
            SET_HW_CONTEXT
 
