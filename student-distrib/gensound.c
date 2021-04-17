@@ -1,6 +1,7 @@
 #include "gensound.h"
 #include "lib.h"
 #include "sys_call.h"
+#include "rtc.h"
 
 int32_t gensound(uint32_t freq, uint32_t time_in_ms) {
     if (time_in_ms == 0) return 0;
