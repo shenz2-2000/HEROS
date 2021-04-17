@@ -162,3 +162,28 @@ int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes) {
     while (!rtc_interrupt_occured) {};
     return 0;
 }
+
+/* sleep
+ * Description: it sleep for roughly a certain time
+ * Inputs: time_in_ms - duration in ms unit
+ * Return Value: ret: 0 if success, -1 if fail
+ */
+int32_t sleep(uint32_t time_in_ms) {
+    int32_t fd, i;
+
+    if (time_in_ms == 0) return 0;
+
+    // open an rtc file
+    fd = open((uint8_t*) "rtc");
+    if (fd == -1) return -1;
+    // set the frequence to 1024 (close to 1000 and is the max freq)
+    rtc_set_freq(RTC_MIN_RATE);
+    // loop
+    for (i = 0; i < time_in_ms; ++i) {
+        rtc_interrupt_occured = 0;
+        rtc_restart_interrupt();
+        while(!rtc_interrupt_occured) {};
+    }
+    close(fd);
+    return 0;
+}

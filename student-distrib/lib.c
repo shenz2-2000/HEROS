@@ -654,26 +654,26 @@ int32_t close(int32_t fd) {
  * Inputs: time_in_ms - duration in ms unit
  * Return Value: ret: 0 if success, -1 if fail
  */
-int32_t sleep(uint32_t time_in_ms) {
-    int32_t fd;
-    int32_t *buf;
-    int32_t freq;
-    int32_t i;
+// int32_t sleep(uint32_t time_in_ms) {
+//     int32_t fd;
+//     int32_t *buf;
+//     int32_t freq;
+//     int32_t i;
 
-    if (time_in_ms == 0) return 0;
+//     if (time_in_ms == 0) return 0;
 
-    // open a rtc file
-    fd = open((uint8_t*) "rtc");
-    if (fd == -1) return -1;
-    // set the frequence to 1024 (close to 1000)
-    freq = 1024;
-    if (write(fd, &freq, 4) == -1) return -1;
-    // loop
-    for (i = 0; i < time_in_ms; ++i) {
-        read(fd, buf, 1);
-    }
+//     // open a rtc file
+//     fd = open((uint8_t*) "rtc");
+//     if (fd == -1) return -1;
+//     // set the frequence to 1024 (close to 1000)
+//     freq = 1024;
+//     if (write(fd, &freq, 4) == -1) return -1;
+//     // loop
+//     for (i = 0; i < time_in_ms; ++i) {
+//         read(fd, buf, 1);
+//     }
 
-    close(fd);
+//     close(fd);
 
-    return 0;
-}
+//     return 0;
+// }

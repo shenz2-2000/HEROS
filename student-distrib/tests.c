@@ -764,13 +764,12 @@ int play_sound_test() {
 
     sleep(3000);
 
-    // printf("stop the sound\n");
+    printf("stop the sound\n");
+
     asm volatile ("INT $0x80"
     : "=a" (ret)
     : "a" (0x0C)
     : "memory", "cc");
-
-    sys_nosound();
 
     return PASS;
 }
