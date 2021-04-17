@@ -94,7 +94,7 @@ int32_t main(){
         return -1;
     }
 
-    // play the right music
+    // play the right music, 23, 265, 5 are lengths
     switch (music_num){
         case 1:
             // div 32 because the frequency is set to 32 rather than 1024
@@ -107,6 +107,6 @@ int32_t main(){
             for (i=0; i<5; i++) beep(freq_default[i], dura_default[i] / 32);
             break;
     }
- 
+
     return 0;
 }

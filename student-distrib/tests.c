@@ -790,7 +790,7 @@ int play_music_test() {
  */
 /* Test suite entry point */
 void launch_tests(){
-    TEST_OUTPUT("div0_test", div0_test());
+//    TEST_OUTPUT("div0_test", div0_test());
 //     TEST_OUTPUT("file_system_test", file_system_test());
     TEST_OUTPUT("shell_test", shell_test());
 //    TEST_OUTPUT("fs_err_test", fs_err_test());
