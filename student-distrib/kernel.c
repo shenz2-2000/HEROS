@@ -13,6 +13,8 @@
 #include "file_sys.h"
 #include "process.h"
 #include "sys_call.h"
+#include "signal_sys_call.h"
+
 #define RUN_TESTS
 
 /* Function Declaration */
@@ -237,8 +239,8 @@ void entry(unsigned long magic, unsigned long addr) {
 
     /* Init process pointer */
     process_init();
-
-
+    /* Init Signal */
+    signal_init();
     /* Enable interrupts */
 
     /* execute shell */
