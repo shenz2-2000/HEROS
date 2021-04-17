@@ -18,7 +18,7 @@ int32_t sys_open(const uint8_t *f_name) {
     int32_t fd = -1;
     pcb_t *cur_pcb;
 
-    1/0;
+    //1/0;
 
     // For error test, we can return back to shell!
 //    int i = 1;

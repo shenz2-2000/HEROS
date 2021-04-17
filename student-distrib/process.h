@@ -4,7 +4,6 @@
 #include "file_sys.h"
 #include "x86_desc.h"
 #include "signal_sys_call.h"
-
 #define N_PCB_LIMIT 2
 
 #define TASK_KSTK_SIZE_IN_B 8192
@@ -20,7 +19,7 @@ struct pcb_t {
     uint32_t k_esp;
     file_arr_t file_arr;
     uint8_t pid;
-    signal_t signals;
+    signal_struct_t signals;
 };
 
 typedef union task_kstack_t {

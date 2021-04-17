@@ -9,7 +9,7 @@
 #include "process.h"
 #include "sys_call.h"
 #include "page_lib.h"
-
+#include "idt.h"
 /* Declaration of constant in interrupt */
 
 #define IDT_ENTRY_KEYBOARD 0x21

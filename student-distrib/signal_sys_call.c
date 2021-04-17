@@ -6,10 +6,13 @@
 #include "x86_desc.h"
 #include "process.h"
 #include "sys_call.h"
+#include "idt.h"
+#include "lib.h"
+extern void user_handler_helper(int32_t signum, signal_handler handler , hw_context *hw_context_addr);
 
 ASMLINKAGE void check_signal(hw_context hw){
 
-    pcb_t * cur_process;
+    //pcb_t * cur_process;
     int32_t signal_idx;
     int32_t eflag;
     uint32_t cur_signal;
@@ -22,8 +25,8 @@ ASMLINKAGE void check_signal(hw_context hw){
     // forbid interrupt
     cli_and_save(eflag);
 
-    cur_process = get_cur_process();
-    cur_signal = (cur_process->signals.signal_pending) & ~(cur_process->signals.signal_masked);
+    //cur_process = get_cur_process();
+    cur_signal = (get_cur_process()->signals.signal_pending) & ~(get_cur_process()->signals.signal_masked);
     if(cur_signal == 0) return;
 
     for(signal_idx = 0; signal_idx < SIGNAL_NUM; signal_idx ++){
@@ -31,11 +34,11 @@ ASMLINKAGE void check_signal(hw_context hw){
     }
 
     // reset the signals
-    cur_process->signals.previous_masked = cur_process->signals.signal_masked;
-    cur_process->signals.signal_pending = 0;
-    cur_process->signals.signal_masked = MASK_ALL;
+    get_cur_process()->signals.previous_masked = get_cur_process()->signals.signal_masked;
+    get_cur_process()->signals.signal_pending = 0;
+    get_cur_process()->signals.signal_masked = MASK_ALL;
 
-    if( cur_process->signals.sig[signal_idx] == default_handler[signal_idx] ) {
+    if( get_cur_process()->signals.sig[signal_idx] == default_handler[signal_idx] ) {
         default_handler[signal_idx]();
         // restore the mask
         restore_signal();
@@ -44,7 +47,7 @@ ASMLINKAGE void check_signal(hw_context hw){
 
     else{
         // now we need to setup the stack frame
-        user_handler_helper(cur_signal, cur_process->signals.sig[signal_idx], &hw);
+        user_handler_helper(cur_signal, get_cur_process()->signals.sig[signal_idx], &hw);
     }
 
     restore_flags(eflag);
@@ -59,7 +62,7 @@ void restore_signal(){
     // clear IF
     cli_and_save(eflag_for_exec);
 
-    get_cur_process()->signals.signal_masked = cur_process->signals.previous_masked;
+    get_cur_process()->signals.signal_masked = get_cur_process()->signals.previous_masked;
 
     restore_flags(eflag_for_exec);
 }
@@ -99,7 +102,7 @@ int32_t sys_set_handler(int32_t signum, void* handler_address) {
  *   RETURN VALUE: 0 if success
  *   SIDE EFFECTS: initialize the signal struct
  */
-int32_t task_signal_init(signal_t* signal_array) {
+int32_t task_signal_init(signal_struct_t* signal_array) {
     if (signal_array == NULL) {
         printf("FAIL to initialize signal struct");
         return -1;
@@ -264,3 +267,4 @@ void signal_init() {
     default_handler[3]=sig_alarm_default;
     default_handler[4]=sig_user1_default;
 }
+
