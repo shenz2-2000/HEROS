@@ -48,7 +48,8 @@ signal_handler default_handler[SIGNAL_NUM];
 
 // Two System Calls
 int32_t sys_set_handler(int32_t signum, void* handler_address);
-extern int32_t sys_sigreturn(void); 
+extern int32_t sys_sigreturn(void);
+extern void user_handler_helper(int32_t cur_signal, signal_handler user_signal_handler, hw_context* cur_hw );
 
 // Signal Functions
 
