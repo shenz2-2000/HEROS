@@ -61,6 +61,7 @@ void naive_exception_handler(hw_context hw){
     }
 //    while(1){}
 #if (EXCEPTION_HANDLE_TYPE == 0)
+        int i = 0;
         while(i < 1000000) i++;
         system_halt(256);
 #elif (EXCEPTION_HANDLE_TYPE == 1)

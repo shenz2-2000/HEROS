@@ -321,6 +321,7 @@ int32_t system_halt(int32_t status) {
 
         // clear page directory for video memory
         clear_video_memory();
+        sys_execute((uint8_t *) "shell");
 
         return -1;
     }

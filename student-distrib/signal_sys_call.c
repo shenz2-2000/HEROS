@@ -10,6 +10,16 @@
 #include "lib.h"
 extern void user_handler_helper(int32_t signum, signal_handler handler , hw_context *hw_context_addr);
 
+
+
+/*
+ * check_signal
+ *   DESCRIPTION: check the current process's signal
+ *   INPUTS: hw - hard_ware context
+ *   OUTPUTS: None
+ *   RETURN VALUE: None
+ *   SIDE EFFECTS: None
+ */
 ASMLINKAGE void check_signal(hw_context hw){
 
     //pcb_t * cur_process;
@@ -18,7 +28,7 @@ ASMLINKAGE void check_signal(hw_context hw){
     uint32_t cur_signal;
 
     // check whether we return to user-stack
-    if (hw.cs != USER_CS){
+    if (hw.cs != USER_CS)
         return;
     }
 
@@ -39,6 +49,7 @@ ASMLINKAGE void check_signal(hw_context hw){
     get_cur_process()->signals.signal_masked = MASK_ALL;
 
     if( get_cur_process()->signals.sig[signal_idx] == default_handler[signal_idx] ) {
+
         default_handler[signal_idx]();
         // restore the mask
         restore_signal();
@@ -56,6 +67,14 @@ ASMLINKAGE void check_signal(hw_context hw){
 
 
 
+/*
+ * restore_signal()
+ *   DESCRIPTION: restore the signal
+ *   INPUTS: None
+ *   OUTPUTS: None
+ *   RETURN VALUE: None
+ *   SIDE EFFECTS: None
+ */
 void restore_signal(){
     int32_t eflag_for_exec;
 
@@ -66,9 +85,6 @@ void restore_signal(){
 
     restore_flags(eflag_for_exec);
 }
-
-
-
 
 
 
@@ -94,6 +110,7 @@ int32_t sys_set_handler(int32_t signum, void* handler_address) {
     return 0;
 }
 
+
 /*
  * task_signal_init
  *   DESCRIPTION: do the initialization for the signal struct
@@ -112,6 +129,8 @@ int32_t task_signal_init(signal_struct_t* signal_array) {
     for(i = 0; i < SIGNAL_NUM; ++i) signal_array->sig[i] = default_handler[i];
     return 0;
 }
+
+
 /*
  * signal_send
  *   DESCRIPTION: send signal to the current process
