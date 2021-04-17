@@ -107,6 +107,6 @@ int32_t main(){
             for (i=0; i<5; i++) beep(freq_default[i], dura_default[i] / 32);
             break;
     }
-    i = 1/0;
+ 
     return 0;
 }
