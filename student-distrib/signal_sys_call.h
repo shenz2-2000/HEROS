@@ -40,6 +40,6 @@ int32_t signal_mask(int32_t signum);
 int32_t signal_unmask(int32_t signum);
 void signal_init(); // Initilize signal system and should be run on boot
 int32_t task_signal_init(signal_struct_t* signal_array); // init signal content
-
+int32_t test_handler();
 #endif
 #endif //FAKE_SIGNAL_SYS_CALL_H

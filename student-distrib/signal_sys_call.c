@@ -28,7 +28,7 @@ ASMLINKAGE void check_signal(hw_context hw){
     uint32_t cur_signal;
 
     // check whether we return to user-stack
-    if (hw.cs != USER_CS)
+    if (hw.cs != USER_CS){
         return;
     }
 
@@ -111,24 +111,6 @@ int32_t sys_set_handler(int32_t signum, void* handler_address) {
 }
 
 
-/*
- * task_signal_init
- *   DESCRIPTION: do the initialization for the signal struct
- *   INPUTS: signal_array -- the struct to be initialized
- *   OUTPUTS: none
- *   RETURN VALUE: 0 if success
- *   SIDE EFFECTS: initialize the signal struct
- */
-int32_t task_signal_init(signal_struct_t* signal_array) {
-    if (signal_array == NULL) {
-        printf("FAIL to initialize signal struct");
-        return -1;
-    }
-    int i;
-    signal_array->signal_pending=signal_array->signal_masked=signal_array->alarm_time=0;
-    for(i = 0; i < SIGNAL_NUM; ++i) signal_array->sig[i] = default_handler[i];
-    return 0;
-}
 
 
 /*
@@ -307,3 +289,23 @@ void signal_init() {
     default_handler[4]=sig_user1_default;
 }
 
+
+
+/*
+ * task_signal_init
+ *   DESCRIPTION: do the initialization for the signal struct
+ *   INPUTS: signal_array -- the struct to be initialized
+ *   OUTPUTS: none
+ *   RETURN VALUE: 0 if success
+ *   SIDE EFFECTS: initialize the signal struct
+ */
+int32_t task_signal_init(signal_struct_t* signal_array) {
+    if (signal_array == NULL) {
+        printf("FAIL to initialize signal struct");
+        return -1;
+    }
+    int i;
+    signal_array->signal_pending=signal_array->signal_masked=signal_array->alarm_time=0;
+    for(i = 0; i < SIGNAL_NUM; ++i) signal_array->sig[i] = default_handler[i];
+    return 0;
+}

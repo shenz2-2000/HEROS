@@ -17,8 +17,8 @@ int32_t sys_open(const uint8_t *f_name) {
     dentry_t dentry;
     int32_t fd = -1;
     pcb_t *cur_pcb;
-    int i;
-    i = 1/0;
+//    int i;
+//    i = 1/0;
 
     // For error test, we can return back to shell!
 //    int i = 1;
