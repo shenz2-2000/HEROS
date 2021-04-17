@@ -5,7 +5,7 @@
 #include "signal_sys_call.h"
 #include "x86_desc.h"
 #include "process.h"
-
+#include "sys_call.h"
 
 ASMLINKAGE void check_signal(hw_context hw){
 
@@ -194,3 +194,78 @@ void signal_restore_mask(void) {
 }
 // Signal Handler Starts here:
 
+
+/*
+ * sig_div_zero_default
+ *   DESCRIPTION: Default handler for divide by zero
+ *   INPUTS: None
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: no
+ */
+int32_t sig_div_zero_default() {
+    int32_t flags;
+    cli_and_save(flags);
+    system_halt(256);
+    restore_flags(flags);
+
+    return -1; // It should not return
+}
+/*
+ * sig_seg_default
+ *   DESCRIPTION: Default handler for segmentation fault
+ *   INPUTS: None
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: no
+ */
+int32_t sig_seg_default() {
+    int32_t flags;
+    cli_and_save(flags);
+    system_halt(256);
+    restore_flags(flags);
+
+    return -1; // It should not return
+}
+
+
+/*
+ * sig_interrupt_default
+ *   DESCRIPTION: Default handler for interrupt
+ *   INPUTS: None
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: no
+ */
+int32_t sig_interrupt_default() {
+    int32_t flags;
+    cli_and_save(flags);
+    system_halt(15);
+    restore_flags(flags);
+
+    return -1; // It should not return
+}
+
+/*
+ * sig_alarm_default
+ *   DESCRIPTION: Default handler for alarm
+ *   INPUTS: None
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: no
+ */
+int32_t sig_alarm_default() {
+    return 0;
+}
+
+/*
+ * sig_user1_default
+ *   DESCRIPTION: Default handler for user1
+ *   INPUTS: None
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: no
+ */
+int32_t sig_user1_default() {
+    return 0;
+}
