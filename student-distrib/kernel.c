@@ -14,6 +14,7 @@
 #include "process.h"
 #include "sys_call.h"
 #include "signal_sys_call.h"
+#include "gensound.h"
 
 #define RUN_TESTS
 
@@ -253,6 +254,9 @@ void entry(unsigned long magic, unsigned long addr) {
 
     /* execute shell */
     // sys_execute((uint8_t *) "shell");
+
+    /* play the boot music */
+    play_song(0);
 
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close

@@ -774,6 +774,14 @@ int play_sound_test() {
     return PASS;
 }
 
+int play_music_test() {
+    TEST_HEADER;
+
+    play_song(0);
+
+    return PASS;
+}
+
 /* launch_tests
  *
  * Inputs: None
@@ -782,9 +790,11 @@ int play_sound_test() {
  */
 /* Test suite entry point */
 void launch_tests(){
+    TEST_OUTPUT("div0_test", div0_test());
 //     TEST_OUTPUT("file_system_test", file_system_test());
-    // TEST_OUTPUT("shell_test", shell_test());
+    TEST_OUTPUT("shell_test", shell_test());
 //    TEST_OUTPUT("fs_err_test", fs_err_test());
 //     invalid_sys_call_test();
-    TEST_OUTPUT("play_sound_test", play_sound_test());
+    // TEST_OUTPUT("play_sound_test", play_sound_test());
+    // TEST_OUTPUT("play_music_test", play_music_test());
 }
