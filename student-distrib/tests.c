@@ -783,8 +783,8 @@ int play_sound_test() {
 /* Test suite entry point */
 void launch_tests(){
 //     TEST_OUTPUT("file_system_test", file_system_test());
-    // TEST_OUTPUT("shell_test", shell_test());
+     TEST_OUTPUT("shell_test", shell_test());
 //    TEST_OUTPUT("fs_err_test", fs_err_test());
 //     invalid_sys_call_test();
-    TEST_OUTPUT("play_sound_test", play_sound_test());
+ //   TEST_OUTPUT("play_sound_test", play_sound_test());
 }

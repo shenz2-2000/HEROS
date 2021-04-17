@@ -328,7 +328,7 @@ int32_t system_halt(int32_t status) {
         delete_process(get_cur_process());
         restore_paging(get_cur_process()->pid, get_cur_process()->pid); // restore the current paging
         // CHECK ALL FILES ARE CLEANED UP
-        file_closed_test();
+        // file_closed_test();
 
         // clear page directory for video memory
         clear_video_memory();
@@ -345,9 +345,9 @@ int32_t system_halt(int32_t status) {
     // clear page directory for video memory
     clear_video_memory();
 
-#if FILE_CLOSED_TEST
-    file_closed_test(); // CHECK ALL FILES ARE CLEANED UP
-#endif
+//#if FILE_CLOSED_TEST
+//    file_closed_test(); // CHECK ALL FILES ARE CLEANED UP
+//#endif
 
     // load esp and return
     asm volatile ("                                                                    \

@@ -22,6 +22,9 @@ extern int32_t ece391_vidmap (uint8_t** screen_start);
 extern int32_t ece391_set_handler (int32_t signum, void* handler);
 extern int32_t ece391_sigreturn (void);
 
+extern int32_t ece391_play_sound(uint32_t nFrequence);
+extern int32_t ece391_nosound();
+
 enum signums {
 	DIV_ZERO = 0,
 	SEGFAULT,
