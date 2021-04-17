@@ -432,6 +432,8 @@ int32_t sys_play_sound(uint32_t nFrequence) {
     uint32_t divide;
     uint8_t temp;
 
+    if (nFrequence == 0) return 0;
+
     // Set the PIT to the desired frequency
     divide = 1193180 / nFrequence; 
     outb(0xb6, 0x43);
