@@ -272,6 +272,25 @@ int32_t sig_user1_default() {
 
 
 /*
+ * test_handler
+ *   DESCRIPTION: handler used to test set_handler
+ *   INPUTS: none
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: none
+ */
+
+int32_t test_handler() {
+    int32_t flags;
+    printf("Set handler success\n");
+    cli_and_save(flags);
+    system_halt(256);
+    restore_flags(flags);
+
+    return -1; // It should not return
+}
+
+/*
  * signal_init
  *   DESCRIPTION: do the initialization for the default struct
  *   INPUTS: none
