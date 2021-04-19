@@ -92,6 +92,11 @@
 ## CP 3.4
     * BUG1 - in sys_call.c, when we want to set video page for the vidmap program, we forget to set a new page table with user priority. Instead we use
              the previous defined page_table0 (kernel priority) as the new entry in page directory, that will cause EXCEPTION 14
-    # FIX  - setup a new page table with priority 1 and use this page to access the video memory region
+    * FIX  - setup a new page table with priority 1 and use this page to access the video memory region
+
+    * BUG2 - in sys_call.c. When we run the syserr program, it reports many errors concerning the return values about not opened file and terminal
+             IOs. I thought that read a unopened file is not a serious problem, only a warning message is enough. But it turns out that the
+             test needs this requires.
+    * FIX  - change the return values to the correct ones.
 
 
