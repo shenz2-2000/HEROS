@@ -6,9 +6,10 @@
 #include "x86_desc.h"
 #include "file_sys.h"
 #include "lib.h"
+#include "process.h"
 // Page control structure
 static uint32_t page_in_use = 0;
-static uint32_t page_id_center[MAX_PAGE] = {0};
+static uint32_t page_id_center[N_PCB_LIMIT] = {0};
 
 /* flush_tlb
  * Description: update the cursor position
@@ -51,7 +52,7 @@ int set_page_for_task(uint8_t* task_file_name, uint32_t* eip){
 
     // potential initialization
     if(page_in_use == 0){
-        for(i = 0; i < MAX_PAGE; i++)
+        for(i = 0; i < N_PCB_LIMIT; i++)
             page_id_center[i] = 0;
     }
 
@@ -211,7 +212,7 @@ int executable_check(dentry_t* task_dentry_ptr){
 
 int get_new_page_id(){
     int i;
-    for(i = 0; i < MAX_PAGE; i++){
+    for(i = 0; i < N_PCB_LIMIT; i++){
         if(page_id_center[i] == 0){
             return i;
         }
@@ -230,7 +231,7 @@ int get_new_page_id(){
 int restore_paging(const int child_id, const int parent_id) {
 
     // Check arguments
-    if ( (child_id >= MAX_PAGE) || (page_id_center[child_id] == 0) ) {
+    if ( (child_id >= N_PCB_LIMIT) || (page_id_center[child_id] == 0) ) {
         return -1;
     }
     set_private_page(parent_id);    // restore parent paging

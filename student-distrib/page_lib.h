@@ -15,7 +15,6 @@
 #define CODE_BASE_VA    0x08048000
 #define ELF_LENGTH      4
 #define FIRST_INSTRUCTION 24
-#define MAX_PAGE 2
 #define USER_VA_START 0x08000000
 #define USER_VA_END   0x08400000
 #define VM_INDEX      0xB8000

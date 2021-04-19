@@ -4,7 +4,7 @@
 #include "file_sys.h"
 #include "x86_desc.h"
 #include "signal_sys_call.h"
-#define N_PCB_LIMIT 2
+#define N_PCB_LIMIT 3
 
 #define TASK_KSTK_SIZE_IN_B 8192
 #define TASK_KSTK_BOTTOM 0x800000    

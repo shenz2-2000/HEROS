@@ -28,9 +28,9 @@ ASMLINKAGE void check_signal(hw_context hw){
     uint32_t cur_signal;
 
     // check whether we return to user-stack
-    if (hw.cs != USER_CS){
-        return;
-    }
+//    if (hw.cs != USER_CS){
+//        return;
+//    }
 
     // forbid interrupt
     cli_and_save(eflag);
@@ -105,7 +105,12 @@ int32_t sys_set_handler(int32_t signum, void* handler_address) {
     // Set function pointer of signal handler corresponding to input para
     int32_t flags;
     cli_and_save(flags);
-    get_cur_process()->signals.sig[signum] = (handler_address==NULL)?default_handler[signum]:(signal_handler)handler_address;
+    if (handler_address == NULL) {
+        get_cur_process()->signals.sig[signum] = default_handler[signum];
+    } else {
+        get_cur_process()->signals.sig[signum] = (signal_handler) handler_address;
+    }
+//    get_cur_process()->signals.sig[signum] = (handler_address==NULL)?default_handler[signum]:(signal_handler)handler_address;
     restore_flags(flags);
     return 0;
 }
