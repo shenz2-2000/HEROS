@@ -147,8 +147,9 @@ int32_t sys_read(int32_t fd, void *buf, int32_t bufsize) {
  * Side effect: None
  */
 
-void invalid_sys_call(){
+int invalid_sys_call(){
      printf("The system call is invalid!!!! Please check the call number!!! \n");
+     return -1;
 }
 
 /**
