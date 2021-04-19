@@ -85,7 +85,7 @@ int32_t sys_close(int32_t fd) {
 
     if (cur_pcb->file_arr.files[fd].flags == AVAILABLE) {
         printf("WARNING [FILE]: cannot CLOSE a file that is not opened. fd: %d\n", fd);
-        return 0;   // not a serious error
+        return -1;
     }
 
     ret = cur_pcb->file_arr.files[fd].f_op->close(fd);
@@ -123,7 +123,7 @@ int32_t sys_read(int32_t fd, void *buf, int32_t bufsize) {
     }
     if (cur_pcb->file_arr.files[fd].flags == AVAILABLE) {
         printf("WARNING [SYS FILE] in sys_read: cannot READ a file that is not opened. fd: %d\n", fd);
-        return 0;   // not a serious error
+        return -1;
     }
     // stdout is write-only
     if (fd == 1) {
@@ -177,7 +177,12 @@ int32_t sys_write(int32_t fd, const void *buf, int32_t bufsize) {
     }
     if (cur_pcb->file_arr.files[fd].flags == AVAILABLE) {
         printf("WARNING [SYS FILE] in sys_write: the file is not opened. fd: %d\n", fd);
-        return 0;   // not a serious error
+        return -1;
+    }
+    // stdin is read-only
+    if (fd == 0) {
+        printf("ERROR [SYS FILE] in sys_write: stdin is read-only\n");
+        return -1;
     }
     return cur_pcb->file_arr.files[fd].f_op->write(fd, buf, bufsize);
 }
