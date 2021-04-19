@@ -8,6 +8,13 @@
 int32_t win10_alarm_freq[] = {587, 294, 440};
 int32_t win10_alarm_duration[] = {54, 54, 214};
 
+
+/**
+ * @brief generate the sound at a given frequency for a given duration (approximately)
+ * @param freq frequency in hz
+ * @param dura duration in ms
+ * @side_effect open rtc and change frequency
+ */
 void beep(uint32_t freq, uint32_t dura) {
     int i;
     uint8_t dum[] = "d";
