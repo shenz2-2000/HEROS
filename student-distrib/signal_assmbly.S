@@ -40,32 +40,30 @@ user_handler_helper:
 
      # save callee-saved register
      pushl %ebp
+     movl  %esp, %ebp
+
      pushl %edi
      pushl %esi
      pushl %ebx
-
-     # ebx is the stack frame pointer
-     movl 20(%esp), %ebx
 
 
      # -----------------------Prepare for calling user_level handler--------------------
 
      # store the parameters
-     movl (%ebx), %edi
+     movl 8(%ebp), %edi
      movl %edi, storage_cur_signal_ptr
-     movl 4(%ebx), %edi
+     movl 12(%ebp), %edi
      movl %edi, storage_handler_ptr
-     movl 8(%ebx), %edi
+     movl 16(%ebp), %edi
      movl %edi, storage_hw_ptr
 
      # get user esp and ebp
+     movl storage_hw_ptr, %edi
+
      movl 20(%edi), %esi
      movl %esi, user_ebp
      movl 60(%edi), %esi
      movl %esi, user_esp
-
-     # store %edi
-     movl %edi, hw_context_ptr
 
      # store kernel stack and load user stack
      movl %esp, kernel_esp
@@ -89,7 +87,7 @@ user_handler_helper:
      subl $1, %esp
 
      # set hard-ware context for the user level handler
-     movl hw_context_ptr, %edi
+     movl storage_hw_ptr, %edi
      pushl   64(%edi)    # ss
      pushl   60(%edi)    # esp
      pushl   56(%edi)    # eflags
@@ -116,6 +114,7 @@ user_handler_helper:
      movl %esp, 60(%edi)
 
      # call the user_level handler
+     movl storage_hw_ptr, %edi
      movl storage_handler_ptr, %esi
      movl %esi, 48(%edi)
 
@@ -170,6 +169,7 @@ copy_loop:
       popl  %ecx
       popl  %ebx
 
+      movl kernel_hw_context_ptr, %esi
       movl 24(%esi), %eax
 
       ret

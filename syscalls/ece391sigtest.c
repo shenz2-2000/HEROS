@@ -32,7 +32,11 @@ int main ()
     return 3;
     }
 
+    ece391_fdputs(1,(uint8_t*)"NOW BEFORE THE 36 LINE\n");
+
     (*badbuf) = 1;
+
+    ece391_fdputs(1,(uint8_t*)"NOW BEFORE THE 36 LINE\n");
     buf[cnt] = '\0';
     ece391_fdputs (1, (uint8_t*)"Hello, ");
     ece391_fdputs (1, buf);

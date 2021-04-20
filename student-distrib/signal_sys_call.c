@@ -28,16 +28,20 @@ ASMLINKAGE void check_signal(hw_context hw){
     uint32_t cur_signal;
 
     // check whether we return to user-stack
-//    if (hw.cs != USER_CS){
-//        return;
-//    }
+    if (hw.cs != USER_CS){
+        return;
+    }
 
     // forbid interrupt
     cli_and_save(eflag);
 
+
     //cur_process = get_cur_process();
-    cur_signal = (get_cur_process()->signals.signal_pending) & ~(get_cur_process()->signals.signal_masked);
-    if(cur_signal == 0) return;
+    cur_signal = (get_cur_process()->signals.signal_pending) & (~get_cur_process()->signals.signal_masked);
+    if(cur_signal == 0) {
+        restore_flags(eflag);
+        return;
+    }
 
     for(signal_idx = 0; signal_idx < SIGNAL_NUM; signal_idx ++){
         if(  ( (cur_signal >> signal_idx) & 0x00000001 )  == 1 ) break;
@@ -58,7 +62,7 @@ ASMLINKAGE void check_signal(hw_context hw){
 
     else{
         // now we need to setup the stack frame
-        user_handler_helper(cur_signal, get_cur_process()->signals.sig[signal_idx], &hw);
+        user_handler_helper(signal_idx, get_cur_process()->signals.sig[signal_idx], &hw);
     }
 
     restore_flags(eflag);

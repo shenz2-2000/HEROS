@@ -30,9 +30,9 @@ signal_handler default_handler[SIGNAL_NUM];
 
 // Two System Calls
 int32_t sys_set_handler(int32_t signum, void* handler_address);
-int32_t sys_sigreturn(void);
+int32_t sys_sig_return();
 
-void restore_signal(void);
+void restore_signal();
 
 // Signal Functions
 int32_t signal_send(int32_t signum);

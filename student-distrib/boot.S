@@ -286,9 +286,8 @@ exception_handler_9:
 
 .globl exception_handler_10
 exception_handler_10:
-         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $1 /*push irq number*/
+         pushl $10 /*push irq number*/
          SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
@@ -300,9 +299,8 @@ exception_handler_10:
 
 .globl exception_handler_11
 exception_handler_11:
-         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $1 /*push irq number*/
+         pushl $11 /*push irq number*/
          SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
@@ -314,9 +312,8 @@ exception_handler_11:
 
 .globl exception_handler_12
 exception_handler_12:
-         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $1 /*push irq number*/
+         pushl $12 /*push irq number*/
          SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
@@ -328,9 +325,8 @@ exception_handler_12:
 
 .globl exception_handler_13
 exception_handler_13:
-         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $1 /*push irq number*/
+         pushl $13 /*push irq number*/
          SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
@@ -342,9 +338,8 @@ exception_handler_13:
 
 .globl exception_handler_14
 exception_handler_14:
-         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $1 /*push irq number*/
+         pushl $14 /*push irq number*/
          SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
@@ -358,7 +353,7 @@ exception_handler_14:
 exception_handler_15:
          pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $1 /*push irq number*/
+         pushl $15 /*push irq number*/
          SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
@@ -372,7 +367,7 @@ exception_handler_15:
 exception_handler_16:
          pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $1 /*push irq number*/
+         pushl $16 /*push irq number*/
          SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
@@ -384,9 +379,8 @@ exception_handler_16:
 
 .globl exception_handler_17
 exception_handler_17:
-         pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $1 /*push irq number*/
+         pushl $17 /*push irq number*/
          SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
@@ -400,7 +394,7 @@ exception_handler_17:
 exception_handler_18:
          pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $1 /*push irq number*/
+         pushl $18 /*push irq number*/
          SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
@@ -414,7 +408,7 @@ exception_handler_18:
 exception_handler_19:
          pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
-         pushl $1 /*push irq number*/
+         pushl $19 /*push irq number*/
          SET_HW_CONTEXT
          # ---------------------call handler function------------------
          call naive_exception_handler
@@ -517,7 +511,7 @@ sys_jump_table:
           .long get_args_sys_call
           .long vidmap_sys_call
           .long set_handler_sys_call
-          .long sig_return_sys_call
+          .long sys_sig_return
           .long play_sound_sys_call
           .long nosound_sys_call
 

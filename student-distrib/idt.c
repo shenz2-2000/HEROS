@@ -174,12 +174,12 @@ ASMLINKAGE int32_t vidmap_sys_call(uint8_t ** screen_start){
     return sys_vidmap(screen_start);
 }
 
-ASMLINKAGE void set_handler_sys_call(int32_t fd, const void* buf, int32_t nbytes){
-    return;
+ASMLINKAGE int32_t set_handler_sys_call(int32_t signum, void* handler_address){
+    return sys_set_handler(signum, handler_address);
 }
 
-ASMLINKAGE void sig_return_sys_call(int32_t fd, const void* buf, int32_t nbytes){
-    return;
+ASMLINKAGE int32_t sig_return_sys_call(){
+    return sys_sig_return();
 }
 
 ASMLINKAGE int32_t play_sound_sys_call(uint32_t nFrequence) {
