@@ -38,6 +38,12 @@ int32_t dura_myth[]={120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120,
                      120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 60, 60, 60, 60, 60,
                      60, 60, 60, 120};
 
+/**
+ * @brief generate the sound at a given frequency for a given duration (approximately)
+ * @param freq frequency in hz
+ * @param dura duration in ms
+ * @side_effect open rtc and change frequency
+ */
 void beep(uint32_t freq, uint32_t dura) {
     int i;
     uint8_t dum[] = "d";
