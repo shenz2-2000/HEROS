@@ -427,6 +427,16 @@ exception_handler_19:
  *   SIDE EFFECTS: jump to the corresponding interrupt handler
  */
 
+ .globl interrupt_entry_0
+interrupt_entry_0:
+    SAVE_ALL_REGS
+    call pit_interrupt_handler
+    pushl $0  # push irq number as argument
+    call send_eoi
+    addl $4, %esp
+    RESTORE_ALL_REGS
+    iret  # return from interrupt
+
  .globl interrupt_entry_1
 interrupt_entry_1:
     SAVE_ALL_REGS
