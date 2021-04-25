@@ -4,7 +4,28 @@
 #include "page_lib.h"
 #include "tests.h"
 #include "signal_sys_call.h"
+#include "scheduler.h"
 #define FILE_CLOSED_TEST 1
+
+/**
+ * load_esp_and_return
+ * Description: reload esp then ret to the address on kernel stack
+ * Input: new_esp - the stack we want to switch to
+ *        status - value to load in eax
+ * Output: None
+ * Side effect: Switch kernel stack
+ */
+void load_esp_and_return(uint32_t new_esp,int32_t status){
+    asm volatile ("                                                                    \
+        movl %0, %%esp  /* load old ESP */                                           \n\
+        ret  /* now it's equivalent to jump execute return */"                         \
+        :                                                                              \
+        : "r" (new_esp)   , "a" (status)                                         \
+        : "cc", "memory"                                                               \
+    );
+}
+
+
 
 /**
  * sys_open
@@ -322,7 +343,12 @@ int32_t sys_execute(uint8_t *command) {
 
 int32_t system_halt(int32_t status) {
 
+
+    pcb_t * cur_task = get_cur_process();
+    task_node * cur_node = cur_task->node;
+
     // condition check
+    // TODO: check whether it works
     if (get_n_present_pcb() == 0) {   // not in a process
 
         // clear page directory for video memory
@@ -331,42 +357,94 @@ int32_t system_halt(int32_t status) {
 
         return -1;
     }
-    if (get_cur_process()->parent == NULL) {
-        // So the main program of base shell return on exit, so we need to execute shell again
-        printf("Warning in system_halt(): halting the base shell...\n");
-        close_all_files(&get_cur_process()->file_arr);  // close FDs
-        delete_process(get_cur_process());
-        restore_paging(get_cur_process()->pid, get_cur_process()->pid); // restore the current paging
-        // CHECK ALL FILES ARE CLEANED UP
-        // file_closed_test();
 
-        // clear page directory for video memory
-        clear_video_memory();
-
-        sys_execute((uint8_t *) "shell");
+    // TODO: return is ok?
+    if( strncmp( (int8_t*)cur_task->name, DUMMY_TASK_NAME, strlen( (int8_t*) cur_task->name) ) == 0){
+        printf("Why you want to halt idle process?\n");
         return -1;
     }
 
-    close_all_files(&get_cur_process()->file_arr);  // close FDs
-    pcb_t *parent = delete_process(get_cur_process());  // clear the pcb
-    restore_paging(get_cur_process()->pid, parent->pid);  // restore parent paging
-    tss.esp0 = parent->k_esp;  // set tss to parent's kernel stack to make sure system calls use correct stack
+    // remove cur_task from task list
+    delete_task_from_list(cur_task);
 
-    // clear page directory for video memory
-    clear_video_memory();
+    // if cur_task has parent, we simply switch to parent task
+    if(cur_task->parent != NULL){
+        // TODO: why init time for parent?
+        init_process_time(cur_task->parent);
+        insert_to_list_start(cur_task->parent->node);
+    }
+
+    // close file array
+
+    // TODO: manipulate terminal
+    // ---------------------------------------
+
+
+    // ---------------------------------------
+
+
+    // no parent, we just reschedule
+    if(cur_task->parent == NULL){
+        close_all_files(&cur_task->file_arr);
+        delete_process(cur_task);
+
+        reschedule();
+
+    }
+
+    else{
+        // we have parent, so just switch to them
+        restore_paging(cur_task->pid,cur_task->parent->pid);
+
+        // TODO: terminal
+        // ---------------------------------------------
+
+
+
+        // ---------------------------------------------
+
+        tss.esp0 = cur_task->parent->k_esp;
+        load_esp_and_return(cur_task->parent->k_esp, status);
+
+
+    }
+
+//    if (get_cur_process()->parent == NULL) {
+//        // So the main program of base shell return on exit, so we need to execute shell again
+//        printf("Warning in system_halt(): halting the base shell...\n");
+//        close_all_files(&get_cur_process()->file_arr);  // close FDs
+//        delete_process(get_cur_process());
+//        restore_paging(get_cur_process()->pid, get_cur_process()->pid); // restore the current paging
+//        // CHECK ALL FILES ARE CLEANED UP
+//        // file_closed_test();
+//
+//        // clear page directory for video memory
+//        clear_video_memory();
+//
+//        sys_execute((uint8_t *) "shell");
+//        return -1;
+//    }
+//
+//    close_all_files(&get_cur_process()->file_arr);  // close FDs
+//    pcb_t *parent = delete_process(get_cur_process());  // clear the pcb
+//    restore_paging(get_cur_process()->pid, parent->pid);  // restore parent paging
+//    tss.esp0 = parent->k_esp;  // set tss to parent's kernel stack to make sure system calls use correct stack
+//
+//    // clear page directory for video memory
+//    clear_video_memory();
 
 //#if FILE_CLOSED_TEST
 //    file_closed_test(); // CHECK ALL FILES ARE CLEANED UP
 //#endif
 
     // load esp and return
-    asm volatile ("                                                                    \
-        movl %0, %%esp  /* load old ESP */                                           \n\
-        ret  /* now it's equivalent to jump execute return */"                         \
-        :                                                                              \
-        : "r" (parent->k_esp)   , "a" (status)                                         \
-        : "cc", "memory"                                                               \
-    );
+//    asm volatile ("                                                                    \
+//        movl %0, %%esp  /* load old ESP */                                           \n\
+//        ret  /* now it's equivalent to jump execute return */"                         \
+//        :                                                                              \
+//        : "r" (parent->k_esp)   , "a" (status)                                         \
+//        : "cc", "memory"                                                               \
+//    );
 
     printf("In system_halt: this function should never return.\n");
     return -1;

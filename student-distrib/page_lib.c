@@ -240,6 +240,41 @@ int restore_paging(const int child_id, const int parent_id) {
     return 0;
 }
 
+/* delete_paging
+ * Description: delete a page, do not restore new page(parent)
+ * Inputs: child_id - page id of the current process
+ * Return Value: -1 on failure and 0 on success
+ * Side effect: None*/
+
+int delete_paging(const int child_id) {
+
+    // Check arguments
+    if ( (child_id >= N_PCB_LIMIT) || (page_id_center[child_id] == 0) ) {
+        return -1;
+    }
+
+    page_id_center[child_id] = 0;
+    page_in_use--;
+    return 0;
+}
+
+/* set_paging
+ * Description: set a page
+ * Inputs: child_id - page id of the current process
+ * Return Value: -1 on failure and 0 on success
+ * Side effect: None*/
+
+int set_paging(const int child_id){
+
+    // Check arguments
+    if ( (child_id >= N_PCB_LIMIT) || (page_id_center[child_id] == 0) ) {
+        return -1;
+    }
+
+    set_private_page(child_id);
+    return 0;
+}
+
 /* set_video_memory
  * Description: setup page directory for user manipulation
  * Inputs: None
