@@ -6,7 +6,8 @@
 #include "tests.h"
 #include "rtc.h"
 #include "terminal.h"
-
+#include "process.h"
+#include "scheduler.h"
 #define RUN_TESTS
 /* Declaration of constant */
 // Maximum Size of keyboard buffer should be 128
@@ -37,7 +38,7 @@ static const char shift_scan_code_table[128] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0             /* 0x54 - 0x80 */
 };
-task_list_node_t local_wait_list = {&(node), &(node)};
+task_node local_wait_list = {&(local_wait_list), &(local_wait_list), NULL ,1};
 terminal_struct_t terminal_slot[MAX_TERMINAL]; // Maximal terminal number is 3
 /*
  * keyboard_interrupt
@@ -83,9 +84,9 @@ void keyboard_interrupt_handler() {
                 putc(focus_task()->terminal->buf[focus_task()->terminal->buf_cnt]);
                 focus_task()->terminal->buf_cnt++;
                 focus_task()->parent->flags &= ~TASK_WAITING_CHILD;
-                sched_refill_time(focus_task());
-                sched_insert_to_head(focus_task());
-                sched_request_run_head_asap();
+                init_process_time(focus_task());
+                insert_to_list_start(focus_task()->node);
+                reschedule();
                 return;
             }
             if ((0 == focus_task()->terminal->user_ask) && input == 0x1C) {
@@ -96,9 +97,9 @@ void keyboard_interrupt_handler() {
         } else if (flag[BACKSPACE_PRESSED]) {  // Manage backspace
             if (focus_task()->terminal->buf_cnt) delete_last(),--focus_task()->terminal->buf_cnt;
         } else if (flag[ALT_PRESSED]) {
-            if (flag[F1_PRESSED]) task_change_focus(1);
-            else if (flag[F2_PRESSED]) task_change_focus(2);
-            else if (flag[F3_PRESSED]) task_change_focus(3);
+            if (flag[F1_PRESSED]) change_focus_task(1);
+            else if (flag[F2_PRESSED]) change_focus_task(2);
+            else if (flag[F3_PRESSED]) change_focus_task(3);
         }
 
     }
@@ -216,7 +217,7 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     if(nbytes >= KEYBOARD_BUF_SIZE) nbytes = KEYBOARD_BUF_SIZE - 1;
 
     // change the status
-    running_task()->terminal->user_ask = nbytes;
+    get_cur_process()->terminal->user_ask = nbytes;
     // clear the line buffer
 
     // loop until exit
@@ -224,8 +225,8 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
         // prevent interrupt from modifying the line buffer
     cli();
     // detect enter
-    for(i = 0; i <= (running_task()->terminal->buf_cnt - 1) ; i++){
-        if(running_task()->terminal->buf[i] == '\n'){
+    for(i = 0; i <= (get_cur_process()->terminal->buf_cnt - 1) ; i++){
+        if(get_cur_process()->terminal->buf[i] == '\n'){
             j = i;
             end_flag = 1;
             break;
@@ -233,25 +234,25 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     }
     sti();
     if (!end_flag) {
-        running_task()->flags |= TASK_WAITING_CHILD;
-        sched_move_running_after_node(&local_wait_list);
-        sched_launch_to_current_head();
+        get_cur_process()->flags |= TASK_WAITING_CHILD;
+        append_to_lists_end(&local_wait_list);
+        reschedule();
     }
     //}
-    running_task()->terminal->user_ask = 0;
+    get_cur_process()->terminal->user_ask = 0;
     // new critical section
     cli();
     // set the copy number
     if(j > nbytes) j = nbytes;
-    if(running_task()->terminal->buf[j-1] != '\n'){
-        running_task()->terminal->buf[j] = '\n';
+    if(get_cur_process()->terminal->buf[j-1] != '\n'){
+        get_cur_process()->terminal->buf[j] = '\n';
         j = j + 1;
     }
     // copy to user buf
-    memcpy(buf,running_task()->terminal->buf,j);
+    memcpy(buf,get_cur_process()->terminal->buf,j);
 
     // set delete_length to handle two conditions of \n and no \n
-    running_task()->terminal->buf_cnt = 0;
+    get_cur_process()->terminal->buf_cnt = 0;
 
 
     sti();

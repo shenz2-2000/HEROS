@@ -46,7 +46,7 @@ void init_scheduler() {
  * Output: None.
  * Side effect: change esp value
  */
-void switch_context(uint32_t old, uint32_t new) {
+#define switch_context(old, new)                                                          \
     asm volatile ("                                                                                         \
     pushl %%ebp                                                                                           \n\
     pushfl                                                                                                \n\
@@ -59,9 +59,9 @@ void switch_context(uint32_t old, uint32_t new) {
     : "=m" (old)                                                                                            \
     : "r" (new)                                                                                             \
     : "cc", "memory"                                                                                        \
-);
+)
 
-}
+
 
 // ---------------------------------------------Some tool function for linked list------------------------------------------
 
@@ -225,7 +225,7 @@ void reschedule(){
     }
 
     // TODO: fill the idle task name macro
-    if( strncmp( (int8_t*)next_task->name, DUMMY_TASK_NAME, strlen( (int8_t*) next_task->name) ) == 0){
+    if( next_task->idle_task ){
         // The first task is idle task, put it to the end of the list
         reposition_to_end(task_list_head.next);
         next_task = task_list_head.next->cur_task;
@@ -279,7 +279,7 @@ ASMLINKAGE void pit_interrupt_handler(hw_context hw) {
     // ------------------------------------------------reschedule starts-----------------------------------------------
 
     // if current running is an idle task
-    if( strncmp( (int8_t*)cur_task->name, DUMMY_TASK_NAME, strlen( (int8_t*) cur_task->name) ) == 0){
+    if( cur_task->idle_task ){
         // reposition cur_task to the end of the linked list
         reposition_to_end(cur_task->node);
         send_eoi(hw.irq);
