@@ -6,6 +6,8 @@
 #include "signal_sys_call.h"
 #include "terminal.h"
 #include "scheduler.h"
+#include "vidmap.h"
+
 #define FILE_CLOSED_TEST 1
 
 /**
