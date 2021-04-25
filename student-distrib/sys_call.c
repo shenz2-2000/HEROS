@@ -4,7 +4,48 @@
 #include "page_lib.h"
 #include "tests.h"
 #include "signal_sys_call.h"
+#include "terminal.h"
 #define FILE_CLOSED_TEST 1
+
+pcb_t *foreground_task[MAX_TERMINAL];
+pcb_t *focus_task_ = NULL;
+#define execute_launch(kesp_des, new_esp, new_eip, ret) asm volatile ("                    \
+    pushfl          /* save flags */                                   \n\
+    pushl %%ebp     /* save EBP*/                                      \n\
+    pushl $1f       /* return address to label 1 after iret */          \n\
+    movl %%esp, %0                                                        \n\
+    pushl $0x002B                                                         \n\
+    pushl %2                                                            \n\
+    pushl $0x206                                                     \n\
+    pushl $0x0023                                                    \n\
+    pushl %3                                                          \n\
+    iret                                                              \n\
+1:  popl %%ebp                                                        \n\
+    movl %%eax, %1                                                     \n\
+    popfl   "                                              \
+    : "=m" (kesp_des),                                                            \
+      "=m" (ret)                                                                      \
+    : "rm" (new_esp), "rm" (new_eip)                                                  \
+    : "cc", "memory"                                                                  \
+)
+#define execute_launch_in_kernel(kesp_des, new_esp, new_eip, ret) asm volatile (" \
+    pushfl                                                  \n\
+    pushl %%ebp                                                    \n\
+    pushl $1f                                                       \n\
+    movl %%esp, %0                                           \n\
+    movl %2, %%esp                                                \n\
+    pushl %3                                                   \n\
+    pushl $0x206   */                                                \n\
+    popfl                                                                           \n\
+    ret                                                        \n\
+1:  popl %%ebp                                                  \n\
+    movl %%eax, %1   */                                            \n\
+    popfl                           "                                              \
+    : "=m" (kesp_save_to), /* must write to memory, or halt() will not get it */      \
+      "=m" (ret)                                                                      \
+    : "r" (new_esp), "r" (new_eip)                                                    \
+    : "cc", "memory"                                                                  \
+)
 
 /**
  * sys_open
@@ -220,13 +261,18 @@ int parse_args(uint8_t *command, uint8_t **args){
  * sys_execute
  * Description: execute the command
  * Input: command -- string to be executed
+ *        wait_for_child -- if set to 1, means it waits for the child to return
+ *                          if set to 0, indicate it's an init task
+ *                          if set to -1, create an idle task
+ *        separate_terminal -- if set to 1 means new terminal is used for this process
+ *        function_address -- NULL means execute by args, else means execute kernel thread
  * Output: None
  * Side effect: Run the new program with the command
  */
 
-int32_t sys_execute(uint8_t *command) {
+int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal, void (*function_address)()) {
     pcb_t *process;
-    int32_t eip;
+    uint32_t eip;
     uint32_t length;
     int pid_ret;
     int ret;
@@ -236,12 +282,21 @@ int32_t sys_execute(uint8_t *command) {
         printf("ERROR in sys_execute: command NULL pointer\n");
         return -1;
     }
-
+    // set up pcb for the new task
     process = create_process();
     if (process==NULL) return -1; // Raise Error
     // Information Setting
-    process->parent = get_n_present_pcb()==1?NULL:get_cur_process();
+    if (get_n_present_pcb()==1) {
+        process->init_task = 1;
+        process->parent = NULL;
+    } else {
+        process->parent = (wait_for_child==1)?get_cur_process():NULL;
+    }
+    if (function_address!=NULL) process->kernal_task=1;
+    if (wait_for_child==-1) process->idle_task=1;
+    process->vidmap_enable = 0;
     process->k_esp = (uint32_t)process+TASK_KSTK_SIZE_IN_B-1;
+    // Parse name and arguments
     parse_args(command, &(process->args));
     process->name = command;
     // move name and argument to new program's PCB
@@ -253,61 +308,62 @@ int32_t sys_execute(uint8_t *command) {
         process->k_esp-=length;
         process->args=(uint8_t *)strcpy((int8_t *)process->k_esp, (int8_t *) process->args);
     }
-
-//    // set video memory for the current process
-//    set_video_memory();
-
+    if (add_task_to_list(process)==-1) return -1;
+    //  set video memory for the current process
+    if (process->kernel_task) {
+        task -> terminal = NULL;
+        task -> id = -1; // kernel task has no paging and terminal
+        eip = (uint32_t) function_address;
+    }  else {
+        if (separate_terminal) {
+            process->terminal = terminal_allocate();
+            terminal_vidmem_open(process->terminal->terminal_id);
+        } else {
+            if (process->init_task) process->terminal = NULL;
+            else process->terminal = get_cur_process()->terminal;
+        }
+    }
     pid_ret = set_page_for_task(command, (uint32_t *)&eip);
     if (pid_ret < 0) {
         delete_process(process);
         return -1;
     }
     process->pid = pid_ret;
+    if (process->terminal != NULL) {
+        foreground_task[process->terminal->terminal_id] = process;
+        task_set_focus_task(process);
+    }
+    terminal_set_running(process->terminal);
+    if (separate_terminal) {
+        clear();
+        reset_screen();
+        printf("TERMINAL %d\n", process->terminal->terminal_id);
+    }
+
     init_file_arr(&(process->file_arr));
     task_signal_init(&(process->signals));
     // Set up tss to make sure system call don't go wrong
-    tss.ss0 = KERNEL_DS;
-    tss.esp0 = process->k_esp;
-
-    if (process->parent==NULL) asm volatile ("                                        \
-    pushfl                                                                          \n\
-    pushl %%ebp                                                                     \n\
-    pushl $1f       /* return to label 1 for continue execute */                    \n\
-    movl %%esp, %0                                                                  \n\
-    /*IRET Preparation*/                                                            \n\
-    pushl $0x002B   /* USER_DS */                                                   \n\
-    pushl %3                                                                        \n\
-    pushf                                                                           \n\
-    pushl $0x0023   /* USER_CS  */                                                  \n\
-    pushl %2                                                                        \n\
-    iret                                                                            \n\
-1:  popl %%ebp                                                                      \n\
-    movl %%eax, %1                                                                  \n\
-    popfl      "                                                                       \
-    : "=m" (length), /* must write to memory*/      \
-      "=m" (ret)                                                                      \
-    : "rm" (eip), "rm" (US_STARTING)                                                  \
-    : "cc", "memory"                                                                  \
-    ); else asm volatile ("                                                           \
-    pushfl                                                                          \n\
-    pushl %%ebp                                                                     \n\
-    pushl $1f       /* return to label 1 for continue execute */                    \n\
-    movl %%esp, %0                                                                  \n\
-    /*IRET Preparation*/                                                            \n\
-    pushl $0x002B   /* USER_DS */                                                   \n\
-    pushl %3                                                                        \n\
-    pushf                                                                           \n\
-    pushl $0x0023   /* USER_CS  */                                                  \n\
-    pushl %2                                                                        \n\
-    iret                                                                            \n\
-1:  popl %%ebp                                                                      \n\
-    movl %%eax, %1                                                                  \n\
-    popfl      "                                                                       \
-    : "=m" (get_cur_process()->k_esp), /* must write to memory*/      \
-      "=m" (ret)                                                                      \
-    : "rm" (eip), "rm" (US_STARTING)                                                  \
-    : "cc", "memory"                                                                  \
-    );
+    // Set up Scheduler
+    if (process -> idle_task) task->time = 0;
+    else init_process_time(process);
+    insert_to_list_start(process->node);
+    if (wait_for_child==1) {
+        reposition_to_end(process->node);
+    }
+    tss.esp0 = task->k_esp;
+    if (process->kernel_task) {
+        if (process->init_task) {
+            execute_launch_in_kernel(length, process->k_esp, eip, ret);
+        } else {
+            execute_launch_in_kernel(get_cur_process()->k_esp, task->kesp, eip, ret);
+        }
+    } else {
+        if (process->init_task) {
+            execute_launch(length, US_STARTING, eip, ret);
+        } else {
+            execute_launch(get_cur_process()->k_esp, USER_STACK_STARTING_ADDR, eip, ret);
+        }
+    }
     return ret;
 }
 

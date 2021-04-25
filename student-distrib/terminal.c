@@ -37,6 +37,8 @@ static const char shift_scan_code_table[128] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0             /* 0x54 - 0x80 */
 };
+task_list_node_t local_wait_list = {&(node), &(node)};
+terminal_struct_t terminal_slot[MAX_TERMINAL]; // Maximal terminal number is 3
 /*
  * keyboard_interrupt
  *   DESCRIPTION: Handle the interrupt from keyboard
@@ -46,7 +48,6 @@ static const char shift_scan_code_table[128] = {
  *   SIDE EFFECTS: interrupt
  */
 void keyboard_interrupt_handler() {
-    cli();
     uint8_t input = inb(KEYBOARD_PORT);
     int capital, letter, shift_on;
     char chr;
@@ -63,31 +64,41 @@ void keyboard_interrupt_handler() {
             reset_screen();
         } else if (scan_code_table[input]) {
             // Manage the overflow issue
-            if (key_buf_cnt < KEYBOARD_BUF_SIZE - 1) {   
+            if (focus_task()->terminal->buf_cnt < KEYBOARD_BUF_SIZE - 1) {
                 letter = (input>=0x10&&input<=0x19) | (input>=0x1E&&input<=0x26) | (input>=0x2C&&input<=0x32);   // Check whether the input is letter
                 if (letter) {
                     chr = capital?shift_scan_code_table[input]:scan_code_table[input];
-                    keyboard_buf[key_buf_cnt++]=chr;
+                    focus_task()->terminal->buf[focus_task()->terminal->buf_cnt++]=chr;
                     putc(chr);
                 } else {
                     shift_on = (flag[LEFT_SHIFT_PRESSED]|flag[RIGHT_SHIFT_PRESSED]);
                     chr = shift_on?shift_scan_code_table[input]:scan_code_table[input]; 
                     putc(chr);
-                    keyboard_buf[key_buf_cnt++]=chr;
+                    focus_task()->terminal->buf[focus_task()->terminal->buf_cnt++]=chr;
                 }
             }
-            // Handle the enter pressed
-            if (input == 0x1C) {    // If enter is pressed
-                if (key_buf_cnt==KEYBOARD_BUF_SIZE-1) putc(scan_code_table[input]), keyboard_buf[key_buf_cnt++] = scan_code_table[input];
-                if (run_read) {
-                    sti();
-                    return;
-                }else {
-                    key_buf_cnt = 0;
-                }
+            // Handle the enter pressed and reading is turned on
+            if ((focus_task()->terminal->user_ask)!=0 && input == 0x1C) {    // If enter is pressed
+                focus_task()->terminal->buf[focus_task()->terminal->buf_cnt] = '\n';
+                putc(focus_task()->terminal->buf[focus_task()->terminal->buf_cnt]);
+                focus_task()->terminal->buf_cnt++;
+                focus_task()->parent->flags &= ~TASK_WAITING_CHILD;
+                sched_refill_time(focus_task());
+                sched_insert_to_head(focus_task());
+                sched_request_run_head_asap();
+                return;
+            }
+            if ((0 == focus_task()->terminal->user_ask) && input == 0x1C) {
+                focus_task()->terminal->buf_cnt = 0;
+                putc('\n');
+                return;
             }
         } else if (flag[BACKSPACE_PRESSED]) {  // Manage backspace
-            if (key_buf_cnt) delete_last(),--key_buf_cnt;
+            if (focus_task()->terminal->buf_cnt) delete_last(),--focus_task()->terminal->buf_cnt;
+        } else if (flag[ALT_PRESSED]) {
+            if (flag[F1_PRESSED]) task_change_focus(1);
+            else if (flag[F2_PRESSED]) task_change_focus(2);
+            else if (flag[F3_PRESSED]) task_change_focus(3);
         }
 
     }
@@ -204,43 +215,44 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     // overflow nbytes
     if(nbytes >= KEYBOARD_BUF_SIZE) nbytes = KEYBOARD_BUF_SIZE - 1;
 
-    // change the status to 1
-    run_read = 1;
+    // change the status
+    running_task()->terminal->user_ask = nbytes;
     // clear the line buffer
-    key_buf_cnt = 0;
 
     // loop until exit
-    while(!end_flag){
+    //while(!end_flag){
         // prevent interrupt from modifying the line buffer
-        cli();
-        // detect enter
-        for(i = 0; i <= (key_buf_cnt - 1) ; i++){
-            if(keyboard_buf[i] == '\n'){
-                j = i;
-                end_flag = 1;
-                break;
-            }
+    cli();
+    // detect enter
+    for(i = 0; i <= (running_task()->terminal->buf_cnt - 1) ; i++){
+        if(running_task()->terminal->buf[i] == '\n'){
+            j = i;
+            end_flag = 1;
+            break;
         }
-
-        sti();
     }
-
+    sti();
+    if (!end_flag) {
+        running_task()->flags |= TASK_WAITING_CHILD;
+        sched_move_running_after_node(&local_wait_list);
+        sched_launch_to_current_head();
+    }
+    //}
+    running_task()->terminal->user_ask = 0;
     // new critical section
     cli();
     // set the copy number
     if(j > nbytes) j = nbytes;
-    if(keyboard_buf[j-1] != '\n'){
-        keyboard_buf[j] = '\n';
+    if(running_task()->terminal->buf[j-1] != '\n'){
+        running_task()->terminal->buf[j] = '\n';
         j = j + 1;
     }
     // copy to user buf
-    memcpy(buf,keyboard_buf,j);
+    memcpy(buf,running_task()->terminal->buf,j);
 
     // set delete_length to handle two conditions of \n and no \n
-    key_buf_cnt = 0;
+    running_task()->terminal->buf_cnt = 0;
 
-    // exit the function
-    run_read = 0;
 
     sti();
 
@@ -279,8 +291,53 @@ int32_t  terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 }
 
 
+/*
+ * terminal_init
+ *   DESCRIPTION: Initialize the terminal slot
+ *   INPUTS: None
+ *   OUTPUTS: None
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: all valid field is set to 0
+ */
 
+void terminal_init() {
+    int i;
+    for (i = 0; i < MAX_TERMINAL; ++i) terminal_slot[i].valid = 0;
+}
 
+/*
+ * terminal_deallocate
+ *   DESCRIPTION: deallocate current terminal
+ *   INPUTS: cur -- pointer to current terminal
+ *   OUTPUTS: None
+ *   RETURN VALUE: none
+ */
+
+void terminal_deallocate(terminal_struct_t* cur) {
+    terminal->valid = 0;
+}
+
+/*
+ * terminal_allocate
+ *   DESCRIPTION: allocate terminal slot for current terminal
+ *   INPUTS: none
+ *   OUTPUTS: pointer to the current terminal
+ *   RETURN VALUE: none
+ */
+
+terminal_struct_t* terminal_allocate() {
+    int x;
+    for (x = 0; x < MAX_TERMINAL; ++x) if (!terminal_slot[i].valid) break;
+    if (i>=MAX_TERMINAL) {
+        printf("NOT AVAILABLE TERMINAL SLOT\n");
+        return NULL;
+    }
+    terminal_slot[x].valid = 1;
+    terminal_slot[x].terminal_id = x;
+    terminal_slot[x].buf_cnt = 0;
+    terminal_slot[x].screen_x = terminal_slot[x].screen_y = 0;
+    return &terminal_slot[x];
+}
 
 
 

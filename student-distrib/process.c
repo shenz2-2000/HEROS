@@ -2,10 +2,9 @@
 #include "file_sys.h"
 #include "page_lib.h"
 #include "lib.h"
-
+#include "terminal.h"
 pcb_t* pcb_ptrs[N_PCB_LIMIT];
 int32_t n_present_pcb;
-
 /**
  * process_init
  * Description: Initialize the process array system

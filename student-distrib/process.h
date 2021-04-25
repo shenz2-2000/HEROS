@@ -13,12 +13,14 @@
 typedef struct pcb_t pcb_t;
 struct pcb_t {
     uint8_t present;
+    uint8_t vidmap_enable;
     pcb_t* parent;
     uint8_t* name;
     uint8_t* args;
     uint32_t k_esp;
     file_arr_t file_arr;
     uint8_t pid;
+    int init_task,kernel_task,idle_task;
     signal_struct_t signals;
 };
 
