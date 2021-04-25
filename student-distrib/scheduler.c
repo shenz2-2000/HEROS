@@ -11,8 +11,12 @@ static int idt_test_cnt = 0;
 task_node task_list_head;
 task_node all_nodes[N_PCB_LIMIT + N_PCB_OFFSET];
 
-/**
- * initialize the scheduler
+/*
+ * init_scheduler
+ * This function will initialize task list and task node array
+ * Input: None
+ * Output: None.
+ * Side effect: None.
  */
 void init_scheduler() {
     int i;
@@ -34,6 +38,14 @@ void init_scheduler() {
 
 
 // TODO: ensure it works here
+/*
+ * switch_context
+ * This function will switch between processes
+ * Input: old: pointer to old esp
+ *        new: pointer to new esp
+ * Output: None.
+ * Side effect: change esp value
+ */
 void switch_context(uint32_t old, uint32_t new) {
     asm volatile ("                                                                                         \
     pushl %%ebp                                                                                           \n\
@@ -43,7 +55,7 @@ void switch_context(uint32_t old, uint32_t new) {
     movl %1, %%esp                                                                                        \n\
     ret                                                                                                   \n\
 0:  popfl                                                                                                 \n\
-    popl %%ebp"                                                                                            \
+    popl %%ebp"                                                                                             \
     : "=m" (old)                                                                                            \
     : "r" (new)                                                                                             \
     : "cc", "memory"                                                                                        \
@@ -53,8 +65,12 @@ void switch_context(uint32_t old, uint32_t new) {
 
 // ---------------------------------------------Some tool function for linked list------------------------------------------
 
-/**
- * add node to the start
+/*
+ * insert_to_list_start
+ * This function will add node to the start
+ * Input: cur_node - the node you want to add
+ * Output: None.
+ * Side effect: change the task list
  */
 void insert_to_list_start(task_node* cur_node) {
 
@@ -68,8 +84,12 @@ void insert_to_list_start(task_node* cur_node) {
     task_list_head.next = cur_node;
 }
 
-/**
- * put a new node to the end
+/*
+ * append_to_list_end
+ * This function will append a new node to the end
+ * Input: cur_node - the node you want to append
+ * Output: None.
+ * Side effect: change task list
  */
 void append_to_list_end(task_node* cur_node) {
 
@@ -83,8 +103,12 @@ void append_to_list_end(task_node* cur_node) {
     task_list_head.prev = cur_node;
 }
 
-/**
- * delete a node from list
+/*
+ * delete_from_list
+ * This function will delete a node from linked list
+ * Input: cur_node - the node to be deleted
+ * Output: None.
+ * Side effect: change the task list
  */
 void delete_from_list(task_node* cur_node) {
 
@@ -101,8 +125,12 @@ void delete_from_list(task_node* cur_node) {
 
 }
 
-/**
- * delete a node from list
+/*
+ * reposition_to_end
+ * This function will reposition a node to end of list
+ * Input: cur_node - the node to be repositioned
+ * Output: None.
+ * Side effect: change task list
  */
 void reposition_to_end(task_node* cur_node) {
 
@@ -111,17 +139,24 @@ void reposition_to_end(task_node* cur_node) {
 
 }
 
-/**
- * init time for a process
+/*
+ * init_process_time
+ * This function will refill the time for a process
+ * Input: cur_process - the process to be manipulated
+ * Output: None.
+ * Side effect: None.
  */
 void init_process_time(pcb_t* cur_process){
     cur_process->time = TIME_INIT;
 }
 
-/**
- * add a task to the list and initialize
- * return 0 if success
- *        -1 if fail
+/*
+ * add_task_to_list
+ * add a task to the list and initialize it
+ * Input: task - task structure to be added
+ * Output: 0 - success
+ *        -1 - fail
+ * Side effect: change the task list
  */
 int32_t add_task_to_list(pcb_t* task){
     int i;
@@ -140,10 +175,13 @@ int32_t add_task_to_list(pcb_t* task){
     return -1;
 }
 
-/**
- * delete a task from the list
- * return 0 if success
- *        -1 if fail
+/*
+ * delete_task_from_list
+ * delete a task from task list
+ * Input: task - task structure to be deleted
+ * Output: 0 - success
+ *        -1 - fail
+ * Side effect: change the task list
  */
 int32_t delete_task_from_list(pcb_t* task){
     int i;
@@ -164,12 +202,24 @@ int32_t delete_task_from_list(pcb_t* task){
 
 // -------------------------------------------------------------------------------------------------------------------------
 
+/*
+ * reschedule
+ * reschedule to a new task (or do nothing)
+ * Input: None
+ * Output: None
+ * Side effect: switch stack and modify task list
+ */
 void reschedule(){
 
     // next_task to run
     pcb_t* next_task = task_list_head.next->cur_task;
 
     // sanity check
+    if(next_task == NULL){
+        printf("WARNING: fail to add task into list!!\n");
+        return;
+    }
+
     if(task_list_head.next == &task_list_head){
         printf("WARNING:there should be at least 1 process in list");
     }
@@ -199,7 +249,10 @@ void reschedule(){
 
 /**
  * Interrupt handler of PIT
+ * @input hw - hardware context on stack
+ * @output None
  * @usage in boot.S
+ * @sideeffect modify list and switch stack
  */
 ASMLINKAGE void pit_interrupt_handler(hw_context hw) {
 
