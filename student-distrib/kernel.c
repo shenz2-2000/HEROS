@@ -239,6 +239,9 @@ void entry(unsigned long magic, unsigned long addr) {
     /*Init IDT*/
     init_IDT();
 
+    /* Init the PIT */
+    enable_irq(0);
+
     /* Init file sys*/
     file_sys_init((module_t *)mbi->mods_addr);
 

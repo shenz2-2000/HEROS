@@ -10,6 +10,16 @@
 #define TASK_KSTK_BOTTOM 0x800000    
 #define TASK_KSTK_PCB_ADDR_MASK 0xFFFFE000
 #define US_STARTING  (0x8400000 - 1)
+
+// the definition of linked list's node
+typedef struct task_node{
+    struct task_node* prev;
+    struct task_node* next;
+    struct pcb_t * cur_task;
+    int valid;
+}task_node;
+
+
 typedef struct pcb_t pcb_t;
 struct pcb_t {
     uint8_t present;
@@ -22,7 +32,11 @@ struct pcb_t {
     uint8_t pid;
     int init_task,kernel_task,idle_task;
     signal_struct_t signals;
+    uint32_t time;
+    task_node* node;
+
 };
+
 
 typedef union task_kstack_t {
     pcb_t pcb;

@@ -31,6 +31,7 @@ extern int get_new_page_id();
 extern void set_video_memory();
 extern void clear_video_memory();
 extern int sys_vidmap(uint8_t** screen_start);
+extern int delete_paging(const int child_id);
 
 int restore_paging(const int child_id, const int parent_id);
 

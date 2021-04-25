@@ -12,6 +12,7 @@
 #include "idt.h"
 /* Declaration of constant in interrupt */
 
+#define IDT_ENTRY_PIT      0x20
 #define IDT_ENTRY_KEYBOARD 0x21
 #define IDT_ENTRY_RTC 0x28
 #define IDT_SYSTEM_CALL 0x80
@@ -89,6 +90,9 @@ void init_IDT(){
     SET_IDT_ENTRY(idt[17],exception_handler_17);
     SET_IDT_ENTRY(idt[18],exception_handler_18);
     SET_IDT_ENTRY(idt[19],exception_handler_19);
+
+    SET_IDT_ENTRY(idt[IDT_ENTRY_PIT], interrupt_entry_0);
+    idt[IDT_ENTRY_PIT].present = 1;
 
     // Set keyboard handler (defined in boot.S)
     SET_IDT_ENTRY(idt[IDT_ENTRY_KEYBOARD], interrupt_entry_1);

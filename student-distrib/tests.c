@@ -7,6 +7,7 @@
 #include "process.h"
 #include "sys_call.h"
 #include "gensound.h"
+#include "scheduler.h"
 
 #define PASS 1
 #define FAIL 0
@@ -792,9 +793,10 @@ int play_music_test() {
 void launch_tests(){
 //    TEST_OUTPUT("div0_test", div0_test());
 //     TEST_OUTPUT("file_system_test", file_system_test());
-    TEST_OUTPUT("shell_test", shell_test());
+//    TEST_OUTPUT("shell_test", shell_test());
 //    TEST_OUTPUT("fs_err_test", fs_err_test());
 //     invalid_sys_call_test();
     // TEST_OUTPUT("play_sound_test", play_sound_test());
     // TEST_OUTPUT("play_music_test", play_music_test());
+//    init_scheduler();
 }

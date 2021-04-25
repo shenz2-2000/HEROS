@@ -84,6 +84,7 @@ extern void exception_handler_128();
 extern void sys_call_linkage();
 
 // Interrupt Handler
+extern void interrupt_entry_0();    // PIT
 extern void interrupt_entry_1();
 extern void interrupt_entry_8();
 

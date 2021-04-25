@@ -170,6 +170,8 @@ copy_loop:
       popl  %ebx
 
       movl kernel_hw_context_ptr, %esi
+
       movl 24(%esi), %eax
+
 
       ret
