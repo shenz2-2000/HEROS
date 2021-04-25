@@ -4,12 +4,14 @@
 #include "file_sys.h"
 #include "x86_desc.h"
 #include "signal_sys_call.h"
-#define N_PCB_LIMIT 3
+
+#define N_PCB_LIMIT 6
 
 #define TASK_KSTK_SIZE_IN_B 8192
 #define TASK_KSTK_BOTTOM 0x800000    
 #define TASK_KSTK_PCB_ADDR_MASK 0xFFFFE000
 #define US_STARTING  (0x8400000 - 1)
+
 typedef struct pcb_t pcb_t;
 struct pcb_t {
     uint8_t present;

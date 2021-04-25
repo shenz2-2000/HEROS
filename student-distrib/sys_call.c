@@ -4,6 +4,8 @@
 #include "page_lib.h"
 #include "tests.h"
 #include "signal_sys_call.h"
+#include "vidmap.h"
+
 #define FILE_CLOSED_TEST 1
 
 /**

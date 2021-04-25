@@ -7,18 +7,23 @@
 
 #include "x86_desc.h"
 #include "file_sys.h"
+#include "terminal.h"
 
 
 #define PDE_IDX         128
 #define PRIVATE_PAGE_VA 32
 #define PDE_MASK        0x00000087
+
 #define CODE_BASE_VA    0x08048000
 #define ELF_LENGTH      4
 #define FIRST_INSTRUCTION 24
+
 #define USER_VA_START 0x08000000
 #define USER_VA_END   0x08400000
-#define VM_INDEX      0xB8000
 
+// task paging
+#define PAGE_IN_USE 1
+#define PAGE_FREE   0
 
 // tool functions
 extern void flush_tlb();

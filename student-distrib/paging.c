@@ -69,7 +69,7 @@ void fill_page(){
 
     }
 
-    // --------------------------Fill the Page Table--------------------
+    // --------------------------Fill the video Page Table (for kernel)--------------------
     for(i = 0; i < PAGE_TABLE_SIZE; i++){
         // points to the start of vedio memory
         if(i == VIDEO_MEMORY_INDEX){
@@ -105,7 +105,7 @@ void fill_page(){
     }
 
 
-    // --------------------------Fill the kernel Page Table--------------------
+    // --------------------------Fill the video Page Table--------------------
     for(i = 0; i < PAGE_TABLE_SIZE; i++){
         // points to the start of vedio memory
         if(i == VIDEO_MEMORY_INDEX){
