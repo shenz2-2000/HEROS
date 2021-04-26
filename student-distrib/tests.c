@@ -686,19 +686,19 @@ long fs_err_test() {
  * Coverage: system call execute
  * Files: 
  */
-int shell_test() {
-    TEST_HEADER;
-    /* non-execuatable file */
-    printf("Now Executing non-execuatable file:\n");
-    if (sys_execute((uint8_t *) "frame0.txt")!=-1) {
-        printf("Return value is wrong!\n");
-        return FAIL;
-    } else printf("Success\n");
-    /* execute shell */
-    printf("Execute Shell\n");
-    sys_execute((uint8_t *) "shell");
-    return PASS;
-}
+//int shell_test() {
+//    TEST_HEADER;
+//    /* non-execuatable file */
+//    printf("Now Executing non-execuatable file:\n");
+//    if (sys_execute((uint8_t *) "frame0.txt")!=-1) {
+//        printf("Return value is wrong!\n");
+//        return FAIL;
+//    } else printf("Success\n");
+//    /* execute shell */
+//    printf("Execute Shell\n");
+//    sys_execute((uint8_t *) "shell");
+//    return PASS;
+//}
 
 /* file_closed_test
  *

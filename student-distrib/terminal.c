@@ -7,9 +7,9 @@
 #include "rtc.h"
 #include "link.h"
 #include "idt.h"
-#include "terminal.h"
 #include "process.h"
 #include "scheduler.h"
+#include "vidmap.h"
 #define RUN_TESTS
 /* Declaration of constant */
 // Maximum Size of keyboard buffer should be 128
@@ -17,7 +17,6 @@ static int key_buf_cnt=0;
 static char keyboard_buf[KEYBOARD_BUF_SIZE];
 static int flag[128];       // There're at most 128 characters on the keyboard
 // check whether terminal_read is working
-static int run_read=0;
 // Using scan code set 1 for we use "US QWERTY" keyboard
 // The table transform scan code to the echo character
 static int CUR_CAP = 0; // Keep the current state of caplock
@@ -108,8 +107,9 @@ void handle_input(uint8_t input) {
 ASMLINKAGE void keyboard_interrupt_handler(hw_context hw) {
     uint8_t input = inb(KEYBOARD_PORT);
     uint32_t flags;
-    cli_and_save(flags) {
-        idt_send_eoi(hw.irq);
+    cli_and_save(flags);
+    {
+        send_eoi(hw.irq);
         if (focus_task()) {
             terminal_set_running(focus_task()->terminal);
         }
@@ -245,7 +245,7 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     }
     sti();
     if (!end_flag) {
-        get_cur_process()->flags |= TASK_WAITING_CHILD;
+//        get_cur_process()->flags |= TASK_WAITING_CHILD;
         append_to_lists_end(&local_wait_list);
         reschedule();
     }
@@ -366,8 +366,8 @@ void terminal_set_running(terminal_struct_t *terminal) {
     if (terminal == get_running_terminal()) return ;
     get_running_terminal() -> screen_x = screen_x;
     get_running_terminal() -> screen_y = screen_y;
-    terminal_vidmem_set(terminal);
+    terminal_vidmap(terminal);
     screen_x = terminal->screen_x;
     screen_y = terminal->screen_y;
-    get_running_terminal() = terminal;
+    set_running_terminal(terminal);
 }

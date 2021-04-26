@@ -6,8 +6,6 @@
 
 static void setup_pit(uint16_t hz);
 
-static int idt_test_cnt = 0;
-
 task_node task_list_head;
 task_node all_nodes[N_PCB_LIMIT + N_PCB_OFFSET];
 

@@ -52,8 +52,9 @@ pcb_t* delete_process(pcb_t* pcb);
 int32_t get_n_present_pcb();
 int parse_args(uint8_t *command, uint8_t **args);
 int32_t system_halt(int32_t status);
-int32_t sys_execute(uint8_t *command);
+int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal, void (*function_address)());
 void change_focus_task(int32_t terminal_id);
 terminal_struct_t* get_running_terminal();
+void set_running_terminal(terminal_struct_t* cur);
 void init_task_main();
 #endif

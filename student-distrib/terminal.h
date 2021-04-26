@@ -18,7 +18,7 @@
 #define ALT_PRESSED 0x38
 #define MAX_TERMINAL 3
 // function declarations
-void keyboard_interrupt_handler();
+
 void terminal_initialization();
 void print_terminal_info();
 

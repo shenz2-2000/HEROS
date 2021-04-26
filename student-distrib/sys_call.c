@@ -4,7 +4,6 @@
 #include "page_lib.h"
 #include "tests.h"
 #include "signal_sys_call.h"
-#include "terminal.h"
 #include "scheduler.h"
 #include "vidmap.h"
 

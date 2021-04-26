@@ -9,7 +9,6 @@
 #include "debug.h"
 #include "tests.h"
 #include "rtc.h"
-#include "terminal.h"
 #include "file_sys.h"
 #include "process.h"
 #include "sys_call.h"
@@ -270,7 +269,7 @@ void entry(unsigned long magic, unsigned long addr) {
     uint32_t flags;
     cli_and_save(flags);
     {
-        system_execute((uint8_t *) "init_task", 0, 0, init_task_main);
+        sys_execute((uint8_t *) "init_task", 0, 0, init_task_main);
         printf("Error: return from the init_task, which should not happen");
     }
     restore_flags(flags);

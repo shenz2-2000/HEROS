@@ -1,6 +1,8 @@
 #ifndef _VIDMAP_H
 #define _VIDMAP_H
 
+#include "terminal.h"
+
 #define VM_INDEX      0xB8000
 #define VM_PTE        0xB8
 

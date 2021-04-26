@@ -1,9 +1,8 @@
 #include "vidmap.h"
 #include "page_lib.h"
 #include "lib.h"
-#include "types.h"
-#include "terminal.h"
-#include "x86_desc.h"
+//#include "types.h"
+//#include "x86_desc.h"
 
 /* global var */
 // terminal

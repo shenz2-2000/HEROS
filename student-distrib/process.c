@@ -2,9 +2,10 @@
 #include "file_sys.h"
 #include "page_lib.h"
 #include "lib.h"
-#include "terminal.h"
 #include "sys_call.h"
 #include "scheduler.h"
+#include "vidmap.h"
+
 pcb_t* pcb_ptrs[N_PCB_LIMIT];
 int32_t n_present_pcb;
 pcb_t *focus_task_ = NULL;
@@ -12,6 +13,9 @@ pcb_t *foreground_task[MAX_TERMINAL];
 terminal_struct_t *running_term = NULL;
 terminal_struct_t* get_running_terminal() {
     return running_term;
+}
+void set_running_terminal (terminal_struct_t* cur) {
+    running_term = cur;
 }
 /**
  * focus_task
@@ -22,31 +26,6 @@ terminal_struct_t* get_running_terminal() {
 pcb_t *focus_task() {
     if (focus_task_ == NULL) printf("No focus task\n");
     return focus_task_;
-}
-
-/**
- * set_focus_task
- * Description: switch terminal
- * Input: terminal_num -- the terminal id want to change to
- * Output: focus_task
- */
-void set_focus_task(pcb_t* target_task) {
-    uint32_t flags;
-    cli_and_save(flags);
-    switch_terminal(target_task->terminal->id, focus_task()->terminal->id);
-    focus_task_ = target_task;
-    task_apply_user_vidmap(get_cur_process());
-    restore_flags(flags);
-}
-
-/**
- * change_focus_task
- * Description: switch terminal
- * Input: terminal_num -- the terminal id want to change to
- * Output: focus_task
- */
-void change_focus_task(int32_t terminal_num) {
-    set_focus_task(foreground_task[terminal_num]);
 }
 
 void process_user_vidmap(pcb_t *process) {
@@ -66,39 +45,105 @@ void process_user_vidmap(pcb_t *process) {
     }
 }
 
-#define execute_launch(kesp_des, new_esp, new_eip, ret) asm volatile ("                    \
-    pushfl          /* save flags */                                   \n\
-    pushl %%ebp     /* save EBP*/                                      \n\
-    pushl $1f       /* return address to label 1 after iret */          \n\
-    movl %%esp, %0                                                        \n\
-    pushl $0x002B                                                         \n\
-    pushl %2                                                            \n\
-    pushl $0x206                                                     \n\
-    pushl $0x0023                                                    \n\
-    pushl %3                                                          \n\
-    iret                                                              \n\
-1:  popl %%ebp                                                        \n\
-    movl %%eax, %1                                                     \n\
-    popfl   "                                              \
-    : "=m" (kesp_des),                                                            \
+/**
+ * set_focus_task
+ * Description: switch terminal
+ * Input: terminal_num -- the terminal id want to change to
+ * Output: focus_task
+ */
+void set_focus_task(pcb_t* target_task) {
+    uint32_t flags;
+    cli_and_save(flags);
+    switch_terminal(target_task->terminal, focus_task()->terminal);
+    focus_task_ = target_task;
+    process_user_vidmap(get_cur_process());
+    restore_flags(flags);
+}
+
+/**
+ * change_focus_task
+ * Description: switch terminal
+ * Input: terminal_num -- the terminal id want to change to
+ * Output: focus_task
+ */
+void change_focus_task(int32_t terminal_num) {
+    set_focus_task(foreground_task[terminal_num]);
+}
+
+//#define execute_launch(kesp_des, new_esp, new_eip, ret) asm volatile ("                    \
+//    pushfl          /* save flags */                                   \n\
+//    pushl %%ebp     /* save EBP*/                                      \n\
+//    pushl $1f       /* return address to label 1 after iret */          \n\
+//    movl %%esp, %0                                                        \n\
+//    pushl $0x002B                                                         \n\
+//    pushl %2                                                            \n\
+//    pushl $0x206                                                     \n\
+//    pushl $0x0023                                                    \n\
+//    pushl %3                                                          \n\
+//    iret                                                              \n\
+//1:  popl %%ebp                                                        \n\
+//    movl %%eax, %1                                                     \n\
+//    popfl   "                                              \
+//    : "=m" (kesp_des),                                                            \
+//      "=m" (ret)                                                                      \
+//    : "rm" (new_esp), "rm" (new_eip)                                                  \
+//    : "cc", "memory"                                                                  \
+//)
+
+#define execute_launch(kesp_save_to, new_esp, new_eip, ret) asm volatile ("                    \
+    pushfl          /* save flags on the stack */                                   \n\
+    pushl %%ebp     /* save EBP on the stack */                                     \n\
+    pushl $1f       /* return address to label 1, on top of the stack after iret */ \n\
+    movl %%esp, %0  /* save current ESP */                                          \n\
+    /* The following stack linkage is for IRET */                                   \n\
+    pushl $0x002B   /* user SS - USER_DS */                                         \n\
+    pushl %2        /* user ESP */                                                  \n\
+    pushl $0x206    /* flags (new program should not care, but IF = 1) */           \n\
+    pushl $0x0023   /* user CS - USER_CS  */                                        \n\
+    pushl %3        /* user EIP */                                                  \n\
+    iret            /* enter user program */                                        \n\
+1:  popl %%ebp      /* restore EBP, must before following instructions */           \n\
+    movl %%eax, %1  /* return value pass by halt() in EAX */                        \n\
+    popfl           /* restore flags */"                                              \
+    : "=m" (kesp_save_to), /* must write to memory, or halt() will not get it */      \
       "=m" (ret)                                                                      \
     : "rm" (new_esp), "rm" (new_eip)                                                  \
     : "cc", "memory"                                                                  \
 )
-#define execute_launch_in_kernel(kesp_des, new_esp, new_eip, ret) asm volatile (" \
-    pushfl                                                  \n\
-    pushl %%ebp                                                    \n\
-    pushl $1f                                                       \n\
-    movl %%esp, %0                                           \n\
-    movl %2, %%esp                                                \n\
-    pushl %3                                                   \n\
-    pushl $0x206   */                                                \n\
+
+//#define execute_launch_in_kernel(kesp_des, new_esp, new_eip, ret) asm volatile (" \
+//    pushfl                                                  \n\
+//    pushl %%ebp                                                    \n\
+//    pushl $1f                                                       \n\
+//    movl %%esp, %0                                           \n\
+//    movl %2, %%esp                                                \n\
+//    pushl %3                                                   \n\
+//    pushl $0x206   */                                                \n\
+//    popfl                                                                           \n\
+//    ret                                                        \n\
+//1:  popl %%ebp                                                  \n\
+//    movl %%eax, %1   */                                            \n\
+//    popfl                           "                                              \
+//    : "=m" (kesp_des), /* must write to memory, or halt() will not get it */      \
+//      "=m" (ret)                                                                      \
+//    : "r" (new_esp), "r" (new_eip)                                                    \
+//    : "cc", "memory"                                                                  \
+//)
+
+#define execute_launch_in_kernel(kesp_save_to, new_esp, new_eip, ret) asm volatile (" \
+    pushfl          /* save flags on the stack */                                   \n\
+    pushl %%ebp     /* save EBP on the stack */                                     \n\
+    pushl $1f       /* return address to label 1, on top of the stack after iret */ \n\
+    movl %%esp, %0  /* save current ESP */                                          \n\
+    movl %2, %%esp  /* set new ESP */                                               \n\
+    pushl %3        /* new EIP */                                                   \n\
+    pushl $0x206    /* flags (new program should not care, but IF = 1) */           \n\
     popfl                                                                           \n\
-    ret                                                        \n\
-1:  popl %%ebp                                                  \n\
-    movl %%eax, %1   */                                            \n\
-    popfl                           "                                              \
-    : "=m" (kesp_des), /* must write to memory, or halt() will not get it */      \
+    ret             /* enter new kernel task */                                     \n\
+1:  popl %%ebp      /* restore EBP, must before following instructions */           \n\
+    movl %%eax, %1  /* return value pass by halt() in EAX */                        \n\
+    popfl           /* restore flags */"                                              \
+    : "=m" (kesp_save_to), /* must write to memory, or halt() will not get it */      \
       "=m" (ret)                                                                      \
     : "r" (new_esp), "r" (new_eip)                                                    \
     : "cc", "memory"                                                                  \
@@ -112,14 +157,22 @@ void process_user_vidmap(pcb_t *process) {
  * Output: None
  * Side effect: Switch kernel stack
  */
-#define load_esp_and_return(new_esp,status){                                           \
-    asm volatile ("                                                                    \
-        movl %0, %%esp  /* load old ESP */                                           \n\
-        ret  /* now it's equivalent to jump execute return */"                         \
-        :                                                                              \
-        : "r" (new_esp)   , "a" (status)                                         \
-        : "cc", "memory"                                                               \
-    )
+//#define load_esp_and_return(new_esp,status) asm volatile ("                  \
+//        movl %0, %%esp  /* load old ESP */                                           \n\
+//        ret  /* now it's equivalent to jump execute return */"                         \
+//        :                                                                              \
+//        : "r" (new_esp)   , "a" (status)                                         \
+//        : "cc", "memory"                                                               \
+//    )
+
+#define load_esp_and_return(old_esp, ret) asm volatile ("                                        \
+    movl %0, %%esp  /* load back old ESP */                                      \n\
+    /* EAX store the return status */                                            \n\
+    ret  /* on the old kernel stack, return address is on the top of the stack */" \
+    :                                                                              \
+    : "r" (old_esp)   , "a" (ret)                                                  \
+    : "cc", "memory"                                                               \
+)
 
 /**
  * parse_args
@@ -213,12 +266,12 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
     //  set video memory for the current process
     if (process->kernel_task) {
         process -> terminal = NULL;
-        process -> id = -1; // kernel task has no paging and terminal
+        process -> pid = -1; // kernel task has no paging and terminal
         eip = (uint32_t) function_address;
     }  else {
         if (separate_terminal) {
             process->terminal = terminal_allocate();
-            terminal_vidmem_open(process->terminal->id);
+            terminal_turn_on(process->terminal);
         } else {
             if (process->init_task) process->terminal = NULL;
             else process->terminal = get_cur_process()->terminal; // Use the caller's terminal
@@ -263,7 +316,7 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
         if (process->init_task) {
             execute_launch(length, US_STARTING, eip, ret);
         } else {
-            execute_launch(get_cur_process()->k_esp, USER_STACK_STARTING_ADDR, eip, ret);
+            execute_launch(get_cur_process()->k_esp, US_STARTING, eip, ret);
         }
     }
     return ret;
@@ -300,10 +353,10 @@ int32_t system_halt(int32_t status) {
     delete_task_from_list(cur_task);
 
     // if cur_task has parent, we simply switch to parent task
-    if(cur_task->parent != NULL){
-    // TODO: why init time for parent?
-    init_process_time(cur_task->parent);
-    insert_to_list_start(cur_task->parent->node);
+    if (cur_task->parent != NULL) {
+        // TODO: why init time for parent?
+        init_process_time(cur_task->parent);
+        insert_to_list_start(cur_task->parent->node);
     }
 
     // close file array
@@ -317,14 +370,14 @@ int32_t system_halt(int32_t status) {
         if (focus_task_->terminal->id == term_id) {
             int new_term_id = get_another_terminal_id(term_id);
             if (new_term_id != -1) {
-                task_set_focus_task(foreground_task[new_term_id]);
-            } 
+                set_focus_task(foreground_task[new_term_id]);
+            }
         }
-        terminal_deallocate(cur_task->terminal);  
+        terminal_deallocate(cur_task->terminal);
     } else {
         foreground_task[cur_task->parent->terminal->id] = cur_task->parent;
         if (focus_task_->terminal->id == cur_task->parent->terminal->id) {
-            task_set_focus_task(cur_task->parent);
+            set_focus_task(cur_task->parent);
         }
     }
 
@@ -333,33 +386,27 @@ int32_t system_halt(int32_t status) {
 
     // no parent, we just reschedule
     if(cur_task->parent == NULL){
-    close_all_files(&cur_task->file_arr);
-    delete_process(cur_task);
+        close_all_files(&cur_task->file_arr);
+        delete_process(cur_task);
+        reschedule();
+    } else {
+        close_all_files(&cur_task->file_arr);
+        delete_process(cur_task);
+        // we have parent, so just switch to them
+        restore_paging(cur_task->pid,cur_task->parent->pid);
 
-    reschedule();
+        // TODO: terminal
+        // ---------------------------------------------
+        terminal_set_running(cur_task->parent->terminal);
+        // ---------------------------------------------
 
+        tss.esp0 = cur_task->parent->k_esp;
+        load_esp_and_return(cur_task->parent->k_esp, status);
+        }
+
+        printf("In system_halt: this function should never return.\n");
+        return -1;
     }
-
-    else{
-    close_all_files(&cur_task->file_arr);
-    delete_process(cur_task);
-    // we have parent, so just switch to them
-    restore_paging(cur_task->pid,cur_task->parent->pid);
-
-    // TODO: terminal
-    // ---------------------------------------------
-    terminal_set_running(cur_task->parent->terminal);
-
-
-    // ---------------------------------------------
-
-    tss.esp0 = cur_task->parent->k_esp;
-    load_esp_and_return(cur_task->parent->k_esp, status);
-    }
-
-    printf("In system_halt: this function should never return.\n");
-    return -1;
-}
 
 /**
  * process_init
@@ -381,7 +428,8 @@ void process_init() {
 
 void run_initial_task() {
     uint32_t flags;
-    cli_and_save(flags) {
+    cli_and_save(flags);
+    {
         sys_execute((uint8_t *) "initial", 0, 0, init_task_main);
     }
     restore_flags(flags);
@@ -461,6 +509,10 @@ int32_t get_n_present_pcb() {
     return n_present_pcb;
 }
 
+void idle_task_main() {
+    while (1) {}
+}
+
 void init_task_main() {
 
     int32_t ret;
@@ -478,6 +530,4 @@ void init_task_main() {
     restore_flags(flags);
 }
 
-void idle_task_main() {
-    while (1) {}
-}
+

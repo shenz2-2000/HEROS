@@ -1,5 +1,4 @@
 #include "file_sys.h"
-#include "multiboot.h"
 #include "lib.h"
 #include "terminal.h"
 #include "rtc.h"

@@ -151,7 +151,7 @@ ASMLINKAGE int32_t close_sys_call(int32_t fd){
  */
 
 
-extern int sys_execute(uint8_t *command);
+// extern int sys_execute(uint8_t *command);
 
 ASMLINKAGE int dummy_sys_call(){
     return invalid_sys_call();
@@ -166,8 +166,8 @@ ASMLINKAGE int32_t halt_sys_call(int8_t status){
     return system_halt((int32_t)status);
 }
 
-ASMLINKAGE int32_t execute_sys_call(uint8_t* command){
-    return sys_execute(command);
+ASMLINKAGE int32_t execute_sys_call( uint8_t *command, int wait_for_child, int separate_terminal, void (*function_address)() ){
+    return sys_execute(command, wait_for_child, separate_terminal, function_address);
 }
 
 ASMLINKAGE int32_t get_args_sys_call(uint8_t *buf, int32_t nbytes){
