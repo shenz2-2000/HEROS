@@ -31,7 +31,7 @@ struct pcb_t {
     uint32_t k_esp;
     file_arr_t file_arr;
     uint8_t pid;
-    uint8_t init_task,kernel_task,idle_task;
+    uint8_t init_task,kernel_task,idle_task,own_terminal;
     signal_struct_t signals;
     uint32_t time;
     task_node* node;
@@ -54,4 +54,5 @@ int parse_args(uint8_t *command, uint8_t **args);
 int32_t system_halt(int32_t status);
 int32_t sys_execute(uint8_t *command);
 void change_focus_task(int32_t terminal_id);
+terminal_struct_t* get_running_terminal();
 #endif

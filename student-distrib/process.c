@@ -10,6 +10,9 @@ int32_t n_present_pcb;
 pcb_t *focus_task_ = NULL;
 pcb_t *foreground_task[MAX_TERMINAL];
 terminal_struct_t *running_term = NULL;
+terminal_struct_t* get_running_terminal() {
+    return running_term;
+}
 /**
  * focus_task
  * Description: return the current focus task
@@ -44,6 +47,23 @@ void set_focus_task(pcb_t* target_task) {
  */
 void change_focus_task(int32_t terminal_num) {
     set_focus_task(foreground_task[terminal_num]);
+}
+
+void process_user_vidmap(pcb_t *process) {
+    // sanity check
+    if (process == NULL) {
+        printf("ERROR in process_user_vidmap(): NULL input");
+        return;
+    }
+    if (process->vidmap_enable) {
+        if (process->terminal == NULL) {
+            printf("ERROR in process_user_vidmap(): the process allocates no terminal but enabled the vidmap");
+            return;
+        }
+        set_video_memory(process->terminal);
+    } else {
+        set_video_memory(NULL); // the process disabled the vidmap
+    }
 }
 
 #define execute_launch(kesp_des, new_esp, new_eip, ret) asm volatile ("                    \
@@ -128,7 +148,15 @@ int parse_args(uint8_t *command, uint8_t **args){
     }
     return 0;
 }
-
+int get_another_terminal_id(int id) {
+    int i;
+    for (i = 1; i < MAX_TERMINAL; i++) {
+        if (foreground_task[(id - i + MAX_TERMINAL) % MAX_TERMINAL] != NULL) {
+            return (id - i + MAX_TERMINAL) % MAX_TERMINAL;
+        }
+    }
+    return -1;
+}
 /**
  * sys_execute
  * Description: execute the command
@@ -189,7 +217,7 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
     }  else {
         if (separate_terminal) {
             process->terminal = terminal_allocate();
-            //terminal_vidmem_open(process->terminal->terminal_id);
+            terminal_vidmem_open(process->terminal->terminal_id);
         } else {
             if (process->init_task) process->terminal = NULL;
             else process->terminal = get_cur_process()->terminal;
@@ -284,7 +312,23 @@ int32_t system_halt(int32_t status) {
 
     // TODO: manipulate terminal
     // ---------------------------------------
-
+    int term_id = cur_task->terminal->id;
+    // Perform the deallocation of terminal
+    if (cur_task->own_terminal) {
+        foreground_task[term_id] = NULL;
+        if (focus_task_->terminal->id == term_id) {
+            int new_term_id = get_another_terminal_id(term_id);
+            if (new_term_id != -1) {
+                task_set_focus_task(foreground_task[new_term_id]);
+            } 
+        }
+        terminal_deallocate(cur_task->terminal);  
+    } else {
+        foreground_task[cur_task->parent->terminal->id] = cur_task->parent;
+        if (focus_task_->terminal->id == cur_task->parent->terminal->id) {
+            task_set_focus_task(cur_task->parent);
+        }
+    }
 
     // ---------------------------------------
 
@@ -304,7 +348,7 @@ int32_t system_halt(int32_t status) {
 
     // TODO: terminal
     // ---------------------------------------------
-
+    terminal_set_running(cur_task->parent->terminal);
 
 
     // ---------------------------------------------

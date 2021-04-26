@@ -211,7 +211,7 @@ int executable_check(dentry_t* task_dentry_ptr){
 int get_new_page_id(){
     int i;
     for(i = 0; i < N_PCB_LIMIT; i++){
-        if(page_status[i] == 0){
+        if(page_status[i] == PAGE_FREE){
             return i;
         }
     }
@@ -229,12 +229,12 @@ int get_new_page_id(){
 int restore_paging(const int child_id, const int parent_id) {
 
     // Check arguments
-    if ( (child_id >= N_PCB_LIMIT) || (page_status[child_id] == 0) ) {
+    if ( (child_id >= N_PCB_LIMIT) || (page_status[child_id] == PAGE_FREE) ) {
         return -1;
     }
     set_private_page(parent_id);    // restore parent paging
-    page_id_center[child_id] = 0;
-    page_in_use--;
+    page_status[child_id] = PAGE_FREE;
+    n_page_in_use--;
     return 0;
 }
 
@@ -247,12 +247,12 @@ int restore_paging(const int child_id, const int parent_id) {
 int delete_paging(const int child_id) {
 
     // Check arguments
-    if ( (child_id >= N_PCB_LIMIT) || (page_id_center[child_id] == 0) ) {
+    if ( (child_id >= N_PCB_LIMIT) || (page_status[child_id] == PAGE_FREE) ) {
         return -1;
     }
 
-    page_id_center[child_id] = 0;
-    page_in_use--;
+    page_status[child_id] = PAGE_FREE;
+    n_page_in_use--;
     return 0;
 }
 
@@ -265,35 +265,13 @@ int delete_paging(const int child_id) {
 int set_paging(const int child_id){
 
     // Check arguments
-    if ( (child_id >= N_PCB_LIMIT) || (page_id_center[child_id] == 0) ) {
+    if ( (child_id >= N_PCB_LIMIT) || (page_status[child_id] == PAGE_FREE) ) {
         return -1;
     }
 
     set_private_page(child_id);
     return 0;
 }
-
-// /* set_video_memory
-//  * Description: setup page directory for user manipulation
-//  * Inputs: None
-//  * Return Value: None
-//  * Side effect: None*/
-
-// void set_video_memory(){
-
-//     if (page_status[child_id] == PAGE_FREE) {
-//         return -1;
-//     }
-
-//     // shut down the child paging and restore parent paging
-//     set_private_page(parent_id);   
-
-//     // 
-
-//     page_status[child_id] = 0;
-//     n_page_in_use--;
-//     return 0;
-// }
 
 /* check_flag
  * Description: check the 1-bit flag is valid or not

@@ -76,7 +76,7 @@ void handle_input(uint8_t input) {
                 focus_task()->terminal->buf[focus_task()->terminal->buf_cnt] = '\n';
                 putc(focus_task()->terminal->buf[focus_task()->terminal->buf_cnt]);
                 focus_task()->terminal->buf_cnt++;
-                focus_task()->parent->flags &= ~TASK_WAITING_CHILD;
+                //focus_task()->parent->flags &= ~TASK_WAITING_CHILD;
                 init_process_time(focus_task());
                 insert_to_list_start(focus_task()->node);
                 reschedule();
@@ -326,7 +326,7 @@ void terminal_init() {
  */
 
 void terminal_deallocate(terminal_struct_t* cur) {
-    terminal->valid = 0;
+    cur->valid = 0;
 }
 
 /*
@@ -339,13 +339,13 @@ void terminal_deallocate(terminal_struct_t* cur) {
 
 terminal_struct_t* terminal_allocate() {
     int x;
-    for (x = 0; x < MAX_TERMINAL; ++x) if (!terminal_slot[i].valid) break;
-    if (i>=MAX_TERMINAL) {
+    for (x = 0; x < MAX_TERMINAL; ++x) if (!terminal_slot[x].valid) break;
+    if (x>=MAX_TERMINAL) {
         printf("NOT AVAILABLE TERMINAL SLOT\n");
         return NULL;
     }
     terminal_slot[x].valid = 1;
-    terminal_slot[x].terminal_id = x;
+    terminal_slot[x].id = x;
     terminal_slot[x].buf_cnt = 0;
     terminal_slot[x].screen_x = terminal_slot[x].screen_y = 0;
     return &terminal_slot[x];
@@ -363,11 +363,11 @@ terminal_struct_t* terminal_allocate() {
  */
 
 void terminal_set_running(terminal_struct_t *terminal) {
-    if (terminal == running_term) return ;
-    running_term -> screen_x = screen_x;
-    running_term -> screen_y = screen_y;
-    //terminal_vidmem_set(terminal);
+    if (terminal == get_running_terminal()) return ;
+    get_running_terminal() -> screen_x = screen_x;
+    get_running_terminal() -> screen_y = screen_y;
+    terminal_vidmem_set(terminal);
     screen_x = terminal->screen_x;
     screen_y = terminal->screen_y;
-    running_term = terminal;
+    get_running_terminal() = terminal;
 }

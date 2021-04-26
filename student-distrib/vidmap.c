@@ -133,7 +133,7 @@ int terminal_turn_on(terminal_struct_t *terminal) {
  * Return Value: None
  * Side effect: None
  * */
-int swtich_terminal(terminal_struct_t *old_terminal, terminal_struct_t *new_terminal) {
+int switch_terminal(terminal_struct_t *old_terminal, terminal_struct_t *new_terminal) {
     // sanity check
     if (old_terminal == new_terminal) return 0;
     if (old_terminal != NULL) {

@@ -13,11 +13,11 @@
 #define TERMINAL_ON     MAX_TERMINAL+2  // avoid interference
 #define TERMINAL_OFF    MAX_TERMINAL+1
 
-void vidmap_init() {
+void vidmap_init();
 void set_video_memory();
 void clear_video_memory();
 int terminal_turn_on(terminal_struct_t *terminal);
-int swtich_terminal(terminal_struct_t *old_terminal, terminal_struct_t *new_terminal);
+int switch_terminal(terminal_struct_t *old_terminal, terminal_struct_t *new_terminal);
 int terminal_vidmap(terminal_struct_t *terminal);
 
 #endif
