@@ -185,6 +185,7 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
     // set up pcb for the new task
     process = create_process();
     if (process==NULL) return -1; // Raise Error
+    process->init_task=process->kernel_task=process->idle_task=process->own_terminal=process->wait_for_child=0;
     // Information Setting
     if (get_n_present_pcb()==1) {
         process->init_task = 1;
@@ -217,10 +218,10 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
     }  else {
         if (separate_terminal) {
             process->terminal = terminal_allocate();
-            terminal_vidmem_open(process->terminal->terminal_id);
+            terminal_vidmem_open(process->terminal->id);
         } else {
             if (process->init_task) process->terminal = NULL;
-            else process->terminal = get_cur_process()->terminal;
+            else process->terminal = get_cur_process()->terminal; // Use the caller's terminal
         }
     }
     pid_ret = set_page_for_task(command, (uint32_t *)&eip);
@@ -229,8 +230,8 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
         return -1;
     }
     process->pid = pid_ret;
-    if (process->terminal != NULL) {
-        foreground_task[process->terminal->id] = process;
+    if (process->terminal != NULL) {   
+        foreground_task[process->terminal->id] = process; // Become the task using terminal
         set_focus_task(process);
     }
     terminal_set_running(process->terminal);
@@ -244,18 +245,19 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
     task_signal_init(&(process->signals));
     // Set up tss to make sure system call don't go wrong
     // Set up Scheduler
-    if (process -> idle_task) task->time = 0;
+    if (process -> idle_task) process->time = 0;
     else init_process_time(process);
     insert_to_list_start(process->node);
     if (wait_for_child==1) {
+        process->wait_for_child=1;
         reposition_to_end(process->node);
     }
-    tss.esp0 = task->k_esp;
+    tss.esp0 = process->k_esp;
     if (process->kernel_task) {
         if (process->init_task) {
             execute_launch_in_kernel(length, process->k_esp, eip, ret);
         } else {
-            execute_launch_in_kernel(get_cur_process()->k_esp, task->kesp, eip, ret);
+            execute_launch_in_kernel(get_cur_process()->k_esp, process->k_esp, eip, ret);
         }
     } else {
         if (process->init_task) {
@@ -288,15 +290,11 @@ int32_t system_halt(int32_t status) {
 
         // clear page directory for video memory
         clear_video_memory();
-        sys_execute((uint8_t *) "shell");
+        sys_execute((uint8_t *) "shell", 0, 1, NULL);
 
         return -1;
     }
 
-    // clear page directory for video memory
-    clear_video_memory();
-
-    sys_execute((uint8_t *) "shell");
 
     // remove cur_task from task list
     delete_task_from_list(cur_task);
@@ -343,6 +341,8 @@ int32_t system_halt(int32_t status) {
     }
 
     else{
+    close_all_files(&cur_task->file_arr);
+    delete_process(cur_task);
     // we have parent, so just switch to them
     restore_paging(cur_task->pid,cur_task->parent->pid);
 
@@ -355,46 +355,7 @@ int32_t system_halt(int32_t status) {
 
     tss.esp0 = cur_task->parent->k_esp;
     load_esp_and_return(cur_task->parent->k_esp, status);
-
-
     }
-
-    //    if (get_cur_process()->parent == NULL) {
-    //        // So the main program of base shell return on exit, so we need to execute shell again
-    //        printf("Warning in system_halt(): halting the base shell...\n");
-    //        close_all_files(&get_cur_process()->file_arr);  // close FDs
-    //        delete_process(get_cur_process());
-    //        restore_paging(get_cur_process()->pid, get_cur_process()->pid); // restore the current paging
-    //        // CHECK ALL FILES ARE CLEANED UP
-    //        // file_closed_test();
-    //
-    //        // clear page directory for video memory
-    //        clear_video_memory();
-    //
-    //        sys_execute((uint8_t *) "shell");
-    //        return -1;
-    //    }
-    //
-    //    close_all_files(&get_cur_process()->file_arr);  // close FDs
-    //    pcb_t *parent = delete_process(get_cur_process());  // clear the pcb
-    //    restore_paging(get_cur_process()->pid, parent->pid);  // restore parent paging
-    //    tss.esp0 = parent->k_esp;  // set tss to parent's kernel stack to make sure system calls use correct stack
-    //
-    //    // clear page directory for video memory
-    //    clear_video_memory();
-
-    //#if FILE_CLOSED_TEST
-    //    file_closed_test(); // CHECK ALL FILES ARE CLEANED UP
-    //#endif
-
-    // load esp and return
-    //    asm volatile ("                                                                    \
-    //        movl %0, %%esp  /* load old ESP */                                           \n\
-    //        ret  /* now it's equivalent to jump execute return */"                         \
-    //        :                                                                              \
-    //        : "r" (parent->k_esp)   , "a" (status)                                         \
-    //        : "cc", "memory"                                                               \
-    //    );
 
     printf("In system_halt: this function should never return.\n");
     return -1;
@@ -421,7 +382,7 @@ void process_init() {
 void run_initial_task() {
     uint32_t flags;
     cli_and_save(flags) {
-        sys_execute((uint8_t *) "initd", 0, 0, init_task_main);
+        sys_execute((uint8_t *) "initial", 0, 0, init_task_main);
     }
     restore_flags(flags);
 }
