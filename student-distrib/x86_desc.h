@@ -188,7 +188,7 @@ typedef union idt_desc_t {
     } __attribute__ ((packed));
 } idt_desc_t;
 
-// self-defined PDE for 4-kb case
+// self-defined PDE for 4-Mb case
 typedef union PDE {
     uint32_t val;
     struct {

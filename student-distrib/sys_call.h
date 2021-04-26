@@ -11,6 +11,8 @@ int invalid_sys_call();
 
 int32_t sys_get_args(uint8_t *buf, int32_t nbytes);
 
+int sys_vidmap(uint8_t** screen_start);
+
 int32_t sys_play_sound(uint32_t nFrequence);
 int32_t sys_nosound();
 

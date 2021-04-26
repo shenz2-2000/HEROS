@@ -25,6 +25,9 @@
 #define PAGE_IN_USE 1
 #define PAGE_FREE   0
 
+// alignment check
+#define PAGE_4KB_ALIGN_CHECK    0x0FFF
+
 // tool functions
 extern void flush_tlb();
 extern int get_eip(dentry_t * task_dentry_ptr);
@@ -33,12 +36,14 @@ extern int load_private_code(dentry_t * task_dentry_ptr);
 extern int executable_check(dentry_t * task_dentry_ptr);
 extern int set_page_for_task(uint8_t* task_file_name, uint32_t* eip);
 extern int get_new_page_id();
-extern void set_video_memory();
-extern void clear_video_memory();
-extern int sys_vidmap(uint8_t** screen_start);
 extern int delete_paging(const int child_id);
 
 int restore_paging(const int child_id, const int parent_id);
 
+int check_flag(uint32_t flag);
+
+int PTE_set(PTE* pte, uint32_t page_addr, uint32_t US, uint32_t RW, uint32_t P);
+
+int PDE_4K_set(PDE *pde, uint32_t pt_addr, uint32_t US, uint32_t RW, uint32_t P);
 
 #endif //FAKE_PAGE_LIB_H

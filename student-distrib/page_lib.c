@@ -224,8 +224,8 @@ int get_new_page_id(){
  * Inputs: child_id - page id of the current process
  *         parent_id - page id of its parent id
  * Return Value: -1 on failure and 0 on success
- * Side effect: None*/
-
+ * Side effect: None
+ * */
 int restore_paging(const int child_id, const int parent_id) {
 
     // Check arguments
@@ -273,33 +273,97 @@ int set_paging(const int child_id){
     return 0;
 }
 
-/* set_video_memory
- * Description: setup page directory for user manipulation
- * Inputs: None
- * Return Value: None
- * Side effect: None*/
+// /* set_video_memory
+//  * Description: setup page directory for user manipulation
+//  * Inputs: None
+//  * Return Value: None
+//  * Side effect: None*/
 
-void set_video_memory(){
+// void set_video_memory(){
 
-    if (page_status[child_id] == PAGE_FREE) {
-        return -1;
-    }
+//     if (page_status[child_id] == PAGE_FREE) {
+//         return -1;
+//     }
 
-    // shut down the child paging and restore parent paging
-    set_private_page(parent_id);   
+//     // shut down the child paging and restore parent paging
+//     set_private_page(parent_id);   
 
-    // 
+//     // 
 
-    page_status[child_id] = 0;
-    n_page_in_use--;
+//     page_status[child_id] = 0;
+//     n_page_in_use--;
+//     return 0;
+// }
+
+/* check_flag
+ * Description: check the 1-bit flag is valid or not
+ * Inputs: flag - the input flag
+ * Return Value: 1 if valid, 0 if not
+ * Side effect: None
+ * */
+int check_flag(uint32_t flag) {
+    if (flag == 0 || flag == 1) return 1;
     return 0;
 }
 
+/* PTE_set
+ * Description: set the target pte entry to be the address of a page
+ * Inputs: pte - the address of target pte entry
+ *         page_addr - the address of the page
+ * Return Value: 0 for success, -1 for fail
+ * Side effect: None
+ * */
+int PTE_set(PTE* pte, uint32_t page_addr, uint32_t US, uint32_t RW, uint32_t P) {
+    if (pte == NULL || page_addr == NULL) {
+        printf("ERROR in PTE_set: NULL input");
+        return -1;
+    }
+    // align check
+    if (page_addr & PAGE_4KB_ALIGN_CHECK) {
+        return -1;
+    }
+    if ((!check_flag(US)) || (!check_flag(RW)) || (!check_flag(P))) {
+        return -1;
+    }
 
+    pte->P = P;
+    pte->US = US;
+    pte->RW = RW;
+    pte->Base_address = page_addr >> 12;
+    
+    return 0;
+}
 
+/* PDE_set
+ * Description: set the target pde entry to be the address of a page table
+ * Inputs: pte - the address of target pde entry
+ *         page_addr - the address of the page table
+ * Return Value: 0 for success, -1 for fail
+ * Side effect: None
+ * */
+int PDE_4K_set(PDE *pde, uint32_t pt_addr, uint32_t US, uint32_t RW, uint32_t P) {
+    if (pde == NULL || pt_addr == NULL) {
+        printf("ERROR in PDE_set: NULL input");
+        return -1;
+    }
+    // align check
+    if (pt_addr & PAGE_4KB_ALIGN_CHECK) {
+        return -1;
+    }
+    if ((!check_flag(US)) || (!check_flag(RW)) || (!check_flag(P))) {
+        return -1;
+    }
 
+    pde->P = P;
+    pde->US = US;
+    pde->RW = RW;
+    // parse for 4-kb case
+    pde->Base_address = pt_addr >> 22;
+    pde->reserved = (pt_addr << 10) >> (10 + 13);
+    pde->PAT = (pt_addr << 19) >> (19 + 12);
 
-
+    return 0;
+}
 
 
 
