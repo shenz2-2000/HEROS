@@ -70,80 +70,40 @@ void change_focus_task(int32_t terminal_num) {
     set_focus_task(foreground_task[terminal_num]);
 }
 
-//#define execute_launch(kesp_des, new_esp, new_eip, ret) asm volatile ("                    \
-//    pushfl          /* save flags */                                   \n\
-//    pushl %%ebp     /* save EBP*/                                      \n\
-//    pushl $1f       /* return address to label 1 after iret */          \n\
-//    movl %%esp, %0                                                        \n\
-//    pushl $0x002B                                                         \n\
-//    pushl %2                                                            \n\
-//    pushl $0x206                                                     \n\
-//    pushl $0x0023                                                    \n\
-//    pushl %3                                                          \n\
-//    iret                                                              \n\
-//1:  popl %%ebp                                                        \n\
-//    movl %%eax, %1                                                     \n\
-//    popfl   "                                              \
-//    : "=m" (kesp_des),                                                            \
-//      "=m" (ret)                                                                      \
-//    : "rm" (new_esp), "rm" (new_eip)                                                  \
-//    : "cc", "memory"                                                                  \
-//)
-
-#define execute_launch(kesp_save_to, new_esp, new_eip, ret) asm volatile ("                    \
-    pushfl          /* save flags on the stack */                                   \n\
-    pushl %%ebp     /* save EBP on the stack */                                     \n\
-    pushl $1f       /* return address to label 1, on top of the stack after iret */ \n\
-    movl %%esp, %0  /* save current ESP */                                          \n\
-    /* The following stack linkage is for IRET */                                   \n\
-    pushl $0x002B   /* user SS - USER_DS */                                         \n\
-    pushl %2        /* user ESP */                                                  \n\
-    pushl $0x206    /* flags (new program should not care, but IF = 1) */           \n\
-    pushl $0x0023   /* user CS - USER_CS  */                                        \n\
-    pushl %3        /* user EIP */                                                  \n\
-    iret            /* enter user program */                                        \n\
-1:  popl %%ebp      /* restore EBP, must before following instructions */           \n\
-    movl %%eax, %1  /* return value pass by halt() in EAX */                        \n\
-    popfl           /* restore flags */"                                              \
-    : "=m" (kesp_save_to), /* must write to memory, or halt() will not get it */      \
+#define execute_launch(kesp_des, new_esp, new_eip, ret) asm volatile ("                    \
+    pushfl          /* save flags */                                   \n\
+    pushl %%ebp     /* save EBP*/                                      \n\
+    pushl $1f       /* return address to label 1 after iret */          \n\
+    movl %%esp, %0                                                        \n\
+    pushl $0x002B                                                         \n\
+    pushl %2                                                            \n\
+    pushl $0x206                                                     \n\
+    pushl $0x0023                                                    \n\
+    pushl %3                                                          \n\
+    iret                                                              \n\
+1:  popl %%ebp                                                        \n\
+    movl %%eax, %1                                                     \n\
+    popfl   "                                              \
+    : "=m" (kesp_des),                                                            \
       "=m" (ret)                                                                      \
     : "rm" (new_esp), "rm" (new_eip)                                                  \
     : "cc", "memory"                                                                  \
 )
 
-//#define execute_launch_in_kernel(kesp_des, new_esp, new_eip, ret) asm volatile (" \
-//    pushfl                                                  \n\
-//    pushl %%ebp                                                    \n\
-//    pushl $1f                                                       \n\
-//    movl %%esp, %0                                           \n\
-//    movl %2, %%esp                                                \n\
-//    pushl %3                                                   \n\
-//    pushl $0x206   */                                                \n\
-//    popfl                                                                           \n\
-//    ret                                                        \n\
-//1:  popl %%ebp                                                  \n\
-//    movl %%eax, %1   */                                            \n\
-//    popfl                           "                                              \
-//    : "=m" (kesp_des), /* must write to memory, or halt() will not get it */      \
-//      "=m" (ret)                                                                      \
-//    : "r" (new_esp), "r" (new_eip)                                                    \
-//    : "cc", "memory"                                                                  \
-//)
-
-#define execute_launch_in_kernel(kesp_save_to, new_esp, new_eip, ret) asm volatile (" \
-    pushfl          /* save flags on the stack */                                   \n\
-    pushl %%ebp     /* save EBP on the stack */                                     \n\
-    pushl $1f       /* return address to label 1, on top of the stack after iret */ \n\
-    movl %%esp, %0  /* save current ESP */                                          \n\
-    movl %2, %%esp  /* set new ESP */                                               \n\
-    pushl %3        /* new EIP */                                                   \n\
-    pushl $0x206    /* flags (new program should not care, but IF = 1) */           \n\
+#define execute_launch_in_kernel(kesp_des, new_esp, new_eip, ret) asm volatile (" \
+    pushfl                                                  \n\
+    pushl %%ebp                                                    \n\
+    pushl $1f                                                       \n\
+    movl %%esp, %0                                           \n\
+    movl %2, %%esp                                                \n\
+    pushl %3                                                   \n\
+    pushl $0x206                                                   \n\
     popfl                                                                           \n\
-    ret             /* enter new kernel task */                                     \n\
-1:  popl %%ebp      /* restore EBP, must before following instructions */           \n\
-    movl %%eax, %1  /* return value pass by halt() in EAX */                        \n\
-    popfl           /* restore flags */"                                              \
-    : "=m" (kesp_save_to), /* must write to memory, or halt() will not get it */      \
+    ret                                                        \n\
+1:  popl %%ebp                                                  \n\
+    movl %%eax, %1                                               \n\
+    popfl                           "                                              \
+    : "=m" (kesp_des), /* must write to memory, or halt() will not get it */      \
       "=m" (ret)                                                                      \
     : "r" (new_esp), "r" (new_eip)                                                    \
     : "cc", "memory"                                                                  \
@@ -157,22 +117,13 @@ void change_focus_task(int32_t terminal_num) {
  * Output: None
  * Side effect: Switch kernel stack
  */
-//#define load_esp_and_return(new_esp,status) asm volatile ("                  \
-//        movl %0, %%esp  /* load old ESP */                                           \n\
-//        ret  /* now it's equivalent to jump execute return */"                         \
-//        :                                                                              \
-//        : "r" (new_esp)   , "a" (status)                                         \
-//        : "cc", "memory"                                                               \
-//    )
-
-#define load_esp_and_return(old_esp, ret) asm volatile ("                                        \
-    movl %0, %%esp  /* load back old ESP */                                      \n\
-    /* EAX store the return status */                                            \n\
-    ret  /* on the old kernel stack, return address is on the top of the stack */" \
-    :                                                                              \
-    : "r" (old_esp)   , "a" (ret)                                                  \
-    : "cc", "memory"                                                               \
-)
+#define load_esp_and_return(new_esp,status) asm volatile ("                  \
+        movl %0, %%esp  /* load old ESP */                                           \n\
+        ret  /* now it's equivalent to jump execute return */"                         \
+        :                                                                              \
+        : "r" (new_esp)   , "a" (status)                                         \
+        : "cc", "memory"                                                               \
+    )
 
 /**
  * parse_args
