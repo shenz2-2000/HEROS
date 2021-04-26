@@ -40,7 +40,7 @@ void flush_tlb() {
  * Function: set up page directory and load the code for the new task (with sanity check)
  * Side effect: change the value of Page Directory*/
 
-int set_page_for_task(uint8_t* task_file_name, uint32_t* eip, uint32_t tid){
+int set_page_for_task(uint8_t* task_file_name, uint32_t* eip){
 
     int i;
     int cur_pid;
