@@ -1,6 +1,7 @@
 #include "vidmap.h"
 #include "page_lib.h"
 #include "lib.h"
+#include "types.h"
 #include "terminal.h"
 #include "x86_desc.h"
 
@@ -44,6 +45,9 @@ void vidmap_init() {
 
         // map to the kernel page itself
         page_table0[VM_PTE + i + 1] = k_bb_pt_list[i][VM_PTE];
+
+        // turn on all the terminals
+        terminal_status[i] = TERMINAL_ON;
     }
 
     flush_tlb();

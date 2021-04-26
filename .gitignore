@@ -115,3 +115,5 @@ dkms.conf
 *.qcow
 source/
 
+# ide
+.vscode
