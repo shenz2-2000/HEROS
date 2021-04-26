@@ -9,6 +9,7 @@ pcb_t* pcb_ptrs[N_PCB_LIMIT];
 int32_t n_present_pcb;
 pcb_t *focus_task_ = NULL;
 pcb_t *foreground_task[MAX_TERMINAL];
+terminal_struct_t *running_term = NULL;
 /**
  * focus_task
  * Description: return the current focus task
@@ -447,4 +448,23 @@ pcb_t* delete_process(pcb_t* pcb) {
  */
 int32_t get_n_present_pcb() {
     return n_present_pcb;
+}
+
+
+/**
+ * terminal_set_running
+ * Description: map physical video memory
+ * Input: terminal -- pointer to the terminal
+ * Output: None
+ * Side effect: None
+ */
+
+void terminal_set_running(terminal_struct_t *terminal) {
+    if (terminal == running_term) return ;
+    running_term -> screen_x = screen_x;
+    running_term -> screen_y = screen_y;
+    terminal_vidmem_set(terminal);
+    screen_x = terminal->screen_x;
+    screen_y = terminal->screen_y;
+    running_term = terminal;
 }
