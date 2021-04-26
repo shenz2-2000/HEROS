@@ -55,4 +55,5 @@ int32_t system_halt(int32_t status);
 int32_t sys_execute(uint8_t *command);
 void change_focus_task(int32_t terminal_id);
 terminal_struct_t* get_running_terminal();
+void init_task_main();
 #endif

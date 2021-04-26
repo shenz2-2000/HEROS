@@ -15,6 +15,7 @@
 #include "sys_call.h"
 #include "signal_sys_call.h"
 #include "gensound.h"
+#include "vidmap.h"
 
 #define RUN_TESTS
 
@@ -249,10 +250,15 @@ void entry(unsigned long magic, unsigned long addr) {
     fill_page();
     init_page_register();
 
+    /* Init vidmap */
+    vidmap_init();
+
     /* Init process pointer */
     process_init();
+
     /* Init Signal */
     signal_init();
+
     /* Enable interrupts */
 
     /* execute shell */
@@ -260,6 +266,17 @@ void entry(unsigned long magic, unsigned long addr) {
 
     /* play the boot music */
     play_song(0);
+
+    uint32_t flags;
+    cli_and_save(flags);
+    {
+        system_execute((uint8_t *) "init_task", 0, 0, init_task_main);
+        printf("Error: return from the init_task, which should not happen");
+    }
+    restore_flags(flags);
+
+    // for test use
+    // sys_execute((uint8_t *) "bibi");
 
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
