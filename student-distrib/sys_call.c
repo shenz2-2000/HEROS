@@ -205,6 +205,7 @@ int32_t sys_write(int32_t fd, const void *buf, int32_t bufsize) {
 
 int sys_vidmap(uint8_t** screen_start){
 
+    pcb_t *cur_pcb = get_cur_process();
     int check_address = (int) screen_start;
 
     // check whether screen_start is in user region (virtual 128MB to 132 MB)
@@ -213,10 +214,16 @@ int sys_vidmap(uint8_t** screen_start){
         return -1;
     }
 
-    // TODO: check whether the current terminal id is correct
+    // check if the current process has allocated a terminal
+    if (cur_pcb->terminal == NULL) {
+        printf("ERROR in get_cur_process(): the current process has allocated no terminal\n");
+        return -1;
+    }
+
+    cur_pcb->vidmap_enable = 1;
 
     // setup the video memory in PD
-    set_video_memory();
+    set_video_memory(cur_pcb->terminal);
 
     *screen_start = (uint8_t*)(USER_VA_END + VM_INDEX);
 
