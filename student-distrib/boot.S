@@ -429,14 +429,19 @@ exception_handler_19:
 
  .globl interrupt_entry_0
 interrupt_entry_0:
-    SAVE_ALL_REGS
+    pushl $0
+    pushl $0
+    SET_HW_CONTEXT
     call pit_interrupt_handler
     pushl $0  # push irq number as argument
     call send_eoi
     addl $4, %esp
-    RESTORE_ALL_REGS
+    // TODO: temporarily disable signal check for debugging
+    # call check_signal
+    RESTORE_HW_CONTEXT
     iret  # return from interrupt
 
+// TODO: change interrupt linkage to support signal
  .globl interrupt_entry_1
 interrupt_entry_1:
     SAVE_ALL_REGS

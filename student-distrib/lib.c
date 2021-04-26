@@ -570,6 +570,21 @@ int8_t* strncpy(int8_t* dest, const int8_t* src, uint32_t n) {
     return dest;
 }
 
+int32_t strcmp(int8_t* str1, int8_t* str2){
+    int32_t i = 0;
+    while(str1[i] != '\0'){
+        if(str2[i] == '\0' || (str1[i] != str2[i])){
+            return -1;
+        }
+        i++;
+    }
+
+    if(str2[i] != '\0'){return -1;}
+
+    return 1;
+
+}
+
 /* void test_interrupts(void)
  * Inputs: void
  * Return Value: void

@@ -6,7 +6,8 @@
 #define _LIB_H
 
 #include "types.h"
-
+extern int screen_x;
+extern int screen_y;
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
 int32_t puts(int8_t *s);
@@ -31,6 +32,7 @@ void* memmove(void* dest, const void* src, uint32_t n);
 int32_t strncmp(const int8_t* s1, const int8_t* s2, uint32_t n);
 int8_t* strcpy(int8_t* dest, const int8_t*src);
 int8_t* strncpy(int8_t* dest, const int8_t*src, uint32_t n);
+int32_t strcmp(int8_t* str1, int8_t* str2);
 
 /* Userspace address-check functions */
 int32_t bad_userspace_addr(const void* addr, int32_t len);

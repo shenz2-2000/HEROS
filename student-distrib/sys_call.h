@@ -17,4 +17,6 @@ int32_t sys_get_args(uint8_t *buf, int32_t nbytes);
 int32_t sys_play_sound(uint32_t nFrequence);
 int32_t sys_nosound();
 
+void load_esp_and_return(uint32_t new_esp,int32_t status);
+
 #endif
