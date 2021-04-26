@@ -394,6 +394,8 @@ int sys_vidmap(uint8_t** screen_start){
         return -1;
     }
 
+    // TODO: check whether the current terminal id is correct
+
     // setup the video memory in PD
     set_video_memory();
 
