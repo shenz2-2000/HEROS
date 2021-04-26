@@ -1,8 +1,6 @@
 #ifndef _VIDMAP_H
 #define _VIDMAP_H
 
-#include "terminal.h"
-
 #define VM_INDEX      0xB8000
 #define VM_PTE        0xB8
 
@@ -18,8 +16,5 @@
 void vidmap_init();
 void set_video_memory();
 void clear_video_memory();
-int terminal_turn_on(terminal_struct_t *terminal);
-int switch_terminal(terminal_struct_t *old_terminal, terminal_struct_t *new_terminal);
-int terminal_vidmap(terminal_struct_t *terminal);
 
 #endif

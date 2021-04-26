@@ -26,14 +26,18 @@ int32_t terminal_open(const uint8_t* filename);
 int32_t terminal_close(int32_t fd);
 int32_t terminal_write(int32_t fd, const void* buf, int32_t nbytes);
 int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes);
-
-typedef struct terminal_struct_t{
+typedef struct terminal_struct_t terminal_struct_t;
+struct terminal_struct_t{
     int valid, id, buf_cnt, user_ask, screen_x, screen_y;
     char buf[KEYBOARD_BUF_SIZE];
-} terminal_struct_t;
+};
 
 void terminal_init();
 terminal_struct_t* terminal_allocate();
 void terminal_deallocate(terminal_struct_t* terminal);
 void terminal_set_running(terminal_struct_t *terminal);
+int terminal_turn_on(terminal_struct_t *terminal);
+int switch_terminal(terminal_struct_t *old_terminal, terminal_struct_t *new_terminal);
+int terminal_vidmap(terminal_struct_t *terminal);
+
 #endif

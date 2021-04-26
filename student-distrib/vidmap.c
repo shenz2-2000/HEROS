@@ -6,13 +6,13 @@
 
 /* global var */
 // terminal
-static int32_t terminal_status[MAX_TERMINAL];
-static terminal_struct_t *terminal_showing;     // current showing terminal
-static terminal_struct_t *terminal_running;     // the terminal that is occupied by a running process
+int32_t terminal_status[MAX_TERMINAL];
+terminal_struct_t *terminal_showing;     // current showing terminal
+terminal_struct_t *terminal_running;     // the terminal that is occupied by a running process
 
 // backup buffer
-static PTE k_bb_pt_list[MAX_TERMINAL][PAGE_TABLE_SIZE];
-static PTE u_bb_pt_list[MAX_TERMINAL][PAGE_TABLE_SIZE];
+PTE k_bb_pt_list[MAX_TERMINAL][PAGE_TABLE_SIZE];
+PTE u_bb_pt_list[MAX_TERMINAL][PAGE_TABLE_SIZE];
 
 /* vidmap_init
  * Description: initialize the video memory map
@@ -99,108 +99,3 @@ void clear_video_memory(){
     flush_tlb();
 }
 
-/* ------------------- terminal operation --------------------- */
-
-/* terminal_turn_on
- * Description: turn on the terminal
- * Inputs: terminal - the target terminal struct
- * Return Value: None
- * Side effect: None
- * */
-int terminal_turn_on(terminal_struct_t *terminal) {
-    if (terminal == NULL) {
-        printf("ERROR in terminal_turn_on(): NULL input");
-        return -1;
-    }
-    if (terminal->id < 0 || terminal->id >= MAX_TERMINAL) {
-        printf("ERROR in terminal_turn_on(): no such terminal_id: %d", terminal->id);
-        return -1;
-    }
-    if (terminal_status[terminal->id] == TERMINAL_ON) {
-        printf("WARNING in terminal_turn_on(): the terminal %d is already turned on\n", terminal->id);
-    }
-
-    terminal_status[terminal->id] = TERMINAL_ON;
-    return 0;
-}
-
-/* swtich_terminal
- * Description: switch the terminal
- * Inputs: old_terminal - the old shown terminal(to be stored). this param can be NULL because the 
- *                   process can allocate a terminal from nothing
- *         new_terminal - the new terminal to be shown (this param can also be NULL)
- * Return Value: None
- * Side effect: None
- * */
-int switch_terminal(terminal_struct_t *old_terminal, terminal_struct_t *new_terminal) {
-    // sanity check
-    if (old_terminal == new_terminal) return 0;
-    if (old_terminal != NULL) {
-        if (old_terminal->id < 0 || old_terminal->id >= MAX_TERMINAL) {
-            printf("ERROR in swtich_terminal(): bad input of old_terminal\n");
-            return -1;
-        }
-        if (terminal_status[old_terminal->id] == TERMINAL_OFF) {
-            printf("ERROR in swtich_terminal(): old_terminal not turned on\n");
-            return -1;
-        }
-    }
-    if (new_terminal != NULL) {
-        if (new_terminal->id < 0 || new_terminal->id >= MAX_TERMINAL) {
-            printf("ERROR in swtich_terminal(): bad input of new_terminal\n");
-            return -1;
-        }
-        if (terminal_status[new_terminal->id] == TERMINAL_OFF) {
-            printf("ERROR in swtich_terminal(): new_terminal not turned on\n");
-            return -1;
-        }
-    }
-
-    // copy the physical video memory to the backup buffer
-    if (old_terminal != NULL) {
-        memcpy((uint8_t *) (VM_INDEX + (old_terminal->id + 1) * BITS_4K), (uint8_t *) (VM_INDEX), BITS_4K);
-    }
-
-    // copy the backup buffer of new terminal to the video memory area
-    if (new_terminal != NULL) {
-        memcpy((uint8_t *) (VM_INDEX), (uint8_t *) (VM_INDEX + (old_terminal->id + 1) * BITS_4K), BITS_4K);
-    }
-
-    terminal_showing = new_terminal;
-    terminal_vidmap(terminal_running);
-
-    return 0;    
-}
-
-/* terminal_vidmap
- * Description: map the target terminal to the corresponding memory area (video mem or backup buffer)
- * Inputs: terminal - the target terminal
- * Return Value: 0 for success
- * Side effect: None
- * */
-int terminal_vidmap(terminal_struct_t *terminal) {
-    int ret;
-
-    // sanity check
-    if (terminal != NULL) {
-        if (terminal->id < 0 || terminal->id >= MAX_TERMINAL) {
-            printf("ERROR in terminal_vidmap(): bad input of terminal\n");
-            return -1;
-        }
-        if (terminal_status[terminal->id] == TERMINAL_OFF) {
-            printf("ERROR in terminal_vidmap(): terminal not turned on\n");
-            return -1;
-        }
-    }
-
-    if (terminal == NULL || (terminal != NULL && terminal->id == terminal_showing)) {
-        ret = PDE_4K_set(&(page_directory[0]), (uint32_t) &(page_table0), 0, 1, 1);
-        if (ret == -1) return -1;
-    } else {
-        ret = PDE_4K_set(&(page_directory[0]), (uint32_t) &(k_bb_pt_list[terminal->id]), 0, 1, 1);
-        if (ret == -1) return -1;
-    }
-    terminal_running = terminal;
-    flush_tlb();
-    return 0;
-}
