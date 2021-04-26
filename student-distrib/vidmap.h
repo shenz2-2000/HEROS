@@ -1,14 +1,6 @@
 #ifndef _VIDMAP_H
 #define _VIDMAP_H
 
-// TODO: delete this before push!
-#define MAX_TERMINAL 3
-typedef struct terminal_struct_t{
-    int id;
-} terminal_struct_t;
-// TODO: to be determined
-#define NULL_TERMINAL_ID 1
-
 #define VM_INDEX      0xB8000
 #define VM_PTE        0xB8
 
