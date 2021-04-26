@@ -4,6 +4,7 @@
 #include "file_sys.h"
 #include "x86_desc.h"
 #include "signal_sys_call.h"
+#include "terminal.h"
 #define N_PCB_LIMIT 3
 
 #define TASK_KSTK_SIZE_IN_B 8192
@@ -30,7 +31,7 @@ struct pcb_t {
     uint32_t k_esp;
     file_arr_t file_arr;
     uint8_t pid;
-    int init_task,kernel_task,idle_task;
+    uint8_t init_task,kernel_task,idle_task;
     signal_struct_t signals;
     uint32_t time;
     task_node* node;
@@ -49,5 +50,8 @@ pcb_t* focus_task();
 pcb_t* create_process();
 pcb_t* delete_process(pcb_t* pcb);
 int32_t get_n_present_pcb();
+int parse_args(uint8_t *command, uint8_t **args);
+int32_t system_halt(int32_t status);
+int32_t sys_execute(uint8_t *command);
 void change_focus_task(int32_t terminal_id);
 #endif

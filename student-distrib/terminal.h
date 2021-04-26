@@ -35,4 +35,5 @@ typedef struct terminal_struct_t{
 void terminal_init();
 terminal_struct_t* terminal_allocate();
 void terminal_deallocate(terminal_struct_t* terminal);
+void terminal_set_running(terminal_struct_t *terminal);
 #endif

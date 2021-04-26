@@ -29,11 +29,10 @@ pcb_t *focus_task() {
  */
 void set_focus_task(pcb_t* target_task) {
     uint32_t flags;
-    cli_and_save(flags){
-        terminal_vidmem_switch(target_task->terminal->id, focus_task()->terminal->id);
-        focus_task_ = target_task;
-        task_apply_user_vidmap(get_cur_process());
-    }
+    cli_and_save(flags);
+    switch_terminal(target_task->terminal->id, focus_task()->terminal->id);
+    focus_task_ = target_task;
+    task_apply_user_vidmap(get_cur_process());
     restore_flags(flags);
 }
 
@@ -79,7 +78,7 @@ void change_focus_task(int32_t terminal_num) {
 1:  popl %%ebp                                                  \n\
     movl %%eax, %1   */                                            \n\
     popfl                           "                                              \
-    : "=m" (kesp_save_to), /* must write to memory, or halt() will not get it */      \
+    : "=m" (kesp_des), /* must write to memory, or halt() will not get it */      \
       "=m" (ret)                                                                      \
     : "r" (new_esp), "r" (new_eip)                                                    \
     : "cc", "memory"                                                                  \
@@ -165,7 +164,7 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
     } else {
         process->parent = (wait_for_child==1)?get_cur_process():NULL;
     }
-    if (function_address!=NULL) process->kernal_task=1;
+    if (function_address!=NULL) process->kernel_task=1;
     if (wait_for_child==-1) process->idle_task=1;
     process->vidmap_enable = 0;
     process->k_esp = (uint32_t)process+TASK_KSTK_SIZE_IN_B-1;
@@ -184,13 +183,13 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
     if (add_task_to_list(process)==-1) return -1;
     //  set video memory for the current process
     if (process->kernel_task) {
-        task -> terminal = NULL;
-        task -> id = -1; // kernel task has no paging and terminal
+        process -> terminal = NULL;
+        process -> id = -1; // kernel task has no paging and terminal
         eip = (uint32_t) function_address;
     }  else {
         if (separate_terminal) {
             process->terminal = terminal_allocate();
-            terminal_vidmem_open(process->terminal->terminal_id);
+            //terminal_vidmem_open(process->terminal->terminal_id);
         } else {
             if (process->init_task) process->terminal = NULL;
             else process->terminal = get_cur_process()->terminal;
@@ -203,14 +202,14 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
     }
     process->pid = pid_ret;
     if (process->terminal != NULL) {
-        foreground_task[process->terminal->terminal_id] = process;
+        foreground_task[process->terminal->id] = process;
         set_focus_task(process);
     }
     terminal_set_running(process->terminal);
     if (separate_terminal) {
         clear();
         reset_screen();
-        printf("TERMINAL %d\n", process->terminal->terminal_id);
+        printf("TERMINAL %d\n", process->terminal->id);
     }
 
     init_file_arr(&(process->file_arr));
@@ -253,7 +252,7 @@ int32_t system_halt(int32_t status) {
 
 
     pcb_t * cur_task = get_cur_process();
-    task_node * cur_node = cur_task->node;
+//    task_node * cur_node = cur_task->node;
 
     // condition check
     // TODO: check whether it works
@@ -270,8 +269,6 @@ int32_t system_halt(int32_t status) {
     clear_video_memory();
 
     sys_execute((uint8_t *) "shell");
-    return -1;
-}
 
     // remove cur_task from task list
     delete_task_from_list(cur_task);
@@ -373,8 +370,17 @@ void process_init() {
         pcb_ptrs[i] = (pcb_t*) (TASK_KSTK_BOTTOM - (i+1) * TASK_KSTK_SIZE_IN_B);
         pcb_ptrs[i]->present = 0;   // init as not present
     }
+    for (i = 0; i < MAX_TERMINAL; ++i) foreground_task[i] = NULL;
+    init_scheduler();
 }
 
+void run_initial_task() {
+    uint32_t flags;
+    cli_and_save(flags) {
+        sys_execute((uint8_t *) "initd", 0, 0, init_task_main);
+    }
+    restore_flags(flags);
+}
 /**
  * create_process
  * Description: create a new pcb and return the pcb pointer
@@ -450,21 +456,23 @@ int32_t get_n_present_pcb() {
     return n_present_pcb;
 }
 
+void init_task_main() {
 
-/**
- * terminal_set_running
- * Description: map physical video memory
- * Input: terminal -- pointer to the terminal
- * Output: None
- * Side effect: None
- */
+    int32_t ret;
+    uint32_t flags;
+    cli_and_save(flags);
+    {
+        sys_execute((uint8_t *) "idle", -1, 0, idle_task_main);
+        sys_execute((uint8_t *) "shell", 0, 1, NULL);
+        sys_execute((uint8_t *) "shell", 0, 1, NULL);
+        do {
+            ret = sys_execute((uint8_t *) "shell", 1, 1, NULL);
+        } while (ret == 0);
+        system_halt(-1);
+    }
+    restore_flags(flags);
+}
 
-void terminal_set_running(terminal_struct_t *terminal) {
-    if (terminal == running_term) return ;
-    running_term -> screen_x = screen_x;
-    running_term -> screen_y = screen_y;
-    terminal_vidmem_set(terminal);
-    screen_x = terminal->screen_x;
-    screen_y = terminal->screen_y;
-    running_term = terminal;
+void idle_task_main() {
+    while (1) {}
 }

@@ -5,6 +5,8 @@
 #include "debug.h"
 #include "tests.h"
 #include "rtc.h"
+#include "link.h"
+#include "idt.h"
 #include "terminal.h"
 #include "process.h"
 #include "scheduler.h"
@@ -40,24 +42,15 @@ static const char shift_scan_code_table[128] = {
 };
 task_node local_wait_list = {&(local_wait_list), &(local_wait_list), NULL ,1};
 terminal_struct_t terminal_slot[MAX_TERMINAL]; // Maximal terminal number is 3
-/*
- * keyboard_interrupt
- *   DESCRIPTION: Handle the interrupt from keyboard
- *   INPUTS: scan code from port 0x60
- *   OUTPUTS: none
- *   RETURN VALUE: none
- *   SIDE EFFECTS: interrupt
- */
-void keyboard_interrupt_handler() {
-    uint8_t input = inb(KEYBOARD_PORT);
+void handle_input(uint8_t input) {
     int capital, letter, shift_on;
     char chr;
     if (input > KEY_BOARD_PRESSED) { // If it is a keyboard release signal
-        flag[input - RELEASE_DIFF] = 0; 
+        flag[input - RELEASE_DIFF] = 0;
         if (input - RELEASE_DIFF == CAPLCL_PRESSED) CUR_CAP^=1;
     }
     else {
-        // Mark the input signal and adjust the captial state
+        // Mark the input signal and adjust the capital state
         flag[input] = 1;
         capital = CUR_CAP ^ (flag[LEFT_SHIFT_PRESSED]|flag[RIGHT_SHIFT_PRESSED]);
         if (flag[CTRL_PRESSED]&&flag[L_PRESSED]) { // Manage Ctrl+l
@@ -73,7 +66,7 @@ void keyboard_interrupt_handler() {
                     putc(chr);
                 } else {
                     shift_on = (flag[LEFT_SHIFT_PRESSED]|flag[RIGHT_SHIFT_PRESSED]);
-                    chr = shift_on?shift_scan_code_table[input]:scan_code_table[input]; 
+                    chr = shift_on?shift_scan_code_table[input]:scan_code_table[input];
                     putc(chr);
                     focus_task()->terminal->buf[focus_task()->terminal->buf_cnt++]=chr;
                 }
@@ -103,8 +96,27 @@ void keyboard_interrupt_handler() {
         }
 
     }
-        
-    sti();
+}
+/*
+ * keyboard_interrupt
+ *   DESCRIPTION: Handle the interrupt from keyboard
+ *   INPUTS: scan code from port 0x60
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ *   SIDE EFFECTS: interrupt
+ */
+ASMLINKAGE void keyboard_interrupt_handler(hw_context hw) {
+    uint8_t input = inb(KEYBOARD_PORT);
+    uint32_t flags;
+    cli_and_save(flags) {
+        idt_send_eoi(hw.irq);
+        if (focus_task()) {
+            terminal_set_running(focus_task()->terminal);
+        }
+    }
+    handle_input(input);
+    terminal_set_running(get_cur_process()->terminal);
+    restore_flags(flags);
 }
 
 
@@ -119,10 +131,8 @@ void keyboard_interrupt_handler() {
 void terminal_initialization(){
     int i;
     // initialization
-    key_buf_cnt = 0;
-    for(i = 0; i < KEYBOARD_BUF_SIZE; i++){
-        flag[i] = 0;
-        keyboard_buf[i] = 0;
+    for(i = 0; i < MAX_TERMINAL; i++){
+        terminal_slot[i].valid = 0;
     }
 }
 
@@ -175,7 +185,7 @@ void print_terminal_info(){
  */
 int32_t terminal_open(const uint8_t* filename){
     // initialization
-    terminal_initialization();
+    (void)filename;
     return 0;
 }
 
@@ -189,6 +199,7 @@ int32_t terminal_open(const uint8_t* filename){
  */
 int32_t terminal_close(int32_t fd){
     // close
+    (void) fd;
     return 0;
 }
 
@@ -343,4 +354,20 @@ terminal_struct_t* terminal_allocate() {
 
 
 
+/**
+ * terminal_set_running
+ * Description: map physical video memory
+ * Input: terminal -- pointer to the terminal
+ * Output: None
+ * Side effect: None
+ */
 
+void terminal_set_running(terminal_struct_t *terminal) {
+    if (terminal == running_term) return ;
+    running_term -> screen_x = screen_x;
+    running_term -> screen_y = screen_y;
+    //terminal_vidmem_set(terminal);
+    screen_x = terminal->screen_x;
+    screen_y = terminal->screen_y;
+    running_term = terminal;
+}
