@@ -236,7 +236,7 @@ void reschedule(){
 
     // TODO: not finished yet, page, vidmap, terminal switch
 
-    tss.esp0 = next_task->k_esp;
+    tss.esp0 = next_task->k_esp_base;
 
     // switch stack to the next task
     // TODO: ensure it works here

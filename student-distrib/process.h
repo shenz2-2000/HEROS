@@ -28,7 +28,7 @@ struct pcb_t {
     pcb_t* parent;
     uint8_t* name;
     uint8_t* args;
-    uint32_t k_esp;
+    uint32_t k_esp, k_esp_base;
     file_arr_t file_arr;
     uint8_t pid;
     uint8_t init_task,kernel_task,idle_task,own_terminal,wait_for_child;

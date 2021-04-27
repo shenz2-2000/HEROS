@@ -199,19 +199,20 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
     }
     if (function_address!=NULL) process->kernel_task=1;
     process->vidmap_enable = 0;
-    process->k_esp = (uint32_t)process+TASK_KSTK_SIZE_IN_B-1;
+    process->k_esp_base = (uint32_t)process+TASK_KSTK_SIZE_IN_B-1;
     // Parse name and arguments
     parse_args(command, &(process->args));
     process->name = command;
     // move name and argument to new program's PCB
     length = strlen((int8_t *)process -> name);
-    process->k_esp-=length;
-    process->name=(uint8_t *)strcpy((int8_t *)process->k_esp, (int8_t *) process->name);
+    process->k_esp_base-=length;
+    process->name=(uint8_t *)strcpy((int8_t *)process->k_esp_base, (int8_t *) process->name);
     if (process->args!=NULL) {
         length = strlen((int8_t *)process -> args);
-        process->k_esp-=length;
-        process->args=(uint8_t *)strcpy((int8_t *)process->k_esp, (int8_t *) process->args);
+        process->k_esp_base-=length;
+        process->args=(uint8_t *)strcpy((int8_t *)process->k_esp_base, (int8_t *) process->args);
     }
+    process -> k_esp = process -> k_esp_base;
     if (add_task_to_list(process)==-1) return -1;
     //  set video memory for the current process
     if (process->kernel_task) {
@@ -350,7 +351,7 @@ int32_t system_halt(int32_t status) {
         terminal_set_running(cur_task->parent->terminal);
         // ---------------------------------------------
 
-        tss.esp0 = cur_task->parent->k_esp;
+        tss.esp0 = cur_task->parent->k_esp_base;
         load_esp_and_return(cur_task->parent->k_esp, status);
         }
 

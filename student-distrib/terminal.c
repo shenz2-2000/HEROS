@@ -373,8 +373,10 @@ terminal_struct_t* terminal_allocate() {
 
 void terminal_set_running(terminal_struct_t *terminal) {
     if (terminal == get_running_terminal()) return ;
-    get_running_terminal() -> screen_x = screen_x;
-    get_running_terminal() -> screen_y = screen_y;
+    if (get_running_terminal()!=NULL) {
+        get_running_terminal() -> screen_x = screen_x;
+        get_running_terminal() -> screen_y = screen_y;
+    }
     terminal_vidmap(terminal);
     screen_x = terminal->screen_x;
     screen_y = terminal->screen_y;
