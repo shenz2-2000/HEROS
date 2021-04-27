@@ -444,23 +444,27 @@ interrupt_entry_0:
 // TODO: change interrupt linkage to support signal
  .globl interrupt_entry_1
 interrupt_entry_1:
-    SAVE_ALL_REGS
+    pushl $0
+    pushl $1
+    SET_HW_CONTEXT
     call keyboard_interrupt_handler
     pushl $1  # push irq number as argument
     call send_eoi
     addl $4, %esp 
-    RESTORE_ALL_REGS
+    RESTORE_HW_CONTEXT
     iret  # return from interrupt 
 
 
 .globl interrupt_entry_8
 interrupt_entry_8:
-    SAVE_ALL_REGS
+    pushl $0
+    pushl $8
+    SET_HW_CONTEXT
     call rtc_interrupt_handler
     pushl $8  # push irq number as argument
     call send_eoi
     addl $4, %esp 
-    RESTORE_ALL_REGS
+    RESTORE_HW_CONTEXT
     iret  # return from interrupt 
 
 # System call handler is in the same format as exception handler

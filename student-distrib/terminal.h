@@ -32,11 +32,13 @@ struct terminal_struct_t{
     char buf[KEYBOARD_BUF_SIZE];
 };
 
+//extern terminal_struct_t null_terminal;
+
 void terminal_init();
 terminal_struct_t* terminal_allocate();
 void terminal_deallocate(terminal_struct_t* terminal);
 void terminal_set_running(terminal_struct_t *terminal);
-int terminal_turn_on(terminal_struct_t *terminal);
+//int terminal_turn_on(terminal_struct_t *terminal);
 int switch_terminal(terminal_struct_t *old_terminal, terminal_struct_t *new_terminal);
 int terminal_vidmap(terminal_struct_t *terminal);
 

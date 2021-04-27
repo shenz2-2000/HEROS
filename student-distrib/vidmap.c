@@ -10,9 +10,38 @@ int32_t terminal_status[MAX_TERMINAL];
 terminal_struct_t *terminal_showing;     // current showing terminal
 terminal_struct_t *terminal_running;     // the terminal that is occupied by a running process
 
+terminal_struct_t* get_terminal_running() {
+    return terminal_running;
+}
+void set_terminal_running(terminal_struct_t *terminal) {
+    terminal_running = terminal;
+}
+
+terminal_struct_t* get_terminal_showing() {
+    return terminal_showing;
+}
+void set_terminal_showing(terminal_struct_t *terminal) {
+    terminal_showing = terminal;
+}
+
 // backup buffer
-PTE k_bb_pt_list[MAX_TERMINAL][PAGE_TABLE_SIZE];
-PTE u_bb_pt_list[MAX_TERMINAL][PAGE_TABLE_SIZE];
+PTE k_bb_pt_0[PAGE_TABLE_SIZE] __attribute__ ((aligned (ALIGN_4K)));
+PTE k_bb_pt_1[PAGE_TABLE_SIZE] __attribute__ ((aligned (ALIGN_4K)));
+PTE k_bb_pt_2[PAGE_TABLE_SIZE] __attribute__ ((aligned (ALIGN_4K)));
+PTE* k_bb_pt_list[MAX_TERMINAL] = {k_bb_pt_0, k_bb_pt_1, k_bb_pt_2};
+
+PTE u_bb_pt_0[PAGE_TABLE_SIZE] __attribute__ ((aligned (ALIGN_4K)));
+PTE u_bb_pt_1[PAGE_TABLE_SIZE] __attribute__ ((aligned (ALIGN_4K)));
+PTE u_bb_pt_2[PAGE_TABLE_SIZE] __attribute__ ((aligned (ALIGN_4K)));
+PTE* u_bb_pt_list[MAX_TERMINAL] = {u_bb_pt_0, u_bb_pt_1, u_bb_pt_2};
+
+//PTE k_bb_pt_list[MAX_TERMINAL][PAGE_TABLE_SIZE] __attribute__ ((aligned (ALIGN_4K)));
+//PTE u_bb_pt_list[MAX_TERMINAL][PAGE_TABLE_SIZE] __attribute__ ((aligned (ALIGN_4K)));
+
+//page_table_struct k_bb_pt_list[MAX_TERMINAL];
+//page_table_struct u_bb_pt_list[MAX_TERMINAL];
+
+extern terminal_struct_t null_terminal;
 
 /* vidmap_init
  * Description: initialize the video memory map
@@ -23,8 +52,8 @@ PTE u_bb_pt_list[MAX_TERMINAL][PAGE_TABLE_SIZE];
 void vidmap_init() {
     int i, j;
 
-    terminal_showing = NULL;
-    terminal_running = NULL;
+    terminal_showing = &null_terminal;
+    terminal_running = &null_terminal;
 
     for (i = 0; i < MAX_TERMINAL; i++) {
         terminal_status[i] = TERMINAL_OFF;
@@ -46,7 +75,7 @@ void vidmap_init() {
         page_table0[VM_PTE + i + 1] = k_bb_pt_list[i][VM_PTE];
 
         // turn on all the terminals
-        terminal_status[i] = TERMINAL_ON;
+        terminal_status[i] = TERMINAL_ON; // the terminals are definitely on
     }
 
     flush_tlb();
@@ -63,7 +92,7 @@ void set_video_memory(terminal_struct_t *terminal){
     // the page directory entry we need to setup
     PDE *u_vm_pde = &(page_directory[U_VM_PDE]);
 
-    if (terminal == NULL) {
+    if (terminal == &null_terminal) {
         // turn off the user vidmap
         u_vm_pde->val = 0;
     } else {

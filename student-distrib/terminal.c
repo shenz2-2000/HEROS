@@ -16,6 +16,13 @@
 // Maximum Size of keyboard buffer should be 128
 static int key_buf_cnt=0;
 static char keyboard_buf[KEYBOARD_BUF_SIZE];
+terminal_struct_t null_terminal ={
+        .valid = 1,
+        .id = -1,
+        .buf_cnt = 0,
+        .screen_x = 0,
+        .screen_y = 0
+};
 static int flag[128];       // There're at most 128 characters on the keyboard
 // check whether terminal_read is working
 // Using scan code set 1 for we use "US QWERTY" keyboard
@@ -45,10 +52,18 @@ terminal_struct_t terminal_slot[MAX_TERMINAL]; // Maximal terminal number is 3
 
 // global var in vidmap.c
 extern int32_t terminal_status[MAX_TERMINAL];
-extern terminal_struct_t *terminal_showing;     // current showing terminal
-extern terminal_struct_t *terminal_running;     // the terminal that is occupied by a running process
-extern PTE k_bb_pt_list[MAX_TERMINAL][PAGE_TABLE_SIZE];
-extern PTE u_bb_pt_list[MAX_TERMINAL][PAGE_TABLE_SIZE];
+//extern terminal_struct_t *terminal_showing;     // current showing terminal
+//extern terminal_struct_t *terminal_running;     // the terminal that is occupied by a running process
+//extern PTE k_bb_pt_list[MAX_TERMINAL][PAGE_TABLE_SIZE];
+//extern PTE u_bb_pt_list[MAX_TERMINAL][PAGE_TABLE_SIZE];
+extern PTE k_bb_pt_0[PAGE_TABLE_SIZE];
+extern PTE k_bb_pt_1[PAGE_TABLE_SIZE];
+extern PTE k_bb_pt_2[PAGE_TABLE_SIZE];
+extern PTE* k_bb_pt_list[MAX_TERMINAL];
+extern PTE u_bb_pt_0[PAGE_TABLE_SIZE];
+extern PTE u_bb_pt_1[PAGE_TABLE_SIZE];
+extern PTE u_bb_pt_2[PAGE_TABLE_SIZE];
+extern PTE* u_bb_pt_list[MAX_TERMINAL];
 
 void handle_input(uint8_t input) {
     int capital, letter, shift_on;
@@ -98,9 +113,9 @@ void handle_input(uint8_t input) {
         } else if (flag[BACKSPACE_PRESSED]) {  // Manage backspace
             if (focus_task()->terminal->buf_cnt) delete_last(),--focus_task()->terminal->buf_cnt;
         } else if (flag[ALT_PRESSED]) {
-            if (flag[F1_PRESSED]) change_focus_task(1);
-            else if (flag[F2_PRESSED]) change_focus_task(2);
-            else if (flag[F3_PRESSED]) change_focus_task(3);
+            if (flag[F1_PRESSED]) change_focus_task(0);
+            else if (flag[F2_PRESSED]) change_focus_task(1);
+            else if (flag[F3_PRESSED]) change_focus_task(2);
         }
 
     }
@@ -228,7 +243,7 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
 
     int i,j;
     int end_flag = 0;
-
+    uint32_t  flags;
     // invalid nbytes
     if(nbytes < 0) return -1;
     // meaningless nbytes
@@ -243,7 +258,7 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     // loop until exit
     while(!end_flag) {
         // prevent interrupt from modifying the line buffer
-        cli();
+        cli_and_save(flags);
         // detect enter
         for (i = 0; i <= (get_cur_process()->terminal->buf_cnt - 1); i++) {
             if (get_cur_process()->terminal->buf[i] == '\n') {
@@ -252,17 +267,12 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
                 break;
             }
         }
-        sti();
+        restore_flags(flags);
     }
-//    if (!end_flag) {
-////        get_cur_process()->flags |= TASK_WAITING_CHILD;
-////        append_to_list_end(&local_wait_list);
-////        reschedule();
-//    }
-    //}
+    printf("Getting out of loop\n");
     get_cur_process()->terminal->user_ask = 0;
     // new critical section
-    cli();
+    cli_and_save(flags);
     // set the copy number
     if(j > nbytes) j = nbytes;
     if(get_cur_process()->terminal->buf[j-1] != '\n'){
@@ -276,7 +286,7 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     get_cur_process()->terminal->buf_cnt = 0;
 
 
-    sti();
+    restore_flags(flags);
 
 
 
@@ -373,41 +383,46 @@ terminal_struct_t* terminal_allocate() {
  */
 
 void terminal_set_running(terminal_struct_t *terminal) {
-    if (terminal == get_running_terminal()) return ;
-    if (get_running_terminal()!=NULL) {
-        get_running_terminal() -> screen_x = screen_x;
-        get_running_terminal() -> screen_y = screen_y;
+    if (terminal == &null_terminal) return;
+    uint32_t flags;
+    cli_and_save(flags);
+    terminal_struct_t* cur = get_running_terminal();
+    if (terminal == cur) return ;
+    if (cur!=&null_terminal) {
+        cur -> screen_x = screen_x;
+        cur -> screen_y = screen_y;
     }
     terminal_vidmap(terminal);
     screen_x = terminal->screen_x;
     screen_y = terminal->screen_y;
     set_running_terminal(terminal);
+    restore_flags(flags);
 }
 
 /* ------------------- terminal operation --------------------- */
 
-/* terminal_turn_on
- * Description: turn on the terminal
- * Inputs: terminal - the target terminal struct
- * Return Value: None
- * Side effect: None
- * */
-int terminal_turn_on(terminal_struct_t *terminal) {
-    if (terminal == NULL) {
-        printf("ERROR in terminal_turn_on(): NULL input");
-        return -1;
-    }
-    if (terminal->id < 0 || terminal->id >= MAX_TERMINAL) {
-        printf("ERROR in terminal_turn_on(): no such terminal_id: %d", terminal->id);
-        return -1;
-    }
-    if (terminal_status[terminal->id] == TERMINAL_ON) {
-        printf("WARNING in terminal_turn_on(): the terminal %d is already turned on\n", terminal->id);
-    }
-
-    terminal_status[terminal->id] = TERMINAL_ON;
-    return 0;
-}
+///* terminal_turn_on
+// * Description: turn on the terminal
+// * Inputs: terminal - the target terminal struct
+// * Return Value: None
+// * Side effect: None
+// * */
+//int terminal_turn_on(terminal_struct_t *terminal) {
+//    if (terminal == NULL) {
+//        printf("ERROR in terminal_turn_on(): NULL input");
+//        return -1;
+//    }
+//    if (terminal->id < 0 || terminal->id >= MAX_TERMINAL) {
+//        printf("ERROR in terminal_turn_on(): no such terminal_id: %d", terminal->id);
+//        return -1;
+//    }
+//    if (terminal_status[terminal->id] == TERMINAL_ON) {
+//        printf("WARNING in terminal_turn_on(): the terminal %d is already turned on\n", terminal->id);
+//    }
+//
+//    terminal_status[terminal->id] = TERMINAL_ON;
+//    return 0;
+//}
 
 /* swtich_terminal
  * Description: switch the terminal
@@ -420,7 +435,7 @@ int terminal_turn_on(terminal_struct_t *terminal) {
 int switch_terminal(terminal_struct_t *old_terminal, terminal_struct_t *new_terminal) {
     // sanity check
     if (old_terminal == new_terminal) return 0;
-    if (old_terminal != NULL) {
+    if (old_terminal != &null_terminal) {
         if (old_terminal->id < 0 || old_terminal->id >= MAX_TERMINAL) {
             printf("ERROR in swtich_terminal(): bad input of old_terminal\n");
             return -1;
@@ -430,7 +445,7 @@ int switch_terminal(terminal_struct_t *old_terminal, terminal_struct_t *new_term
             return -1;
         }
     }
-    if (new_terminal != NULL) {
+    if (new_terminal != &null_terminal) {
         if (new_terminal->id < 0 || new_terminal->id >= MAX_TERMINAL) {
             printf("ERROR in swtich_terminal(): bad input of new_terminal\n");
             return -1;
@@ -442,17 +457,18 @@ int switch_terminal(terminal_struct_t *old_terminal, terminal_struct_t *new_term
     }
 
     // copy the physical video memory to the backup buffer
-    if (old_terminal != NULL) {
+    if (old_terminal != &null_terminal) {
         memcpy((uint8_t *) (VM_INDEX + (old_terminal->id + 1) * BITS_4K), (uint8_t *) (VM_INDEX), BITS_4K);
     }
 
     // copy the backup buffer of new terminal to the video memory area
-    if (new_terminal != NULL) {
+    if (new_terminal != &null_terminal) {
         memcpy((uint8_t *) (VM_INDEX), (uint8_t *) (VM_INDEX + (new_terminal->id + 1) * BITS_4K), BITS_4K);
     }
 
-    terminal_showing = new_terminal;
-    terminal_vidmap(terminal_running);
+//    terminal_showing = new_terminal;
+    set_terminal_showing(new_terminal);
+    terminal_vidmap(get_terminal_running());
 
     return 0;
 }
@@ -467,7 +483,7 @@ int terminal_vidmap(terminal_struct_t *terminal) {
     int ret;
 
     // sanity check
-    if (terminal != NULL) {
+    if (terminal != &null_terminal) {
         if (terminal->id < 0 || terminal->id >= MAX_TERMINAL) {
             printf("ERROR in terminal_vidmap(): bad input of terminal\n");
             return -1;
@@ -478,14 +494,15 @@ int terminal_vidmap(terminal_struct_t *terminal) {
         }
     }
 
-    if (terminal == NULL || (terminal != NULL && terminal == terminal_showing)) {
+    if (terminal == &null_terminal || (terminal != &null_terminal && terminal == get_terminal_showing())) {
         ret = PDE_4K_set(&(page_directory[0]), (uint32_t) &(page_table0), 0, 1, 1);
         if (ret == -1) return -1;
     } else {
         ret = PDE_4K_set(&(page_directory[0]), (uint32_t) &(k_bb_pt_list[terminal->id]), 0, 1, 1);
         if (ret == -1) return -1;
     }
-    terminal_running = terminal;
+//    terminal_running = terminal;
+    set_terminal_running(terminal);
     flush_tlb();
     return 0;
 }

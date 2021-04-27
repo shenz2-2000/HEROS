@@ -10,7 +10,8 @@ pcb_t* pcb_ptrs[N_PCB_LIMIT];
 int32_t n_present_pcb;
 pcb_t *focus_task_ = NULL;
 pcb_t *foreground_task[MAX_TERMINAL];
-terminal_struct_t *running_term = NULL;
+extern terminal_struct_t null_terminal;
+terminal_struct_t *running_term = &null_terminal;
 terminal_struct_t* get_running_terminal() {
     return running_term;
 }
@@ -35,13 +36,13 @@ void process_user_vidmap(pcb_t *process) {
         return;
     }
     if (process->vidmap_enable) {
-        if (process->terminal == NULL) {
+        if (process->terminal == &null_terminal) {
             printf("ERROR in process_user_vidmap(): the process allocates no terminal but enabled the vidmap");
             return;
         }
         set_video_memory(process->terminal);
     } else {
-        set_video_memory(NULL); // the process disabled the vidmap
+        set_video_memory(&null_terminal); // the process disabled the vidmap
     }
 }
 
@@ -54,8 +55,10 @@ void process_user_vidmap(pcb_t *process) {
 void set_focus_task(pcb_t* target_task) {
     uint32_t flags;
     cli_and_save(flags);
-    if (focus_task()==NULL) switch_terminal(NULL,target_task->terminal);
-    else switch_terminal(target_task->terminal, focus_task()->terminal);
+    terminal_struct_t* old_term, *new_term;
+    if (focus_task()==NULL) old_term = &null_terminal;else old_term=focus_task()->terminal;
+    if (target_task==NULL) new_term = &null_terminal;else new_term=target_task->terminal;
+    switch_terminal(old_term,new_term);
     focus_task_ = target_task;
     process_user_vidmap(get_cur_process());
     restore_flags(flags);
@@ -216,15 +219,15 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
     if (add_task_to_list(process)==-1) return -1;
     //  set video memory for the current process
     if (process->kernel_task) {
-        process -> terminal = NULL;
+        process -> terminal = &null_terminal;
         process -> pid = -1; // kernel task has no paging and terminal
         eip = (uint32_t) function_address;
     }  else {
         if (separate_terminal) {
             process->terminal = terminal_allocate();
-            terminal_turn_on(process->terminal);
+//            terminal_turn_on(process->terminal);
         } else {
-            if (process->init_task) process->terminal = NULL;
+            if (process->init_task) process->terminal = &null_terminal;
             else process->terminal = get_cur_process()->terminal; // Use the caller's terminal
         }
         pid_ret = set_page_for_task(command, (uint32_t *)&eip);
@@ -233,7 +236,7 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
             return -1;
         }
         process->pid = pid_ret;
-        if (process->terminal != NULL) {
+        if (process->terminal != &null_terminal) {
             foreground_task[process->terminal->id] = process; // Become the task using terminal
             set_focus_task(process);
         }
@@ -462,18 +465,26 @@ int32_t get_n_present_pcb() {
 
 void init_task_main() {
 
-    int32_t ret;
+    int32_t ret = 0 ,ret2;
     uint32_t flags;
     cli_and_save(flags);
-    {
-        sys_execute((uint8_t *) "shell", 0, 1, NULL);
-        sys_execute((uint8_t *) "shell", 0, 1, NULL);
-        do {
-            ret = sys_execute((uint8_t *) "shell", 1, 1, NULL);
-        } while (ret == 0);
-        system_halt(-1);
-    }
-    restore_flags(flags);
+
+    sys_execute((uint8_t *) "shell", 0, 1, NULL);
+    sys_execute((uint8_t *) "shell", 0, 1, NULL);
+    sys_execute((uint8_t *) "shell", 0, 1, NULL);
+
+//        sys_execute((uint8_t *) "shell", 0, 1, NULL);
+//        do {
+//            ret = sys_execute((uint8_t *) "shell", 1, 1, NULL);
+//            printf("sys execute returns\n");
+//            if (ret==0) {
+//                printf("FUCK why is this 0?\n");
+//            }
+//        } while (ret == 0);
+//        system_halt(-1);
+
+     restore_flags(flags);
+     while(1);
 }
 
 

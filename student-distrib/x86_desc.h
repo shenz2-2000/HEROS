@@ -228,6 +228,10 @@ typedef union PTE {
     } __attribute__ ((packed));
 } PTE;
 
+//typedef struct __attribute__((packed)) __attribute__((aligned (ALIGN_4K))) {
+//    PTE pte[PAGE_TABLE_SIZE];
+//} page_table_struct;
+
 // pointers defined in x86_desc.S
 extern PDE page_directory[PAGE_DIRECTORY_SIZE] __attribute__ ((aligned (ALIGN_4K)));    // the main kernel page directory
 extern PTE page_table0[PAGE_TABLE_SIZE]__attribute__ ((aligned (ALIGN_4K)));    // the first page table (pde), containing the physical vidmem

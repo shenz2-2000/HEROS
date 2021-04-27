@@ -2,7 +2,7 @@
 #include "lib.h"
 #include "idt.h"
 #include "process.h"
-
+#include "page_lib.h"
 
 static void setup_pit(uint16_t hz);
 
@@ -234,8 +234,14 @@ void reschedule(){
         return;
     }
 
-    // TODO: not finished yet, page, vidmap, terminal switch
+    set_running_terminal(next_task->terminal);
 
+//    if(next_task->pid != -1){
+//        set_private_page(next_task->pid);
+//    }
+    set_private_page(next_task->pid);
+
+    process_user_vidmap(next_task);
     tss.esp0 = next_task->k_esp_base;
 
     // switch stack to the next task
