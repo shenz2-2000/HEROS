@@ -241,23 +241,24 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
     // clear the line buffer
 
     // loop until exit
-    //while(!end_flag){
+    while(!end_flag) {
         // prevent interrupt from modifying the line buffer
-    cli();
-    // detect enter
-    for(i = 0; i <= (get_cur_process()->terminal->buf_cnt - 1) ; i++){
-        if(get_cur_process()->terminal->buf[i] == '\n'){
-            j = i;
-            end_flag = 1;
-            break;
+        cli();
+        // detect enter
+        for (i = 0; i <= (get_cur_process()->terminal->buf_cnt - 1); i++) {
+            if (get_cur_process()->terminal->buf[i] == '\n') {
+                j = i;
+                end_flag = 1;
+                break;
+            }
         }
+        sti();
     }
-    sti();
-    if (!end_flag) {
-//        get_cur_process()->flags |= TASK_WAITING_CHILD;
-        append_to_list_end(&local_wait_list);
-        reschedule();
-    }
+//    if (!end_flag) {
+////        get_cur_process()->flags |= TASK_WAITING_CHILD;
+////        append_to_list_end(&local_wait_list);
+////        reschedule();
+//    }
     //}
     get_cur_process()->terminal->user_ask = 0;
     // new critical section
