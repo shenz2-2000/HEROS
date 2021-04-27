@@ -54,7 +54,8 @@ void process_user_vidmap(pcb_t *process) {
 void set_focus_task(pcb_t* target_task) {
     uint32_t flags;
     cli_and_save(flags);
-    switch_terminal(target_task->terminal, focus_task()->terminal);
+    if (focus_task()==NULL) switch_terminal(NULL,target_task->terminal);
+    else switch_terminal(target_task->terminal, focus_task()->terminal);
     focus_task_ = target_task;
     process_user_vidmap(get_cur_process());
     restore_flags(flags);
@@ -167,7 +168,6 @@ int get_another_terminal_id(int id) {
  * Input: command -- string to be executed
  *        wait_for_child -- if set to 1, means it waits for the child to return
  *                          if set to 0, indicate it's an init task
- *                          if set to -1, create an idle task
  *        separate_terminal -- if set to 1 means new terminal is used for this process
  *        function_address -- NULL means execute by args, else means execute kernel thread
  * Output: None
@@ -189,7 +189,7 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
     // set up pcb for the new task
     process = create_process();
     if (process==NULL) return -1; // Raise Error
-    process->init_task=process->kernel_task=process->idle_task=process->own_terminal=process->wait_for_child=0;
+    process->init_task=process->kernel_task=process->own_terminal=process->wait_for_child=0;
     // Information Setting
     if (get_n_present_pcb()==1) {
         process->init_task = 1;
@@ -198,7 +198,6 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
         process->parent = (wait_for_child==1)?get_cur_process():NULL;
     }
     if (function_address!=NULL) process->kernel_task=1;
-    if (wait_for_child==-1) process->idle_task=1;
     process->vidmap_enable = 0;
     process->k_esp = (uint32_t)process+TASK_KSTK_SIZE_IN_B-1;
     // Parse name and arguments
@@ -227,30 +226,30 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
             if (process->init_task) process->terminal = NULL;
             else process->terminal = get_cur_process()->terminal; // Use the caller's terminal
         }
-    }
-    pid_ret = set_page_for_task(command, (uint32_t *)&eip);
-    if (pid_ret < 0) {
-        delete_process(process);
-        return -1;
-    }
-    process->pid = pid_ret;
-    if (process->terminal != NULL) {   
-        foreground_task[process->terminal->id] = process; // Become the task using terminal
-        set_focus_task(process);
-    }
-    terminal_set_running(process->terminal);
-    if (separate_terminal) {
-        clear();
-        reset_screen();
-        printf("TERMINAL %d\n", process->terminal->id);
+        pid_ret = set_page_for_task(command, (uint32_t *)&eip);
+        if (pid_ret < 0) {
+            delete_process(process);
+            return -1;
+        }
+        process->pid = pid_ret;
+        if (process->terminal != NULL) {
+            foreground_task[process->terminal->id] = process; // Become the task using terminal
+            set_focus_task(process);
+        }
+        terminal_set_running(process->terminal);
+        if (separate_terminal) {
+            clear();
+            reset_screen();
+            printf("TERMINAL %d\n", process->terminal->id);
+        }
+
     }
 
     init_file_arr(&(process->file_arr));
     task_signal_init(&(process->signals));
     // Set up tss to make sure system call don't go wrong
     // Set up Scheduler
-    if (process -> idle_task) process->time = 0;
-    else init_process_time(process);
+    init_process_time(process);
     insert_to_list_start(process->node);
     if (wait_for_child==1) {
         process->wait_for_child=1;
@@ -460,17 +459,12 @@ int32_t get_n_present_pcb() {
     return n_present_pcb;
 }
 
-void idle_task_main() {
-    while (1) {}
-}
-
 void init_task_main() {
 
     int32_t ret;
     uint32_t flags;
     cli_and_save(flags);
     {
-        sys_execute((uint8_t *) "idle", -1, 0, idle_task_main);
         sys_execute((uint8_t *) "shell", 0, 1, NULL);
         sys_execute((uint8_t *) "shell", 0, 1, NULL);
         do {

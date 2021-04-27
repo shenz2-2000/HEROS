@@ -445,7 +445,7 @@ int switch_terminal(terminal_struct_t *old_terminal, terminal_struct_t *new_term
 
     // copy the backup buffer of new terminal to the video memory area
     if (new_terminal != NULL) {
-        memcpy((uint8_t *) (VM_INDEX), (uint8_t *) (VM_INDEX + (old_terminal->id + 1) * BITS_4K), BITS_4K);
+        memcpy((uint8_t *) (VM_INDEX), (uint8_t *) (VM_INDEX + (new_terminal->id + 1) * BITS_4K), BITS_4K);
     }
 
     terminal_showing = new_terminal;
