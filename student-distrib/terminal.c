@@ -52,8 +52,8 @@ terminal_struct_t terminal_slot[MAX_TERMINAL]; // Maximal terminal number is 3
 /* global var in vidmap.c */
 // terminal
 int32_t terminal_status[MAX_TERMINAL];
-terminal_struct_t *terminal_showing;     // current showing terminal
-terminal_struct_t *terminal_running;     // the terminal that is occupied by a running process
+static terminal_struct_t *terminal_showing;     // current showing terminal
+static terminal_struct_t *terminal_running;     // the terminal that is occupied by a running process
 
 // backup buffer
 PTE k_bb_pt_0[PAGE_TABLE_SIZE] __attribute__ ((aligned (ALIGN_4K)));
