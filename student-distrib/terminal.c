@@ -349,7 +349,7 @@ void terminal_set_running(terminal_struct_t *terminal) {
     uint32_t flags;
     cli_and_save(flags);
     terminal_struct_t* cur = get_running_terminal();
-    if (terminal == cur) return
+    if (terminal == cur) return;
     cur -> screen_x = screen_x;
     cur -> screen_y = screen_y;
     terminal_vidmap(terminal);

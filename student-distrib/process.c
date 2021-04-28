@@ -217,7 +217,7 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
         process->args=(uint8_t *)strcpy((int8_t *)process->k_esp_base, (int8_t *) process->args);
     }
     process -> k_esp = process -> k_esp_base;
-    if (add_task_to_list(process)==-1) return -1;
+
     //  set video memory for the current process
     if (process->kernel_task) {
         process -> terminal = &null_terminal;
@@ -254,8 +254,10 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
     task_signal_init(&(process->signals));
     // Set up tss to make sure system call don't go wrong
     // Set up Scheduler
+    if (add_task_to_list(process)==-1) return -1;
     init_process_time(process);
-    insert_to_list_start(process->node);
+//    insert_to_list_start(process->node);
+
     if (wait_for_child==1) {
         process->wait_for_child=1;
         reposition_to_end(process->node);
