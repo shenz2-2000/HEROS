@@ -102,9 +102,9 @@ void handle_input(uint8_t input) {
                 putc(focus_task()->terminal->buf[focus_task()->terminal->buf_cnt]);
                 focus_task()->terminal->buf_cnt++;
                 //focus_task()->parent->flags &= ~TASK_WAITING_CHILD;
-                init_process_time(focus_task());
-                insert_to_list_start(focus_task()->node);
-                reschedule();
+//                init_process_time(focus_task());
+                //insert_to_list_start(focus_task()->node);
+//                reschedule();
                 return;
             }
             if ((0 == focus_task()->terminal->user_ask) && input == 0x1C) {
@@ -272,15 +272,16 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
 int32_t  terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 
     int i;
+    int flags;
 
     // prevent rtc or other interrupt to disrupt
-    cli();
+    cli_and_save(flags);
 
     for(i = 0; i < nbytes; i++){
         putc( ((uint8_t*) buf)[i] );
     }
 
-    sti();
+    restore_flags(flags);
     return 0;
 
 }

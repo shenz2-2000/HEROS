@@ -44,7 +44,8 @@ void idt_init();
  */
 void naive_exception_handler(hw_context hw){
     // check whether input is valid
-    cli();
+    int flags;
+    cli_and_save(flags);
     if(hw.irq >= 20){
         printf("------------------------------------------------\n");
         printf("WARNING! The Input of Exception is invalid!!!!\n");
@@ -70,7 +71,7 @@ void naive_exception_handler(hw_context hw){
 
 #endif
 
-    sti();
+    restore_flags(flags);
 }
 
 /*

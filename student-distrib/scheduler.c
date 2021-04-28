@@ -281,7 +281,7 @@ void reschedule(){
  * @sideeffect modify list and switch stack
  */
 ASMLINKAGE void pit_interrupt_handler(hw_context hw) {
-
+    // printf("int ");
     uint32_t eflags;
     pcb_t* cur_task = get_cur_process();
 
@@ -309,6 +309,7 @@ ASMLINKAGE void pit_interrupt_handler(hw_context hw) {
         // reposition cur_task to the end of the linked list
         reposition_to_end(cur_task->node);
         send_eoi(hw.irq);
+        printf("res idle\n");
         reschedule();
     }
     // not idle task
@@ -317,9 +318,16 @@ ASMLINKAGE void pit_interrupt_handler(hw_context hw) {
 
         // time is used up
         if(cur_task->time <= 0){
+            task_node* cur_nmsl = task_list_head.next;
+            while (cur_nmsl!=&task_list_head) {
+                printf("%s -> ", cur_nmsl->cur_task->name);
+                cur_nmsl = cur_nmsl->next;
+            }
+            printf("\n");
             init_process_time(cur_task);
             reposition_to_end(cur_task->node);
             send_eoi(hw.irq);
+
             reschedule();
         }
         else{
@@ -327,7 +335,7 @@ ASMLINKAGE void pit_interrupt_handler(hw_context hw) {
         }
     }
 
-    restore_signal(eflags);
+    restore_flags(eflags);
 
 }
 

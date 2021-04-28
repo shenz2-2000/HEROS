@@ -32,8 +32,16 @@ void beep(uint32_t freq, uint32_t dura) {
 }
 
 int32_t main(){
+//    int i;
+//    for (i=0; i<10; i++) beep(freq_default[i], dura_default[i] / 32);
     int i;
-    for (i=0; i<10; i++) beep(freq_default[i], dura_default[i] / 32);
+    uint8_t dum[] = "d";
+    uint8_t buf[] = "rtc";
+    ece391_fdputs (1, (uint8_t*)"Konijiwaq!\n");
+    int dev_rtc = ece391_open(buf);
+    for (i = 0; i < 3; i++) ece391_read(dev_rtc, dum, 1);
+    ece391_fdputs (1, (uint8_t*)"Fantastic BiBi!\n");
+    for (i = 0; i < 3; i++) ece391_read(dev_rtc, dum, 1);
 
     return 0;
 }

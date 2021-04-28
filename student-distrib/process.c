@@ -258,10 +258,10 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
     init_process_time(process);
 //    insert_to_list_start(process->node);
 
-    if (wait_for_child==1) {
-        process->wait_for_child=1;
-        reposition_to_end(process->node);
-    }
+//    if (wait_for_child==1) {
+//        process->wait_for_child=1;
+//        reposition_to_end(process->node);
+//    }
     tss.esp0 = process->k_esp;
     if (process->kernel_task) {
         if (process->init_task) {
@@ -469,26 +469,15 @@ int32_t get_n_present_pcb() {
 
 void init_task_main() {
 
-    int32_t ret = 0 ,ret2;
+    int32_t ret = 0;
     uint32_t flags;
     cli_and_save(flags);
 
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
-    sys_execute((uint8_t *) "shell", 0, 1, NULL);
-    sys_execute((uint8_t *) "shell", 0, 1, NULL);
+    //sys_execute((uint8_t *) "shell", 0, 1, NULL);
+    restore_flags(flags);
+    while(1) {};
 
-//        sys_execute((uint8_t *) "shell", 0, 1, NULL);
-//        do {
-//            ret = sys_execute((uint8_t *) "shell", 1, 1, NULL);
-//            printf("sys execute returns\n");
-//            if (ret==0) {
-//                printf("FUCK why is this 0?\n");
-//            }
-//        } while (ret == 0);
-//        system_halt(-1);
-
-     restore_flags(flags);
-     while(1);
 }
 
 
