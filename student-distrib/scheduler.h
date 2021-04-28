@@ -20,7 +20,7 @@
 void init_scheduler();
 void init_process_time(pcb_t* cur_process);
 
-void insert_to_list_start(task_node* cur_node);
+//void insert_to_list_start(task_node* cur_node);
 void append_to_list_end(task_node* cur_node);
 void delete_from_list(task_node* cur_node);
 void reposition_to_end(task_node* cur_node);

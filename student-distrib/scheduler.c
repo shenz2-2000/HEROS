@@ -69,17 +69,17 @@ void init_scheduler() {
  * Output: None.
  * Side effect: change the task list
  */
-void insert_to_list_start(task_node* cur_node) {
-
-    // original head
-    task_node* temp = task_list_head.next;
-
-    // reinsert
-    temp->prev = cur_node;
-    cur_node->next = temp;
-    cur_node->prev = &task_list_head;
-    task_list_head.next = cur_node;
-}
+//void insert_to_list_start(task_node* cur_node) {
+//
+//    // original head
+//    task_node* temp = task_list_head.next;
+//
+//    // reinsert
+//    temp->prev = cur_node;
+//    cur_node->next = temp;
+//    cur_node->prev = &task_list_head;
+//    task_list_head.next = cur_node;
+//}
 
 /*
  * append_to_list_end
@@ -318,12 +318,12 @@ ASMLINKAGE void pit_interrupt_handler(hw_context hw) {
 
         // time is used up
         if(cur_task->time <= 0){
-            task_node* cur_nmsl = task_list_head.next;
-            while (cur_nmsl!=&task_list_head) {
-                printf("%s -> ", cur_nmsl->cur_task->name);
-                cur_nmsl = cur_nmsl->next;
-            }
-            printf("\n");
+//            task_node* cur_nmsl = task_list_head.next;
+//            while (cur_nmsl!=&task_list_head) {
+//                printf("%s -> ", cur_nmsl->cur_task->name);
+//                cur_nmsl = cur_nmsl->next;
+//            }
+//            printf("\n");
             init_process_time(cur_task);
             reposition_to_end(cur_task->node);
             send_eoi(hw.irq);

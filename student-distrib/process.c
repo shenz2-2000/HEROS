@@ -233,6 +233,7 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
         }
         pid_ret = set_page_for_task(command, (uint32_t *)&eip);
         if (pid_ret < 0) {
+            if (wait_for_child==1) get_cur_process()->having_child_running=0;
             delete_process(process);
             return -1;
         }
@@ -314,7 +315,6 @@ int32_t system_halt(int32_t status) {
         // TODO: why init time for parent?
         cur_task->parent->having_child_running = 0;
         init_process_time(cur_task->parent);
-        insert_to_list_start(cur_task->parent->node);
     }
 
     // close file array
@@ -474,7 +474,8 @@ void init_task_main() {
     cli_and_save(flags);
 
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
-    //sys_execute((uint8_t *) "shell", 0, 1, NULL);
+    sys_execute((uint8_t *) "shell", 0, 1, NULL);
+    sys_execute((uint8_t *) "shell", 0, 1, NULL);
     restore_flags(flags);
     while(1) {};
 
