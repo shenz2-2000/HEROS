@@ -312,6 +312,12 @@ int32_t  terminal_write(int32_t fd, const void* buf, int32_t nbytes){
 
     int i;
 
+    // sanity check
+    if (buf == NULL) {
+        printf("ERROR in terminal_write(): NULL buf input\n");
+        return -1;
+    }
+
     // prevent rtc or other interrupt to disrupt
     cli();
 
@@ -348,6 +354,11 @@ void terminal_init() {
  */
 
 void terminal_deallocate(terminal_struct_t* cur) {
+    // sanity check
+    if (cur == NULL) {
+        printf("ERROR in terminal_deallocate(): NULL cur input\n");
+        return;
+    }
     cur->valid = 0;
 }
 
@@ -385,6 +396,11 @@ terminal_struct_t* terminal_allocate() {
  */
 
 void terminal_set_running(terminal_struct_t *terminal) {
+    // sanity check
+    if (terminal == NULL) {
+        printf("ERROR in terminal_set_running(): NULL terminal input\n");
+        return;
+    }
     if (terminal == &null_terminal) return;
     uint32_t flags;
     cli_and_save(flags);
@@ -447,6 +463,12 @@ void vidmap_init() {
  * Side effect: None
  * */
 void set_video_memory(terminal_struct_t *terminal){
+
+    // sanity check
+    if (terminal == NULL) {
+        printf("ERROR in set_video_memory(): NULL terminal input\n");
+        return;
+    }
 
     // the page directory entry we need to setup
     PDE *u_vm_pde = &(page_directory[U_VM_PDE]);
@@ -522,6 +544,15 @@ void clear_video_memory(){
  * */
 int switch_terminal(terminal_struct_t *old_terminal, terminal_struct_t *new_terminal) {
     // sanity check
+    if (old_terminal == NULL) {
+        printf("ERROR in switch_terminal(): NULL old_terminal input\n");
+        return -1;
+    }
+    if (new_terminal == NULL) {
+        printf("ERROR in switch_terminal(): NULL new_terminal input\n");
+        return -1;
+    }
+
     if (old_terminal == new_terminal) return 0;
     if (old_terminal != &null_terminal) {
         if (old_terminal->id < 0 || old_terminal->id >= MAX_TERMINAL) {
@@ -569,6 +600,12 @@ int switch_terminal(terminal_struct_t *old_terminal, terminal_struct_t *new_term
  * */
 int terminal_vidmap(terminal_struct_t *terminal) {
     int ret;
+
+    // sanity check
+    if (terminal == NULL) {
+        printf("ERROR in terminal_vidmap(): NULL terminal input\n");
+        return -1;
+    }
 
     // sanity check
     if (terminal != &null_terminal) {
