@@ -258,10 +258,10 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
     init_process_time(process);
 //    insert_to_list_start(process->node);
 
-    if (wait_for_child==1) {
-        process->wait_for_child=1;
-        reposition_to_end(process->node);
-    }
+//    if (wait_for_child==1) {
+//        process->wait_for_child=1;
+//        reposition_to_end(process->node);
+//    }
     tss.esp0 = process->k_esp;
     if (process->kernel_task) {
         if (process->init_task) {

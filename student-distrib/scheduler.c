@@ -327,7 +327,7 @@ ASMLINKAGE void pit_interrupt_handler(hw_context hw) {
         }
     }
 
-    restore_signal(eflags);
+    restore_flags(eflags);
 
 }
 
