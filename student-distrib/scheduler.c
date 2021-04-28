@@ -120,7 +120,6 @@ void delete_from_list(task_node* cur_node) {
 
     cur_node->prev = NULL;
     cur_node->next = NULL;
-
 }
 
 /*
@@ -212,9 +211,20 @@ void reschedule(){
     // next_task to run
     pcb_t* next_task = task_list_head.next->cur_task;
 
+
     // sanity check
     if(next_task == NULL){
-        printf("WARNING: fail to add task into list!!\n");
+//        printf("WARNING: fail to add task into list!!\n");
+        return;
+    }
+
+    while(next_task->having_child_running){
+        reposition_to_end(next_task->node);
+        next_task = task_list_head.next;
+    }
+
+    if(next_task == NULL){
+//        printf("WARNING: fail to add task into list!!\n");
         return;
     }
 
@@ -245,10 +255,7 @@ void reschedule(){
 //            }
 //        }
 //    }
-     while(next_task->having_child_running){
-         reposition_to_end(next_task->node);
-         next_task = task_list_head.next;
-     }
+
 
     set_running_terminal(next_task->terminal);
 
