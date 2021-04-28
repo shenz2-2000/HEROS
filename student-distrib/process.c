@@ -191,6 +191,7 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
     // set up pcb for the new task
     process = create_process();
     if (process==NULL) return -1; // Raise Error
+    process->having_child_running=0;
     process->init_task=process->kernel_task=process->own_terminal=process->wait_for_child=0;
     // Information Setting
     if (get_n_present_pcb()==1) {
@@ -198,6 +199,7 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
         process->parent = NULL;
     } else {
         process->parent = (wait_for_child==1)?get_cur_process():NULL;
+        if (wait_for_child==1) get_cur_process()->having_child_running=1;
     }
     if (function_address!=NULL) process->kernel_task=1;
     process->vidmap_enable = 0;
@@ -215,7 +217,7 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
         process->args=(uint8_t *)strcpy((int8_t *)process->k_esp_base, (int8_t *) process->args);
     }
     process -> k_esp = process -> k_esp_base;
-    if (add_task_to_list(process)==-1) return -1;
+
     //  set video memory for the current process
     if (process->kernel_task) {
         process -> terminal = &null_terminal;
@@ -252,12 +254,14 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
     task_signal_init(&(process->signals));
     // Set up tss to make sure system call don't go wrong
     // Set up Scheduler
+    if (add_task_to_list(process)==-1) return -1;
     init_process_time(process);
-    insert_to_list_start(process->node);
-    if (wait_for_child==1) {
-        process->wait_for_child=1;
-        reposition_to_end(process->node);
-    }
+//    insert_to_list_start(process->node);
+
+//    if (wait_for_child==1) {
+//        process->wait_for_child=1;
+//        reposition_to_end(process->node);
+//    }
     tss.esp0 = process->k_esp;
     if (process->kernel_task) {
         if (process->init_task) {
@@ -308,6 +312,7 @@ int32_t system_halt(int32_t status) {
     // if cur_task has parent, we simply switch to parent task
     if (cur_task->parent != NULL) {
         // TODO: why init time for parent?
+        cur_task->parent->having_child_running = 0;
         init_process_time(cur_task->parent);
         insert_to_list_start(cur_task->parent->node);
     }

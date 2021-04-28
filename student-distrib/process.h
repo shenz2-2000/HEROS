@@ -32,6 +32,7 @@ struct pcb_t {
     file_arr_t file_arr;
     uint8_t pid;
     uint8_t init_task,kernel_task,idle_task,own_terminal,wait_for_child;
+    uint8_t having_child_running;
     signal_struct_t signals;
     uint32_t time;
     task_node* node;

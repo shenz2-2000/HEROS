@@ -163,45 +163,6 @@ void terminal_initialization(){
 }
 
 /*
- * print_terminal_info
- *   DESCRIPTION: For test, print some sentences
- *   INPUTS: none
- *   OUTPUTS: none
- *   RETURN VALUE: none
- *   SIDE EFFECTS: none
- */
-void print_terminal_info(){
-    int i;
-    int fail_flag = 0;
-    // print current key buf cnt
-    printf("current key_buf_cnt is: %d\n",key_buf_cnt);
-    for(i = 0; i < KEYBOARD_BUF_SIZE; i++){
-        if(flag[i] != 0) {
-            fail_flag = 1;
-            break;
-        }
-    }
-
-    // check fail_flag
-    if(fail_flag == 1) printf("The flag array is wrong!!\n");
-    else printf("The flag array is correct!!\n");
-
-    fail_flag = 0;
-
-    for(i = 0; i < KEYBOARD_BUF_SIZE; i++){
-        if(keyboard_buf[i] != 0) {
-            fail_flag = 1;
-            break;
-        }
-    }
-
-    // fail or not
-    if(fail_flag == 1) printf("The keyboard buffer is wrong!!\n");
-    else printf("The keyboard buffer is correct!!\n");
-
-}
-
-/*
  * terminal_open
  *   DESCRIPTION: Open the terminal
  *   INPUTS: filename -- name of file
@@ -405,11 +366,9 @@ void terminal_set_running(terminal_struct_t *terminal) {
     uint32_t flags;
     cli_and_save(flags);
     terminal_struct_t* cur = get_running_terminal();
-    if (terminal == cur) return ;
-    if (cur!=&null_terminal) {
-        cur -> screen_x = screen_x;
-        cur -> screen_y = screen_y;
-    }
+    if (terminal == cur) return;
+    cur -> screen_x = screen_x;
+    cur -> screen_y = screen_y;
     terminal_vidmap(terminal);
     screen_x = terminal->screen_x;
     screen_y = terminal->screen_y;
@@ -511,28 +470,6 @@ void clear_video_memory(){
 
 /* ------------------- terminal operation --------------------- */
 
-///* terminal_turn_on
-// * Description: turn on the terminal
-// * Inputs: terminal - the target terminal struct
-// * Return Value: None
-// * Side effect: None
-// * */
-//int terminal_turn_on(terminal_struct_t *terminal) {
-//    if (terminal == NULL) {
-//        printf("ERROR in terminal_turn_on(): NULL input");
-//        return -1;
-//    }
-//    if (terminal->id < 0 || terminal->id >= MAX_TERMINAL) {
-//        printf("ERROR in terminal_turn_on(): no such terminal_id: %d", terminal->id);
-//        return -1;
-//    }
-//    if (terminal_status[terminal->id] == TERMINAL_ON) {
-//        printf("WARNING in terminal_turn_on(): the terminal %d is already turned on\n", terminal->id);
-//    }
-//
-//    terminal_status[terminal->id] = TERMINAL_ON;
-//    return 0;
-//}
 
 /* swtich_terminal
  * Description: switch the terminal

@@ -6,8 +6,8 @@
 
 static void setup_pit(uint16_t hz);
 
-task_node task_list_head;
-task_node all_nodes[N_PCB_LIMIT + N_PCB_OFFSET];
+static task_node task_list_head;
+static task_node all_nodes[N_PCB_LIMIT + N_PCB_OFFSET];
 
 /*
  * init_scheduler
@@ -22,14 +22,13 @@ void init_scheduler() {
     task_list_head.next = &task_list_head;
     task_list_head.prev = &task_list_head;
     task_list_head.cur_task = NULL;
+    task_list_head.valid = 1;
 
     for(i = 0; i < (N_PCB_LIMIT+N_PCB_OFFSET); i++){
-        task_node dummy;
-        dummy.next = NULL;
-        dummy.prev = NULL;
-        dummy.valid = 0;
-        dummy.cur_task = NULL;
-        all_nodes[i] = dummy;
+        all_nodes[i].next = NULL;
+        all_nodes[i].prev = NULL;
+        all_nodes[i].valid = 0;
+        all_nodes[i].cur_task = NULL;
     }
 
 }
@@ -120,7 +119,6 @@ void delete_from_list(task_node* cur_node) {
 
     cur_node->prev = NULL;
     cur_node->next = NULL;
-
 }
 
 /*
@@ -158,7 +156,7 @@ void init_process_time(pcb_t* cur_process){
  */
 int32_t add_task_to_list(pcb_t* task){
     int i;
-    for(i = 0; i < N_PCB_LIMIT+N_PCB_OFFSET; i++){
+    for(i = 1; i < N_PCB_LIMIT+N_PCB_OFFSET; i++){
         if(all_nodes[i].valid == 0){
             // initialize the node
             all_nodes[i].valid = 1;
@@ -212,7 +210,18 @@ void reschedule(){
     // next_task to run
     pcb_t* next_task = task_list_head.next->cur_task;
 
+
     // sanity check
+    if(next_task == NULL){
+        printf("WARNING: fail to add task into list!!\n");
+        return;
+    }
+
+    while(next_task->having_child_running){
+        reposition_to_end(next_task->node);
+        next_task = task_list_head.next->cur_task;
+    }
+
     if(next_task == NULL){
         printf("WARNING: fail to add task into list!!\n");
         return;
@@ -222,17 +231,30 @@ void reschedule(){
         printf("WARNING:there should be at least 1 process in list");
     }
 
-    // TODO: fill the idle task name macro
-    if( next_task->idle_task ){
-        // The first task is idle task, put it to the end of the list
-        reposition_to_end(task_list_head.next);
-        next_task = task_list_head.next->cur_task;
-    }
+    // TODO: no idle task now?
+//    if( next_task->idle_task ){
+//        // The first task is idle task, put it to the end of the list
+//        reposition_to_end(task_list_head.next);
+//        next_task = task_list_head.next->cur_task;
+//    }
 
     if(get_cur_process() == task_list_head.next->cur_task){
         // do nothing, do not need to switch
         return;
     }
+
+    // check whether have child
+//    if(next_task->having_child_running){
+//        while(next_task->having_child_running){
+//            if(next_task->node->next == &task_list_head){
+//                next_task = task_list_head.next->cur_task;
+//            }
+//            else {
+//                next_task = next_task->node->next->cur_task;
+//            }
+//        }
+//    }
+
 
     set_running_terminal(next_task->terminal);
 
@@ -305,7 +327,7 @@ ASMLINKAGE void pit_interrupt_handler(hw_context hw) {
         }
     }
 
-    restore_signal(eflags);
+    restore_flags(eflags);
 
 }
 
