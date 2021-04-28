@@ -191,6 +191,7 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
     // set up pcb for the new task
     process = create_process();
     if (process==NULL) return -1; // Raise Error
+    process->having_child_running=0;
     process->init_task=process->kernel_task=process->own_terminal=process->wait_for_child=0;
     // Information Setting
     if (get_n_present_pcb()==1) {
@@ -198,6 +199,7 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
         process->parent = NULL;
     } else {
         process->parent = (wait_for_child==1)?get_cur_process():NULL;
+        if (wait_for_child==1) get_cur_process()->having_child_running=1;
     }
     if (function_address!=NULL) process->kernel_task=1;
     process->vidmap_enable = 0;
@@ -308,6 +310,7 @@ int32_t system_halt(int32_t status) {
     // if cur_task has parent, we simply switch to parent task
     if (cur_task->parent != NULL) {
         // TODO: why init time for parent?
+        cur_task->parent->having_child_running = 0;
         init_process_time(cur_task->parent);
         insert_to_list_start(cur_task->parent->node);
     }

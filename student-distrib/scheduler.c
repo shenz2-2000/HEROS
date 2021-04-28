@@ -222,17 +222,33 @@ void reschedule(){
         printf("WARNING:there should be at least 1 process in list");
     }
 
-    // TODO: fill the idle task name macro
-    if( next_task->idle_task ){
-        // The first task is idle task, put it to the end of the list
-        reposition_to_end(task_list_head.next);
-        next_task = task_list_head.next->cur_task;
-    }
+    // TODO: no idle task now?
+//    if( next_task->idle_task ){
+//        // The first task is idle task, put it to the end of the list
+//        reposition_to_end(task_list_head.next);
+//        next_task = task_list_head.next->cur_task;
+//    }
 
     if(get_cur_process() == task_list_head.next->cur_task){
         // do nothing, do not need to switch
         return;
     }
+
+    // check whether have child
+//    if(next_task->having_child_running){
+//        while(next_task->having_child_running){
+//            if(next_task->node->next == &task_list_head){
+//                next_task = task_list_head.next->cur_task;
+//            }
+//            else {
+//                next_task = next_task->node->next->cur_task;
+//            }
+//        }
+//    }
+     while(next_task->having_child_running){
+         reposition_to_end(next_task->node);
+         next_task = task_list_head.next;
+     }
 
     set_running_terminal(next_task->terminal);
 
