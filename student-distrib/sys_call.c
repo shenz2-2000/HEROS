@@ -5,7 +5,6 @@
 #include "tests.h"
 #include "signal_sys_call.h"
 #include "scheduler.h"
-#include "vidmap.h"
 
 #define FILE_CLOSED_TEST 1
 

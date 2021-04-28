@@ -14,7 +14,6 @@
 #include "sys_call.h"
 #include "signal_sys_call.h"
 #include "gensound.h"
-#include "vidmap.h"
 
 #define RUN_TESTS
 

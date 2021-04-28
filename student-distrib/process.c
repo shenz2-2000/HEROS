@@ -4,7 +4,6 @@
 #include "lib.h"
 #include "sys_call.h"
 #include "scheduler.h"
-#include "vidmap.h"
 
 pcb_t* pcb_ptrs[N_PCB_LIMIT];
 int32_t n_present_pcb;
