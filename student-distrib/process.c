@@ -204,6 +204,7 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
     if (function_address!=NULL) process->kernel_task=1;
     process->vidmap_enable = 0;
     process->k_esp_base = (uint32_t)process+TASK_KSTK_SIZE_IN_B-1;
+    process->k_esp = (uint32_t)process + TASK_KSTK_SIZE_IN_B-1;
     // Parse name and arguments
     parse_args(command, &(process->args));
     process->name = command;
