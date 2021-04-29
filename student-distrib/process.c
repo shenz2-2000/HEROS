@@ -24,7 +24,7 @@ void set_running_terminal (terminal_struct_t* cur) {
  * Output: focus_task
  */
 pcb_t *focus_task() {
-    if (focus_task_ == NULL) printf("No focus task\n");
+    // if (focus_task_ == NULL) printf("No focus task\n");
     return focus_task_;
 }
 
