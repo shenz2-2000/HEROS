@@ -283,9 +283,12 @@ int32_t  terminal_write(int32_t fd, const void* buf, int32_t nbytes){
     // prevent rtc or other interrupt to disrupt
     cli_and_save(flags);
 
+//    printf("WRITE:Current Running Terminal:%d\n",get_running_terminal()->id);
+//    printf("Before: %d %d\n",get_running_terminal()->screen_x,get_running_terminal()->screen_y);
     for(i = 0; i < nbytes; i++){
         putc( ((uint8_t*) buf)[i] );
     }
+//    printf("After: %d %d\n",get_running_terminal()->screen_x,get_running_terminal()->screen_y);
 
     restore_flags(flags);
     return 0;
@@ -363,7 +366,6 @@ void terminal_set_running(terminal_struct_t *terminal) {
         printf("ERROR in terminal_set_running(): NULL terminal input\n");
         return;
     }
-    if (terminal == &null_terminal) return;
     uint32_t flags;
     cli_and_save(flags);
     terminal_struct_t* cur = get_running_terminal();

@@ -256,7 +256,7 @@ void reschedule(){
 //    }
 
 
-    set_running_terminal(next_task->terminal);
+    terminal_set_running(next_task->terminal);
 
 //    if(next_task->pid != -1){
 //        set_private_page(next_task->pid);
@@ -320,7 +320,8 @@ ASMLINKAGE void pit_interrupt_handler(hw_context hw) {
         if(cur_task->time <= 0){
 //            task_node* cur_nmsl = task_list_head.next;
 //            while (cur_nmsl!=&task_list_head) {
-//                printf("%s -> ", cur_nmsl->cur_task->name);
+//                printf("%s", cur_nmsl->cur_task->name);
+//                printf("(terminal:%d %d %d)->", cur_nmsl->cur_task->terminal->id,cur_nmsl->cur_task->terminal->screen_x,cur_nmsl->cur_task->terminal->screen_y);
 //                cur_nmsl = cur_nmsl->next;
 //            }
 //            printf("\n");

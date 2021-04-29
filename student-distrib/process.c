@@ -247,6 +247,7 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
             clear();
             reset_screen();
             printf("TERMINAL %d\n", process->terminal->id);
+//            printf("Current Running terminal is:%d\n",running_term->id);
         }
 
     }
