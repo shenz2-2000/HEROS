@@ -7,7 +7,7 @@
 
 
 #define DUMMY_TASK_NAME "idle_init_name"
-#define INIT_PIT_FREQ   10
+#define INIT_PIT_FREQ   100
 #define MEM_FENCE       512
 #define TIME_DECREASE_PER_INTERRUPT 10
 #define TIME_INIT 200
