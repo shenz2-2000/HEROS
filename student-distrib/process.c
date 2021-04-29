@@ -226,6 +226,7 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
     }  else {
         if (separate_terminal) {
             process->terminal = terminal_allocate();
+            process->own_terminal = 1;
 //            terminal_turn_on(process->terminal);
         } else {
             if (process->init_task) process->terminal = &null_terminal;
@@ -470,7 +471,7 @@ int32_t get_n_present_pcb() {
 
 void init_task_main() {
 
-    int32_t ret = 0;
+    int32_t ret = 0, i;
     uint32_t flags;
     cli_and_save(flags);
 
@@ -478,7 +479,11 @@ void init_task_main() {
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
     restore_flags(flags);
-    while(1) {};
+    while(1) {
+        for (i = 0; i<MAX_TERMINAL;++i) if (foreground_task[i]==NULL) {
+                sys_execute((uint8_t *) "shell", 0, 1, NULL);
+        }
+    };
 
 }
 
