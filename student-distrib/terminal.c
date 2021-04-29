@@ -51,7 +51,7 @@ terminal_struct_t terminal_slot[MAX_TERMINAL]; // Maximal terminal number is 3
 
 /* global var in vidmap.c */
 // terminal
-int32_t terminal_status[MAX_TERMINAL];
+int32_t terminal_status[MAX_TERMINAL];          // the status of terminal vidmap (default all open)
 static terminal_struct_t *terminal_showing;     // current showing terminal
 static terminal_struct_t *terminal_running;     // the terminal that is occupied by a running process
 

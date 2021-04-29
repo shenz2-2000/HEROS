@@ -309,7 +309,7 @@ ASMLINKAGE void pit_interrupt_handler(hw_context hw) {
         // reposition cur_task to the end of the linked list
         reposition_to_end(cur_task->node);
         send_eoi(hw.irq);
-        printf("res idle\n");
+        // printf("res idle\n");
         reschedule();
     }
     // not idle task
