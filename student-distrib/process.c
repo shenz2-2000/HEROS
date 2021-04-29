@@ -349,6 +349,7 @@ int32_t system_halt(int32_t status) {
     if(cur_task->parent == NULL){
         close_all_files(&cur_task->file_arr);
         delete_process(cur_task);
+        delete_paging(cur_task->pid);
         reschedule();
     } else {
         close_all_files(&cur_task->file_arr);
