@@ -57,7 +57,7 @@ int terminal_vidmap(terminal_struct_t *terminal);
 
 // vidmap
 void vidmap_init();
-void set_video_memory();
+void set_video_memory(terminal_struct_t *terminal);
 void clear_video_memory();
 
 #endif

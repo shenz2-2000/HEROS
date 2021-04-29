@@ -60,6 +60,7 @@ PTE k_bb_pt_0[PAGE_TABLE_SIZE] __attribute__ ((aligned (ALIGN_4K)));
 PTE k_bb_pt_1[PAGE_TABLE_SIZE] __attribute__ ((aligned (ALIGN_4K)));
 PTE k_bb_pt_2[PAGE_TABLE_SIZE] __attribute__ ((aligned (ALIGN_4K)));
 PTE* k_bb_pt_list[MAX_TERMINAL] = {k_bb_pt_0, k_bb_pt_1, k_bb_pt_2};
+// NOTE!!!: the element in this list is pointers to the tables! no need to dereference again!
 
 PTE u_bb_pt_0[PAGE_TABLE_SIZE] __attribute__ ((aligned (ALIGN_4K)));
 PTE u_bb_pt_1[PAGE_TABLE_SIZE] __attribute__ ((aligned (ALIGN_4K)));
@@ -114,7 +115,8 @@ void handle_input(uint8_t input) {
             }
         } else if (flag[BACKSPACE_PRESSED]) {  // Manage backspace
             if (focus_task()->terminal->buf_cnt) delete_last(),--focus_task()->terminal->buf_cnt;
-        } else if (flag[ALT_PRESSED]) {
+        // } else if (flag[ALT_PRESSED]) {
+        } else {
             if (flag[F1_PRESSED]) change_focus_task(0);
             else if (flag[F2_PRESSED]) change_focus_task(1);
             else if (flag[F3_PRESSED]) change_focus_task(2);
@@ -444,7 +446,7 @@ void set_video_memory(terminal_struct_t *terminal){
             PDE_4K_set(u_vm_pde, (uint32_t) (&video_page_table0), 1, 1, 1);    // user level
         } else {
             // map the video mem to backup buffers
-            PDE_4K_set(u_vm_pde, (uint32_t) (&u_bb_pt_list[terminal->id]), 1, 1, 1);
+            PDE_4K_set(u_vm_pde, (uint32_t) (u_bb_pt_list[terminal->id]), 1, 1, 1);
         }
     }
 
@@ -538,6 +540,7 @@ int switch_terminal(terminal_struct_t *old_terminal, terminal_struct_t *new_term
  * Return Value: 0 for success
  * Side effect: None
  * */
+/* NOTE: this function is only invoked when set running terminal (reschedule) and switch terminal*/
 int terminal_vidmap(terminal_struct_t *terminal) {
     int ret;
 
@@ -563,7 +566,7 @@ int terminal_vidmap(terminal_struct_t *terminal) {
         ret = PDE_4K_set(&(page_directory[0]), (uint32_t) &(page_table0), 0, 1, 1);
         if (ret == -1) return -1;
     } else {
-        ret = PDE_4K_set(&(page_directory[0]), (uint32_t) &(k_bb_pt_list[terminal->id]), 0, 1, 1);
+        ret = PDE_4K_set(&(page_directory[0]), (uint32_t) (k_bb_pt_list[terminal->id]), 0, 1, 1);
         if (ret == -1) return -1;
     }
 //    terminal_running = terminal;
