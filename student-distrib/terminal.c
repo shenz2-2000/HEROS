@@ -67,7 +67,9 @@ PTE u_bb_pt_1[PAGE_TABLE_SIZE] __attribute__ ((aligned (ALIGN_4K)));
 PTE u_bb_pt_2[PAGE_TABLE_SIZE] __attribute__ ((aligned (ALIGN_4K)));
 PTE* u_bb_pt_list[MAX_TERMINAL] = {u_bb_pt_0, u_bb_pt_1, u_bb_pt_2};
 
-
+terminal_struct_t* get_showing_terminal(){
+    return terminal_showing;
+}
 void handle_input(uint8_t input) {
     int capital, letter, shift_on;
     char chr;
