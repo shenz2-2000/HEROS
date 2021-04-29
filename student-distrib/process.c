@@ -52,6 +52,7 @@ void process_user_vidmap(pcb_t *process) {
  * Output: focus_task
  */
 void set_focus_task(pcb_t* target_task) {
+    if (target_task!=NULL && target_task->terminal==NULL) return;
     uint32_t flags;
     cli_and_save(flags);
     terminal_struct_t* old_term, *new_term;

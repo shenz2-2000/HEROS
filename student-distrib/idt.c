@@ -158,7 +158,12 @@ ASMLINKAGE int dummy_sys_call(){
 }
 
 ASMLINKAGE int32_t write_sys_call(int32_t fd, const void* buf, int32_t nbytes){
-    return sys_write(fd,buf,nbytes);
+    uint32_t flags;
+    int32_t ret;
+    cli_and_save(flags);
+    ret = sys_write(fd,buf,nbytes);
+    restore_flags(flags);
+    return ret;
 }
 
 
@@ -181,7 +186,12 @@ ASMLINKAGE int32_t get_args_sys_call(uint8_t *buf, int32_t nbytes){
 }
 
 ASMLINKAGE int32_t vidmap_sys_call(uint8_t ** screen_start){
-    return sys_vidmap(screen_start);
+    uint32_t flags;
+    int32_t ret;
+    cli_and_save(flags);
+    ret = sys_vidmap(screen_start);
+    restore_flags(flags);
+    return ret;
 }
 
 ASMLINKAGE int32_t set_handler_sys_call(int32_t signum, void* handler_address){

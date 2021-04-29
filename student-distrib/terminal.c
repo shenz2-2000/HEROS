@@ -119,9 +119,9 @@ void handle_input(uint8_t input) {
             if (focus_task()->terminal->buf_cnt) delete_last(),--focus_task()->terminal->buf_cnt;
         // } else if (flag[ALT_PRESSED]) {
         } else {
-            if (flag[F1_PRESSED]) change_focus_task(0);
+            if (flag[F3_PRESSED]) change_focus_task(2);
             else if (flag[F2_PRESSED]) change_focus_task(1);
-            else if (flag[F3_PRESSED]) change_focus_task(2);
+            else if (flag[F1_PRESSED]) change_focus_task(0);
         }
 
     }
@@ -366,6 +366,10 @@ terminal_struct_t* terminal_allocate() {
 
 void terminal_set_running(terminal_struct_t *terminal) {
     // sanity check
+    if (get_running_terminal() == NULL) {
+        printf("ERROR for terminal_set_running(): running_terminal is NULL\n");
+        return;
+    }
     if (terminal == NULL) {
         printf("ERROR in terminal_set_running(): NULL terminal input\n");
         return;
@@ -373,7 +377,10 @@ void terminal_set_running(terminal_struct_t *terminal) {
     uint32_t flags;
     cli_and_save(flags);
     terminal_struct_t* cur = get_running_terminal();
-    if (terminal == cur) return;
+    if (terminal == cur) {
+        restore_flags(flags);
+        return;
+    }
     cur -> screen_x = screen_x;
     cur -> screen_y = screen_y;
     terminal_vidmap(terminal);
@@ -518,6 +525,14 @@ int switch_terminal(terminal_struct_t *old_terminal, terminal_struct_t *new_term
             return -1;
         }
     }
+
+    int ret;
+    ret = PDE_4K_set(&(page_directory[0]), (uint32_t) &(page_table0), 0, 1, 1);
+    if (ret == -1) {
+        printf("ERROR in switch: PDE set wrong\n");
+        return -1;
+    }
+    flush_tlb();
 
     // copy the physical video memory to the backup buffer
     if (old_terminal != &null_terminal) {
