@@ -2,7 +2,7 @@
  * vim:ts=4 noexpandtab */
 
 #include "lib.h"
-
+#include "terminal.h"
 #define VIDEO       0xB8000
 #define NUM_COLS    80
 #define NUM_ROWS    25
@@ -84,7 +84,7 @@ void delete_last(void) {
                     *(uint8_t *)(video_mem+((screen_x+screen_y*NUM_COLS)<<1)+1)=ATTRIB;
 
     // update the cursor position
-    update_cursor(screen_x,screen_y);
+    update_cursor(get_showing_terminal()->screen_x,get_showing_terminal()->screen_y);
 }
 
 /* void reset_screen(void);
@@ -252,7 +252,7 @@ void putc(uint8_t c) {
                     *(uint8_t *)(video_mem+((NUM_COLS*i+j)<<1)+1) = ATTRIB;
                 }
             screen_y--;
-            update_cursor(screen_x,screen_y);
+            update_cursor(get_showing_terminal()->screen_x,get_showing_terminal()->screen_y);
         }
     } else {
         *(uint8_t *)(video_mem + ((NUM_COLS * screen_y + screen_x) << 1)) = c;

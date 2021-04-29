@@ -10,7 +10,7 @@
 #define INIT_PIT_FREQ   100
 #define MEM_FENCE       512
 #define TIME_DECREASE_PER_INTERRUPT 10
-#define TIME_INIT 200
+#define TIME_INIT 50
 #define N_PCB_OFFSET 10
 
 
