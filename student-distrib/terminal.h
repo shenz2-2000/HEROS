@@ -54,7 +54,7 @@ void terminal_set_running(terminal_struct_t *terminal);
 //int terminal_turn_on(terminal_struct_t *terminal);
 int switch_terminal(terminal_struct_t *old_terminal, terminal_struct_t *new_terminal);
 int terminal_vidmap(terminal_struct_t *terminal);
-
+terminal_struct_t* get_showing_terminal();
 // vidmap
 void vidmap_init();
 void set_video_memory(terminal_struct_t *terminal);
