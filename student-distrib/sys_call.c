@@ -212,6 +212,11 @@ int sys_vidmap(uint8_t** screen_start){
         return -1;
     }
 
+    if (cur_pcb == NULL) {
+        printf("ERROR in get_cur_process(): the cur_pcb is NULL\n");
+        return -1;
+    }
+
     // check if the current process has allocated a terminal
     if (cur_pcb->terminal==NULL || cur_pcb->terminal->id == -1) {
         printf("ERROR in get_cur_process(): the current process has allocated no terminal\n");

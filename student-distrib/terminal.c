@@ -236,7 +236,7 @@ int32_t terminal_read(int32_t fd, void* buf, int32_t nbytes){
         }
         restore_flags(flags);
     }
-    printf("Getting out of loop\n");
+    // printf("Getting out of loop\n");
     get_cur_process()->terminal->user_ask = 0;
     // new critical section
     cli_and_save(flags);
@@ -409,7 +409,7 @@ void vidmap_init() {
         /* set the backup buffers for kernel and user vid map */
 
         // firstly clear the back up buffers
-        for (j = 0; j < BITS_4K; j++) {
+        for (j = 0; j < PAGE_TABLE_SIZE; j++) {
             k_bb_pt_list[i][j].val = 0;
             u_bb_pt_list[i][j].val = 0;
         }

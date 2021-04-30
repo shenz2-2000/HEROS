@@ -34,15 +34,16 @@ void process_user_vidmap(pcb_t *process) {
         printf("ERROR in process_user_vidmap(): NULL input");
         return;
     }
-    if (process->vidmap_enable) {
-        if (process->terminal == &null_terminal) {
-            printf("ERROR in process_user_vidmap(): the process allocates no terminal but enabled the vidmap");
-            return;
-        }
-        set_video_memory(process->terminal);
-    } else {
-        set_video_memory(&null_terminal); // the process disabled the vidmap
-    }
+    // if (process->vidmap_enable) {
+    //     if (process->terminal == &null_terminal) {
+    //         printf("ERROR in process_user_vidmap(): the process allocates no terminal but enabled the vidmap");
+    //         return;
+    //     }
+    //     set_video_memory(process->terminal);
+    // } else {
+    //     set_video_memory(&null_terminal); // the process disabled the vidmap
+    // }
+    set_video_memory(process->terminal);
 }
 
 /**
