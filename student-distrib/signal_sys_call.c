@@ -27,10 +27,6 @@ ASMLINKAGE void check_signal(hw_context hw){
     int32_t eflag;
     uint32_t cur_signal;
 
-    // check whether we return to user-stack
-    if (hw.cs != USER_CS){
-        return;
-    }
 
     // forbid interrupt
     cli_and_save(eflag);
@@ -139,7 +135,12 @@ int32_t signal_send(int32_t signum) {
     // Set pending signal corresponding to input para
     int32_t flags;
     cli_and_save(flags);
-    get_cur_process()->signals.signal_pending |= 1<<signum;
+    if (signum == 2 || signum == 3) {// interrupt or alarm
+        if (focus_task() != NULL)
+            focus_task()->signals.signal_pending |= 1<<signum;
+    } else {
+        get_cur_process()->signals.signal_pending |= 1<<signum;
+    }
     restore_flags(flags);
     return 0;
 }

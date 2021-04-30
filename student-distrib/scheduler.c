@@ -295,7 +295,13 @@ ASMLINKAGE void pit_interrupt_handler(hw_context hw) {
     cli_and_save(eflags);
 
     // TODO: signal alarm
-
+    if (focus_task()) {
+        focus_task()->signals.alarm_time += 1000 / INIT_PIT_FREQ; // Time increase per interrupt
+        if (focus_task()->signals.alarm_time > ALARM_TIME) {
+            signal_send(3); // ALARM
+            focus_task()->signals.alarm_time = 0;
+        }
+    }
     // check overflow
     if( ( cur_task->k_esp < ( (uint32_t)cur_task + MEM_FENCE + sizeof(pcb_t) ) ) || ( cur_task->k_esp > TASK_KSTK_SIZE_IN_B + (uint32_t)cur_task)){
         printf("Kernel stack overflow is happening!!\n");

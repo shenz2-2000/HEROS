@@ -122,7 +122,10 @@ void handle_input(uint8_t input) {
             else if (flag[F2_PRESSED]) change_focus_task(1);
             else if (flag[F3_PRESSED]) change_focus_task(2);
         }
-
+        if (flag[CTRL_PRESSED] && flag[C_PRESSED]) {
+            signal_send(2); // Interrupt
+            return;
+        }
     }
 }
 /*

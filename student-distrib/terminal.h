@@ -11,6 +11,7 @@
 #define L_PRESSED           0x26
 #define BACKSPACE_PRESSED   0x0E
 #define KEYBOARD_PORT 0x60
+#define C_PRESSED     0x2E
 #define KEYBOARD_BUF_SIZE 128
 #define F1_PRESSED 0x3B
 #define F2_PRESSED 0x3C

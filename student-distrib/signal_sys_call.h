@@ -15,7 +15,7 @@
 #include "idt.h"
 #include "types.h"
 // #include "types.h"
-
+#define ALARM_TIME 1000 // 10000ms = 10s
 typedef int32_t (*signal_handler)(void);
 typedef struct signal_struct_t {
     uint32_t signal_pending;
