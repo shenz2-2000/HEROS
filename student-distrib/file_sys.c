@@ -465,7 +465,6 @@ int32_t dir_read(int32_t fd, void *buf, int32_t bufsize){
 
     cur_pcb = get_cur_process();
     cur_pos = cur_pcb->file_arr.files[fd].f_pos;
-    cur_pos++;
 
     // check the #bytes to read
     bufsize = (bufsize > F_NAME_LIMIT) ? F_NAME_LIMIT : bufsize;
@@ -475,7 +474,7 @@ int32_t dir_read(int32_t fd, void *buf, int32_t bufsize){
 
     // copy to buffer
     strncpy(buf, (int8_t *) (bblock_ptr->dentries[cur_pos].f_name), bufsize);
-    cur_pcb->file_arr.files[fd].f_pos = cur_pos;
+    cur_pcb->file_arr.files[fd].f_pos++;
 
     return bufsize;
 
