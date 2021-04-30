@@ -117,11 +117,10 @@ void handle_input(uint8_t input) {
             }
         } else if (flag[BACKSPACE_PRESSED]) {  // Manage backspace
             if (focus_task()->terminal->buf_cnt) delete_last(),--focus_task()->terminal->buf_cnt;
-        // } else if (flag[ALT_PRESSED]) {
-        } else {
-            if (flag[F3_PRESSED]) change_focus_task(2);
+        } else if (flag[ALT_PRESSED]) {
+            if (flag[F1_PRESSED]) change_focus_task(0);
             else if (flag[F2_PRESSED]) change_focus_task(1);
-            else if (flag[F1_PRESSED]) change_focus_task(0);
+            else if (flag[F3_PRESSED]) change_focus_task(2);
         }
 
     }
@@ -544,7 +543,6 @@ int switch_terminal(terminal_struct_t *old_terminal, terminal_struct_t *new_term
         memcpy((uint8_t *) (VM_INDEX), (uint8_t *) (VM_INDEX + (new_terminal->id + 1) * BITS_4K), BITS_4K);
     }
 
-//    terminal_showing = new_terminal;
     terminal_showing = new_terminal;
     terminal_vidmap(terminal_running);
 
@@ -586,7 +584,6 @@ int terminal_vidmap(terminal_struct_t *terminal) {
         ret = PDE_4K_set(&(page_directory[0]), (uint32_t) (k_bb_pt_list[terminal->id]), 0, 1, 1);
         if (ret == -1) return -1;
     }
-//    terminal_running = terminal;
     terminal_running = terminal;
     flush_tlb();
     return 0;
