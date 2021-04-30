@@ -416,8 +416,8 @@ void vidmap_init() {
 
         // map the 0xB8000 of user and kernel backup buffers to backup area
         // which is 0xB9000, BA000, BB000
-        PTE_set(&(k_bb_pt_list[i][VM_PTE]), VM_INDEX + (i+1) * BITS_4K, 1, 1, 1);
-        PTE_set(&(u_bb_pt_list[i][VM_PTE]), VM_INDEX + (i+1) * BITS_4K, 0, 1, 1);
+        PTE_set(&(k_bb_pt_list[i][VM_PTE]), VM_INDEX + (i+1) * BITS_4K, 0, 1, 1);
+        PTE_set(&(u_bb_pt_list[i][VM_PTE]), VM_INDEX + (i+1) * BITS_4K, 1, 1, 1);
 
         // map to the kernel page itself
         page_table0[VM_PTE + i + 1] = k_bb_pt_list[i][VM_PTE];

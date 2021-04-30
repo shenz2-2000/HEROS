@@ -104,6 +104,30 @@ void fill_page(){
         }
     }
 
+    // for(i = 0; i < PAGE_TABLE_SIZE; i++){
+    //     // points to the start of vedio memory
+    //     if(i == VIDEO_MEMORY_INDEX){
+    //         page_table1[i].P = 1;
+    //         page_table1[i].RW = 1;
+    //         page_table1[i].US = 0;
+    //         page_table1[i].PWT = 0;
+    //         page_table1[i].PCD = 0;
+    //         page_table1[i].A = 0;
+    //         page_table1[i].D = 0;
+    //         page_table1[i].PAT = 0;
+    //         page_table1[i].G = 0;
+    //         page_table1[i].AVAIAL = 0;
+    //         page_table1[i].Base_address = VIDEO_MEMORY_INDEX;
+    //         continue;
+    //     }
+
+    //     // else, just filled with 0
+    //     else{
+    //         page_table1[i].val = 0;
+    //         continue;
+    //     }
+    // }
+
 
     // --------------------------Fill the video Page Table--------------------
     for(i = 0; i < PAGE_TABLE_SIZE; i++){

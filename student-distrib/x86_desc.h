@@ -236,6 +236,7 @@ typedef union PTE {
 // to print the value in gdb, using: p (PTE) page_table0[0xB8]
 extern PDE page_directory[PAGE_DIRECTORY_SIZE] __attribute__ ((aligned (ALIGN_4K)));    // the main kernel page directory
 extern PTE page_table0[PAGE_TABLE_SIZE]__attribute__ ((aligned (ALIGN_4K)));    // the first page table (pde), containing the physical vidmem
+// extern PTE page_table1[PAGE_TABLE_SIZE]__attribute__ ((aligned (ALIGN_4K)));
 extern PTE video_page_table0[PAGE_TABLE_SIZE]__attribute__ ((aligned (ALIGN_4K)));  // user 132MB + 0xB8000
 
 /* The IDT itself (declared in x86_desc.S */
