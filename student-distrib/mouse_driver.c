@@ -11,13 +11,14 @@
 int32_t left_button_pressed = 0;
 uint8_t prev_input;
 uint32_t mouse_x= 10, mouse_y= 10;
-//void set_mouse_cursor(int x, int y){
-//    x = (x << 5) | 0x0010;
-//    outw(x,0x3c4);
-//
-//    y = (y << 5) | 0x0011;
-//    outw(y,0x3c4);
-//}
+
+void set_mouse_cursor(int x, int y){
+    x = (x << 5) | 0x0010;
+    outw(x,0x3c4);
+
+    y = (y << 5) | 0x0011;
+    outw(y,0x3c4);
+}
 
 
 
@@ -76,7 +77,7 @@ void initialize_mouse(){
 ASMLINKAGE void mouse_handler(hw_context hw) {
     uint8_t input = inb(0x60);
     if (input == 0xFA) return;// ACK signal
-    int32_t x_delta = port_read(),y_delta = port_read();
+    int32_t x_delta = port_read(MOUSE_DATA_PORT,MOUSE_CHECK_PORT),y_delta = port_read(MOUSE_DATA_PORT,MOUSE_CHECK_PORT);
     if (input&Y_overflow || input&X_overflow) return;
     if (!(prev_input&LEFT_PRESSED) && (input&LEFT_PRESSED)) {
         left_button_pressed=1;
