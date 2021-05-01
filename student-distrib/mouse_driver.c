@@ -7,18 +7,10 @@
 #include "link.h"
 #include "process.h"
 #include "idt.h"
-#define Y_overflow (1<<7)
-#define X_overflow (1<<6)
-#define MID_PRESSED (1<<2)
-#define RIGHT_PRESSED (1<<1)
-#define LEFT_PRESSED (1)
-#define TEXT_MODE_WIDTH    80
-#define TEXT_MODE_HEIGHT    25
-#define X_SIGN     (1<<4)
-#define Y_SIGN     (1<<5)
+
 int32_t left_button_pressed = 0;
 uint8_t prev_input;
-uint32_t mouse_x=945, mouse_y=30;
+uint32_t mouse_x= 10, mouse_y= 10;
 //void set_mouse_cursor(int x, int y){
 //    x = (x << 5) | 0x0010;
 //    outw(x,0x3c4);
@@ -26,6 +18,60 @@ uint32_t mouse_x=945, mouse_y=30;
 //    y = (y << 5) | 0x0011;
 //    outw(y,0x3c4);
 //}
+
+
+
+// for mouse, just port_read(MOUSE_DATA_PORT, MOUSE_CHECK_PORT)
+uint8_t port_read(uint8_t read_port, uint8_t check_port){
+
+    // we need to check the first bit in check_port
+    while(1){
+        if( ((inb(check_port)) & 1)  == 1) break;
+    }
+
+    return inb(read_port);
+
+}
+
+// for mouse, just port_write(content, MOUSE_DATA_PORT, MOUSE_CHECK_PORT)
+void port_write(uint8_t content, uint8_t target_port, uint8_t check_port){
+
+    // we need to check the device is not keyboard
+    while(1){
+        if( (( inb(check_port) & 0x2 ) == 0)) break;
+    }
+
+    outb(content, target_port);
+
+}
+
+void send_command_to_mouse(uint8_t command){
+
+    // two steps to send command
+    port_write(PRECEDE_COMMAND,MOUSE_CHECK_PORT,MOUSE_CHECK_PORT);
+    port_write(command,MOUSE_DATA_PORT,MOUSE_CHECK_PORT);
+
+    // wait for success
+    while(1){
+        if (port_read(MOUSE_DATA_PORT,MOUSE_CHECK_PORT) == MOUSE_ACKNOWLEDGE) break;
+    }
+}
+
+void initialize_mouse(){
+    send_command_to_mouse(MOUSE_RESET);
+    port_write(0x20,MOUSE_CHECK_PORT,MOUSE_CHECK_PORT);
+
+    uint8_t cur_status = port_read(MOUSE_DATA_PORT,MOUSE_CHECK_PORT);
+    cur_status = (cur_status | 0x2) & ( ~(0x20) );
+
+    port_write(0x60,MOUSE_CHECK_PORT,MOUSE_CHECK_PORT);
+    port_write(cur_status,MOUSE_DATA_PORT,MOUSE_CHECK_PORT);
+
+    send_command_to_mouse(0xF4);
+
+    set_mouse_cursor(mouse_x, mouse_y);
+
+}
 
 ASMLINKAGE void mouse_handler(hw_context hw) {
     uint8_t input = inb(0x60);
@@ -52,3 +98,4 @@ ASMLINKAGE void mouse_handler(hw_context hw) {
     prev_input = input;
     set_blue_cursor(mouse_x, mouse_y);
 }
+
