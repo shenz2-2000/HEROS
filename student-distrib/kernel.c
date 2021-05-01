@@ -14,6 +14,7 @@
 #include "sys_call.h"
 #include "signal_sys_call.h"
 #include "gensound.h"
+#include "mouse_driver.h"
 // #include "wav_player.h"
 
 #define RUN_TESTS
@@ -258,6 +259,9 @@ void entry(unsigned long magic, unsigned long addr) {
 
     /* Init Signal */
     signal_init();
+
+    /* Init Mouse */
+    initialize_mouse();
 
     /* Enable interrupts */
 
