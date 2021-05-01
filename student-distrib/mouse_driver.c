@@ -7,7 +7,7 @@
 #include "link.h"
 #include "process.h"
 #include "idt.h"
-
+#include "i8259.h"
 int32_t left_button_pressed = 0;
 uint8_t prev_input;
 uint32_t mouse_x= 10, mouse_y= 10;
@@ -75,9 +75,13 @@ void initialize_mouse(){
 }
 
 ASMLINKAGE void mouse_handler(hw_context hw) {
-    uint8_t input = inb(0x60);
-    if (input == 0xFA) return;// ACK signal
+
+    send_eoi(hw.irq);
+    if (!(inb(MOUSE_CHECK_PORT)&1) || !(inb(MOUSE_CHECK_PORT)&0x20)) return;
+    uint8_t input = inb(MOUSE_DATA_PORT);
+    if (input == MOUSE_ACKNOWLEDGE) return;// ACK signal
     int32_t x_delta = port_read(MOUSE_DATA_PORT,MOUSE_CHECK_PORT),y_delta = port_read(MOUSE_DATA_PORT,MOUSE_CHECK_PORT);
+    if (!(input & 0x08)) return;
     if (input&Y_overflow || input&X_overflow) return;
     if (!(prev_input&LEFT_PRESSED) && (input&LEFT_PRESSED)) {
         left_button_pressed=1;
