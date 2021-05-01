@@ -61,26 +61,6 @@ void init_scheduler() {
 
 
 // ---------------------------------------------Some tool function for linked list------------------------------------------
-
-/*
- * insert_to_list_start
- * This function will add node to the start
- * Input: cur_node - the node you want to add
- * Output: None.
- * Side effect: change the task list
- */
-//void insert_to_list_start(task_node* cur_node) {
-//
-//    // original head
-//    task_node* temp = task_list_head.next;
-//
-//    // reinsert
-//    temp->prev = cur_node;
-//    cur_node->next = temp;
-//    cur_node->prev = &task_list_head;
-//    task_list_head.next = cur_node;
-//}
-
 /*
  * append_to_list_end
  * This function will append a new node to the end
@@ -143,7 +123,10 @@ void reposition_to_end(task_node* cur_node) {
  * Side effect: None.
  */
 void init_process_time(pcb_t* cur_process){
-    cur_process->time = TIME_INIT;
+    char s[10] = "shell";
+    if (strcmp((int8_t*)cur_process->name, s) == 1) {
+        cur_process->time = TIME_INIT_FOR_SHELL;
+    } else cur_process->time = TIME_INIT;
 }
 
 /*
@@ -231,43 +214,19 @@ void reschedule(){
         printf("WARNING:there should be at least 1 process in list");
     }
 
-    // TODO: no idle task now?
-//    if( next_task->idle_task ){
-//        // The first task is idle task, put it to the end of the list
-//        reposition_to_end(task_list_head.next);
-//        next_task = task_list_head.next->cur_task;
-//    }
-
     if(get_cur_process() == task_list_head.next->cur_task){
         // do nothing, do not need to switch
         return;
     }
 
-    // check whether have child
-//    if(next_task->having_child_running){
-//        while(next_task->having_child_running){
-//            if(next_task->node->next == &task_list_head){
-//                next_task = task_list_head.next->cur_task;
-//            }
-//            else {
-//                next_task = next_task->node->next->cur_task;
-//            }
-//        }
-//    }
-
 
     terminal_set_running(next_task->terminal);
-
-//    if(next_task->pid != -1){
-//        set_private_page(next_task->pid);
-//    }
     set_private_page(next_task->pid);
 
     process_user_vidmap(next_task);
     tss.esp0 = next_task->k_esp_base;
 
     // switch stack to the next task
-    // TODO: ensure it works here
     switch_context(get_cur_process()->k_esp,next_task->k_esp);
 
 }
@@ -281,7 +240,6 @@ void reschedule(){
  * @sideeffect modify list and switch stack
  */
 ASMLINKAGE void pit_interrupt_handler(hw_context hw) {
-    // printf("int ");
     uint32_t eflags;
     pcb_t* cur_task = get_cur_process();
 
@@ -315,26 +273,16 @@ ASMLINKAGE void pit_interrupt_handler(hw_context hw) {
         // reposition cur_task to the end of the linked list
         reposition_to_end(cur_task->node);
         send_eoi(hw.irq);
-        // printf("res idle\n");
         reschedule();
     }
     // not idle task
     else{
         cur_task->time -= TIME_DECREASE_PER_INTERRUPT;
-
         // time is used up
         if(cur_task->time <= 0){
-//            task_node* cur_nmsl = task_list_head.next;
-//            while (cur_nmsl!=&task_list_head) {
-//                printf("%s", cur_nmsl->cur_task->name);
-//                printf("(terminal:%d %d %d)->", cur_nmsl->cur_task->terminal->id,cur_nmsl->cur_task->terminal->screen_x,cur_nmsl->cur_task->terminal->screen_y);
-//                cur_nmsl = cur_nmsl->next;
-//            }
-//            printf("\n");
             init_process_time(cur_task);
             reposition_to_end(cur_task->node);
             send_eoi(hw.irq);
-
             reschedule();
         }
         else{

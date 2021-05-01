@@ -224,8 +224,6 @@ int sys_vidmap(uint8_t** screen_start){
         return -1;
     }
 
-    cur_pcb->vidmap_enable = 1;
-
     // setup the video memory in PD
     set_video_memory(cur_pcb->terminal);
 

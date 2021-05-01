@@ -7,7 +7,7 @@
 
 pcb_t* pcb_ptrs[N_PCB_LIMIT];
 int32_t n_present_pcb;
-pcb_t *focus_task_ = NULL;
+pcb_t *cur_task = NULL;
 pcb_t *foreground_task[MAX_TERMINAL];
 extern terminal_struct_t null_terminal;
 terminal_struct_t *running_term = &null_terminal;
@@ -23,9 +23,8 @@ void set_running_terminal (terminal_struct_t* cur) {
  * Input: None
  * Output: focus_task
  */
-pcb_t *focus_task() {
-    // if (focus_task_ == NULL) printf("No focus task\n");
-    return focus_task_;
+pcb_t *get_showing_task() {
+    return cur_task;
 }
 
 void process_user_vidmap(pcb_t *process) {
@@ -34,15 +33,6 @@ void process_user_vidmap(pcb_t *process) {
         printf("ERROR in process_user_vidmap(): NULL input");
         return;
     }
-    // if (process->vidmap_enable) {
-    //     if (process->terminal == &null_terminal) {
-    //         printf("ERROR in process_user_vidmap(): the process allocates no terminal but enabled the vidmap");
-    //         return;
-    //     }
-    //     set_video_memory(process->terminal);
-    // } else {
-    //     set_video_memory(&null_terminal); // the process disabled the vidmap
-    // }
     set_video_memory(process->terminal);
 }
 
@@ -52,33 +42,32 @@ void process_user_vidmap(pcb_t *process) {
  * Input: terminal_num -- the terminal id want to change to
  * Output: focus_task
  */
-void set_focus_task(pcb_t* target_task) {
+void set_showing_task(pcb_t* target_task) {
     if (target_task!=NULL && target_task->terminal==NULL) return;
     uint32_t flags;
     cli_and_save(flags);
-    terminal_struct_t* old_term, *new_term;
-    if (focus_task()==NULL) old_term = &null_terminal;else old_term=focus_task()->terminal;
-    if (target_task==NULL) new_term = &null_terminal;else new_term=target_task->terminal;
+    terminal_struct_t* old_term = get_showing_task()==NULL?&null_terminal:get_showing_task()->terminal;
+    terminal_struct_t* new_term = target_task==NULL?&null_terminal:target_task->terminal;
     switch_terminal(old_term,new_term);
-    focus_task_ = target_task;
+    cur_task = target_task;
     process_user_vidmap(get_cur_process());
     restore_flags(flags);
 }
 
 /**
- * change_focus_task
+ * change_focus_terminal
  * Description: switch terminal
  * Input: terminal_num -- the terminal id want to change to
  * Output: focus_task
  */
-void change_focus_task(int32_t terminal_num) {
-    set_focus_task(foreground_task[terminal_num]);
+void change_focus_terminal(int32_t terminal_num) {
+    set_showing_task(foreground_task[terminal_num]);
 }
 
-#define execute_launch(kesp_des, new_esp, new_eip, ret) asm volatile ("                    \
+#define execute_user_program_asm(esp_des, esp, eip, ret) asm volatile ("                    \
     pushfl          /* save flags */                                   \n\
     pushl %%ebp     /* save EBP*/                                      \n\
-    pushl $1f       /* return address to label 1 after iret */          \n\
+    pushl $0f                                                               \n\
     movl %%esp, %0                                                        \n\
     pushl $0x002B                                                         \n\
     pushl %2                                                            \n\
@@ -86,31 +75,31 @@ void change_focus_task(int32_t terminal_num) {
     pushl $0x0023                                                    \n\
     pushl %3                                                          \n\
     iret                                                              \n\
-1:  popl %%ebp                                                        \n\
+0:  popl %%ebp                                                        \n\
     movl %%eax, %1                                                     \n\
     popfl   "                                              \
-    : "=m" (kesp_des),                                                            \
+    : "=m" (esp_des),                                                            \
       "=m" (ret)                                                                      \
-    : "rm" (new_esp), "rm" (new_eip)                                                  \
+    : "rm" (esp), "rm" (eip)                                                  \
     : "cc", "memory"                                                                  \
 )
 
-#define execute_launch_in_kernel(kesp_des, new_esp, new_eip, ret) asm volatile (" \
+#define execute_program_in_kernel_asm(esp_des, esp, eip, ret) asm volatile (" \
     pushfl                                                  \n\
     pushl %%ebp                                                    \n\
-    pushl $1f                                                       \n\
+    pushl $0f                                                       \n\
     movl %%esp, %0                                           \n\
     movl %2, %%esp                                                \n\
     pushl %3                                                   \n\
     pushl $0x206                                                   \n\
     popfl                                                                           \n\
     ret                                                        \n\
-1:  popl %%ebp                                                  \n\
+0:  popl %%ebp                                                  \n\
     movl %%eax, %1                                               \n\
     popfl                           "                                              \
-    : "=m" (kesp_des), /* must write to memory, or halt() will not get it */      \
+    : "=m" (esp_des), /* must write to memory, or halt() will not get it */      \
       "=m" (ret)                                                                      \
-    : "r" (new_esp), "r" (new_eip)                                                    \
+    : "r" (esp), "r" (eip)                                                    \
     : "cc", "memory"                                                                  \
 )
 
@@ -159,11 +148,8 @@ int parse_args(uint8_t *command, uint8_t **args){
 }
 int get_another_terminal_id(int id) {
     int i;
-    for (i = 1; i < MAX_TERMINAL; i++) {
-        if (foreground_task[(id - i + MAX_TERMINAL) % MAX_TERMINAL] != NULL) {
-            return (id - i + MAX_TERMINAL) % MAX_TERMINAL;
-        }
-    }
+    for (i = 0; i < MAX_TERMINAL; i++)
+        if (foreground_task[i] != NULL && id!=i) return id;
     return -1;
 }
 /**
@@ -204,7 +190,6 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
         if (wait_for_child==1) get_cur_process()->having_child_running=1;
     }
     if (function_address!=NULL) process->kernel_task=1;
-    process->vidmap_enable = 0;
     process->k_esp_base = (uint32_t)process+TASK_KSTK_SIZE_IN_B-1;
     process->k_esp = (uint32_t)process + TASK_KSTK_SIZE_IN_B-1;
     // Parse name and arguments
@@ -230,7 +215,6 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
         if (separate_terminal) {
             process->terminal = terminal_allocate();
             process->own_terminal = 1;
-//            terminal_turn_on(process->terminal);
         } else {
             if (process->init_task) process->terminal = &null_terminal;
             else process->terminal = get_cur_process()->terminal; // Use the caller's terminal
@@ -244,42 +228,33 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
         process->pid = pid_ret;
         if (process->terminal != &null_terminal) {
             foreground_task[process->terminal->id] = process; // Become the task using terminal
-            set_focus_task(process);
+            set_showing_task(process);
         }
         terminal_set_running(process->terminal);
         if (separate_terminal) {
             clear();
             reset_screen();
             printf("TERMINAL %d\n", process->terminal->id);
-//            printf("Current Running terminal is:%d\n",running_term->id);
         }
-
     }
-
     init_file_arr(&(process->file_arr));
     task_signal_init(&(process->signals));
-    // Set up tss to make sure system call don't go wrong
     // Set up Scheduler
     if (add_task_to_list(process)==-1) return -1;
     init_process_time(process);
-//    insert_to_list_start(process->node);
-
-//    if (wait_for_child==1) {
-//        process->wait_for_child=1;
-//        reposition_to_end(process->node);
-//    }
+    // Set up tss to make sure system call don't go wrong
     tss.esp0 = process->k_esp;
     if (process->kernel_task) {
         if (process->init_task) {
-            execute_launch_in_kernel(length, process->k_esp, eip, ret);
+            execute_program_in_kernel_asm(length, process->k_esp, eip, ret);
         } else {
-            execute_launch_in_kernel(get_cur_process()->k_esp, process->k_esp, eip, ret);
+            execute_program_in_kernel_asm(get_cur_process()->k_esp, process->k_esp, eip, ret);
         }
     } else {
         if (process->init_task) {
-            execute_launch(length, US_STARTING, eip, ret);
+            execute_user_program_asm(length, US_STARTING, eip, ret);
         } else {
-            execute_launch(get_cur_process()->k_esp, US_STARTING, eip, ret);
+            execute_user_program_asm(get_cur_process()->k_esp, US_STARTING, eip, ret);
         }
     }
     return ret;
@@ -298,10 +273,8 @@ int32_t system_halt(int32_t status) {
 
 
     pcb_t * cur_task = get_cur_process();
-//    task_node * cur_node = cur_task->node;
 
     // condition check
-    // TODO: check whether it works
     if (get_n_present_pcb() == 0) {   // not in a process
 
         // clear page directory for video memory
@@ -317,30 +290,27 @@ int32_t system_halt(int32_t status) {
 
     // if cur_task has parent, we simply switch to parent task
     if (cur_task->parent != NULL) {
-        // TODO: why init time for parent?
         cur_task->parent->having_child_running = 0;
         init_process_time(cur_task->parent);
     }
 
     // close file array
-
-    // TODO: manipulate terminal
     // ---------------------------------------
     int term_id = cur_task->terminal->id;
     // Perform the deallocation of terminal
     if (cur_task->own_terminal) {
         foreground_task[term_id] = NULL;
-        if (focus_task_->terminal->id == term_id) {
+        if (get_showing_task()->terminal->id == term_id) {
             int new_term_id = get_another_terminal_id(term_id);
             if (new_term_id != -1) {
-                set_focus_task(foreground_task[new_term_id]);
+                set_showing_task(foreground_task[new_term_id]);
             }
         }
         terminal_deallocate(cur_task->terminal);
     } else {
         foreground_task[cur_task->parent->terminal->id] = cur_task->parent;
-        if (focus_task_->terminal->id == cur_task->parent->terminal->id) {
-            set_focus_task(cur_task->parent);
+        if (get_showing_task()->terminal->id == cur_task->parent->terminal->id) {
+            set_showing_task(cur_task->parent);
         }
     }
 
@@ -354,18 +324,13 @@ int32_t system_halt(int32_t status) {
         delete_paging(cur_task->pid);
         reschedule();
     } else {
-        close_all_files(&cur_task->file_arr);
-        delete_process(cur_task);
-        // we have parent, so just switch to them
-        restore_paging(cur_task->pid,cur_task->parent->pid);
-
-        // TODO: terminal
-        // ---------------------------------------------
-        terminal_set_running(cur_task->parent->terminal);
-        // ---------------------------------------------
-
-        tss.esp0 = cur_task->parent->k_esp_base;
-        load_esp_and_return(cur_task->parent->k_esp, status);
+            close_all_files(&cur_task->file_arr);
+            delete_process(cur_task);
+            // we have parent, so just switch to them
+            restore_paging(cur_task->pid,cur_task->parent->pid);
+            terminal_set_running(cur_task->parent->terminal);
+            tss.esp0 = cur_task->parent->k_esp_base;
+            load_esp_and_return(cur_task->parent->k_esp, status);
         }
 
         printf("In system_halt: this function should never return.\n");
@@ -475,7 +440,7 @@ int32_t get_n_present_pcb() {
 
 void init_task_main() {
 
-    int32_t ret = 0, i;
+    int32_t i;
     uint32_t flags;
     cli_and_save(flags);
 

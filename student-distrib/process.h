@@ -24,7 +24,6 @@ typedef struct task_node{
 typedef struct pcb_t pcb_t;
 struct pcb_t {
     uint8_t present;
-    uint8_t vidmap_enable;
     pcb_t* parent;
     uint8_t* name;
     uint8_t* args;
@@ -53,8 +52,9 @@ pcb_t* delete_process(pcb_t* pcb);
 int32_t get_n_present_pcb();
 int parse_args(uint8_t *command, uint8_t **args);
 int32_t system_halt(int32_t status);
+pcb_t *get_showing_task();
 int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal, void (*function_address)());
-void change_focus_task(int32_t terminal_id);
+void change_focus_terminal(int32_t terminal_id);
 terminal_struct_t* get_running_terminal();
 void set_running_terminal(terminal_struct_t* cur);
 void init_task_main();
