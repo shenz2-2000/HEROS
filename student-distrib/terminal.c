@@ -13,8 +13,6 @@
 #define RUN_TESTS
 /* Declaration of constant */
 // Maximum Size of keyboard buffer should be 128
-static int key_buf_cnt=0;
-static char keyboard_buf[KEYBOARD_BUF_SIZE];
 terminal_struct_t null_terminal ={
         .valid = 1,
         .id = -1,
@@ -104,10 +102,6 @@ void handle_input(uint8_t input) {
                 focus_task()->terminal->buf[focus_task()->terminal->buf_cnt] = '\n';
                 putc(focus_task()->terminal->buf[focus_task()->terminal->buf_cnt]);
                 focus_task()->terminal->buf_cnt++;
-                //focus_task()->parent->flags &= ~TASK_WAITING_CHILD;
-//                init_process_time(focus_task());
-                //insert_to_list_start(focus_task()->node);
-//                reschedule();
                 return;
             }
             if ((0 == focus_task()->terminal->user_ask) && input == 0x1C) {
@@ -118,11 +112,10 @@ void handle_input(uint8_t input) {
         } else if (flag[BACKSPACE_PRESSED]) {  // Manage backspace
             if (focus_task()->terminal->buf_cnt) delete_last(),--focus_task()->terminal->buf_cnt;
         } else if (flag[ALT_PRESSED]) {
-            if (flag[F1_PRESSED]) change_focus_task(0);
-            else if (flag[F2_PRESSED]) change_focus_task(1);
-            else if (flag[F3_PRESSED]) change_focus_task(2);
+            if (flag[F1_PRESSED]) change_focus_terminal(0);
+            else if (flag[F2_PRESSED]) change_focus_terminal(1);
+            else if (flag[F3_PRESSED]) change_focus_terminal(2);
         }
-
     }
 }
 /*

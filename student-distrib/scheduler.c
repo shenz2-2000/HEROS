@@ -143,7 +143,10 @@ void reposition_to_end(task_node* cur_node) {
  * Side effect: None.
  */
 void init_process_time(pcb_t* cur_process){
-    cur_process->time = TIME_INIT;
+    char s[10] = "shell";
+    if (strcmp((int8_t*)cur_process->name, s) == 1) {
+        cur_process->time = TIME_INIT_FOR_SHELL;
+    } else cur_process->time = TIME_INIT;
 }
 
 /*
