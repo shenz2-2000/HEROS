@@ -168,16 +168,25 @@ ASMLINKAGE int32_t write_sys_call(int32_t fd, const void* buf, int32_t nbytes){
 
 
 ASMLINKAGE int32_t halt_sys_call(int8_t status){
-    return system_halt((int32_t)status);
+
+    int32_t eflags;
+    int32_t return_val;
+
+    cli_and_save(eflags);
+    return_val = system_halt((int32_t)status);
+    restore_flags(eflags);
+
+    return return_val;
 }
 
 ASMLINKAGE int32_t execute_sys_call( uint8_t *command){
     uint32_t flags;
-    cli_and_save(flags);
-
     int32_t ret;
+
+    cli_and_save(flags);
     ret = sys_execute(command, 1, 0, NULL);
     restore_flags(flags);
+
     return ret;
 }
 

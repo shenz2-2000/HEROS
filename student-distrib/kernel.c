@@ -51,14 +51,14 @@ void naive_exception_handler(hw_context hw){
         printf("WARNING! The Input of Exception is invalid!!!!\n");
         printf("------------------------------------------------\n");
         // shut the screen into blue
-        set_blue_screen();
+//        set_blue_screen();
     }
     else {
         printf("------------------------------------------------\n");
         printf("WARNING! EXCEPTION %u HAPPENS!\n", hw.irq);
         printf("------------------------------------------------\n");
         // shut the screen into blue
-        set_blue_screen();
+//        set_blue_screen();
     }
 //    while(1){}
 #if (EXCEPTION_HANDLE_TYPE == 0)

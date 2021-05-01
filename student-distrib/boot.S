@@ -258,7 +258,7 @@ exception_handler_7:
 
 .globl exception_handler_8
 exception_handler_8:
-         pushl $0 /*push dummy*/
+         #pushl $0 /*push dummy*/
          # ---------------------push the entry number------------------
          pushl $8 /*push irq number*/
          SET_HW_CONTEXT
@@ -433,11 +433,11 @@ interrupt_entry_0:
     pushl $0
     SET_HW_CONTEXT
     call pit_interrupt_handler
-    pushl $0  # push irq number as argument
-    call send_eoi
-    addl $4, %esp
+    #pushl $0  # push irq number as argument
+    #call send_eoi
+    #addl $4, %esp
     // TODO: temporarily disable signal check for debugging
-    # call check_signal
+    call check_signal
     RESTORE_HW_CONTEXT
     iret  # return from interrupt
 
