@@ -13,7 +13,10 @@
 
 int screen_x;
 int screen_y;
+int prev_mouse_x = 0;
+int prev_mouse_y = 0;
 static char* video_mem = (char *)VIDEO;
+
 
 
 
@@ -34,6 +37,19 @@ void update_cursor(int x, int y){
 }
 
 
+void set_blue_cursor(int32_t x, int32_t y){
+
+    *(uint8_t *)(video_mem + ((x + y*NUM_COLS) << 1) + 1) = BULE_SCREEN;
+
+    if(prev_mouse_x == x && prev_mouse_y == y) return;
+
+    else{
+        *(uint8_t *)(video_mem + ((prev_mouse_x + prev_mouse_y*NUM_COLS) << 1) + 1) = ATTRIB;
+        prev_mouse_x = x;
+        prev_mouse_y = y;
+    }
+
+}
 
 /* void set_blue_screen(void);
  * Description: Set the whole screen into blue

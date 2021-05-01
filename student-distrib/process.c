@@ -5,6 +5,7 @@
 #include "sys_call.h"
 #include "scheduler.h"
 #include "wav_player.h"
+#include "mouse_driver.h"
 
 pcb_t* pcb_ptrs[N_PCB_LIMIT];
 int32_t n_present_pcb;
@@ -466,6 +467,9 @@ void init_task_main() {
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
+    for(i = 0; i < 30; i++){
+        set_mouse_cursor(i+5,2*i+5);
+    }
     restore_flags(flags);
     while(1) {
         for (i = 0; i<MAX_TERMINAL;++i) if (foreground_task[i]==NULL) {
