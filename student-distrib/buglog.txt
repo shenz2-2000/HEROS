@@ -112,4 +112,12 @@
 
     * FIX  - we check whether cs of hardware context on stack is USER_CS, otherwise we just return.
 
+    * BUG3 - In terminal.c, when we do ctrl+c, the screen will output a "c" character. This problem is caused by I input the c character in the line buffer.
+    * FIX -  Before putting anything into the line buffer, I first check whether ctrl+c is happening. If so, just return.
+
+    * BUG4 - When we execute hello, and input our name, the input will also gives it to shell.
+             This is caused by we are both executing shell and hello, so they all receive our input and respond.
+    * FIX -  In execute, we keep track of the current task's parent, and make it wait for the child to return.
+
+
 

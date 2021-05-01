@@ -64,10 +64,23 @@ PTE u_bb_pt_0[PAGE_TABLE_SIZE] __attribute__ ((aligned (ALIGN_4K)));
 PTE u_bb_pt_1[PAGE_TABLE_SIZE] __attribute__ ((aligned (ALIGN_4K)));
 PTE u_bb_pt_2[PAGE_TABLE_SIZE] __attribute__ ((aligned (ALIGN_4K)));
 PTE* u_bb_pt_list[MAX_TERMINAL] = {u_bb_pt_0, u_bb_pt_1, u_bb_pt_2};
-
+/*
+ * get_showing_terminal
+ *   DESCRIPTION: Return the terminal that is currently showing
+ *   OUTPUTS: none
+ *   RETURN VALUE: terminal_showing
+ */
 terminal_struct_t* get_showing_terminal(){
     return terminal_showing;
 }
+
+/*
+ * handle_input
+ *   DESCRIPTION: Based on the keyboard input, do the corresponding operation
+ *   INPUTS: input -- the input ASCII number
+ *   OUTPUTS: none
+ *   RETURN VALUE: none
+ */
 void handle_input(uint8_t input) {
     int capital, letter, shift_on;
     char chr;
@@ -454,25 +467,6 @@ void set_video_memory(terminal_struct_t *terminal){
     flush_tlb();
 }
 
-/* clear_video_memory
- * Description: clear page directory for user manipulation
- * Inputs: None
- * Return Value: None
- * Side effect: None
- * */
-// FIXME: ??? what's this for??
-void clear_video_memory(){
-
-    // the page directory entry we need to setup
-    PDE video_entry;
-
-    video_entry.val = 0;
-
-    // fill in the directory entry #33
-    page_directory[PRIVATE_PAGE_VA + 1] = video_entry;
-
-    flush_tlb();
-}
 
 /* ------------------- terminal operation --------------------- */
 

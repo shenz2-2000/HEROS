@@ -11,17 +11,29 @@ pcb_t *cur_task = NULL;
 pcb_t *foreground_task[MAX_TERMINAL];
 extern terminal_struct_t null_terminal;
 terminal_struct_t *running_term = &null_terminal;
+/**
+ * get_running_terminal
+ * Description: return the terminal of the task that is running
+ * Input: None
+ * Output: running_term
+ */
 terminal_struct_t* get_running_terminal() {
     return running_term;
 }
+/**
+ * set_running_terminal
+ * Description: set the terminal to be the input terminal
+ * Input: None
+ * Output: none
+ */
 void set_running_terminal (terminal_struct_t* cur) {
     running_term = cur;
 }
 /**
- * focus_task
- * Description: return the current focus task
+ * get_showing_task
+ * Description: return the current task that is showing
  * Input: None
- * Output: focus_task
+ * Output: cur_task
  */
 pcb_t *get_showing_task() {
     return cur_task;
@@ -37,10 +49,10 @@ void process_user_vidmap(pcb_t *process) {
 }
 
 /**
- * set_focus_task
- * Description: switch terminal
- * Input: terminal_num -- the terminal id want to change to
- * Output: focus_task
+ * set_showing_task
+ * Description: change the task that we are showing
+ * Input: target_task -- the task we want to set
+ * Output: None
  */
 void set_showing_task(pcb_t* target_task) {
     if (target_task!=NULL && target_task->terminal==NULL) return;
@@ -146,6 +158,13 @@ int parse_args(uint8_t *command, uint8_t **args){
     }
     return 0;
 }
+
+/**
+ * get_another_terminal_id
+ * Description: get the terminal id that is not empty
+ * Input: id -- the empty terminal id
+ * Output: None
+ */
 int get_another_terminal_id(int id) {
     int i;
     for (i = 0; i < MAX_TERMINAL; i++)
@@ -273,17 +292,6 @@ int32_t system_halt(int32_t status) {
 
 
     pcb_t * cur_task = get_cur_process();
-
-    // condition check
-    if (get_n_present_pcb() == 0) {   // not in a process
-
-        // clear page directory for video memory
-        clear_video_memory();
-        sys_execute((uint8_t *) "shell", 0, 1, NULL);
-
-        return -1;
-    }
-
 
     // remove cur_task from task list
     delete_task_from_list(cur_task);
@@ -437,7 +445,12 @@ pcb_t* delete_process(pcb_t* pcb) {
 int32_t get_n_present_pcb() {
     return n_present_pcb;
 }
-
+/**
+ * init_task_main
+ * Description: Open three terminal and keep them
+ * Input: None
+ * Output: none
+ */
 void init_task_main() {
 
     int32_t i;
