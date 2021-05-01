@@ -51,7 +51,8 @@ int32_t write(int32_t fd, const void* buf, int32_t nbytes);
 // cursor function
 void update_cursor(int x, int y);
 
-
+// mouse cursor function
+void set_blue_cursor(int32_t x, int32_t y);
 
 int max(int a, int b);
 /* Port read functions */
