@@ -11,6 +11,7 @@
 #define MEM_FENCE       100
 #define TIME_DECREASE_PER_INTERRUPT 10
 #define TIME_INIT 50
+#define TIME_INIT_FOR_SHELL 30
 #define N_PCB_OFFSET 10
 
 
