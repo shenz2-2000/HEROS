@@ -100,3 +100,16 @@
     * FIX  - change the return values to the correct ones.
 
 
+## CP 3.5
+    * BUG1 - in scheduler.c, when we manipulate the task linked list, we write a wrong function called insert_to_list_head. That function will insert a node
+             to the head of the list by switching the prev and next field. However, our main method to change the list is another function called append_to_list_end. That will
+             cause an internal detachment of our linked list since we use both of two functions.
+    * FIX  - stop using insert_to_list_head. Only using delete_from_list and append_to_list_end
+
+
+    * BUG2 - in signal_sys_call.c, when we do signal check, we forget to check whether there is a switch from kernel to user or not. That will damage the system since signal
+             should only be check when return from Exception Interrupt and System call.
+
+    * FIX  - we check whether cs of hardware context on stack is USER_CS, otherwise we just return.
+
+
