@@ -620,6 +620,13 @@ int max(int a, int b){
     return a>b?a:b;
 }
 
+/* int min(a, b)
+ * Inputs: a, b be the two number
+ * Return Value: the smaller one of the two
+ * Function: Calculate the smaller one of the two number */
+int min(int a, int b){
+    return a<b?a:b;
+}
 
 /* int32_t read(int32_t fd, void* buf, int32_t nbytes)
  * Inputs: fd : file descriptor

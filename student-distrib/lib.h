@@ -55,6 +55,7 @@ void update_cursor(int x, int y);
 void set_blue_cursor(int32_t x, int32_t y);
 
 int max(int a, int b);
+int min(int a, int b);
 /* Port read functions */
 /* Inb reads a byte and returns its value as a zero-extended 32-bit
  * unsigned int */
