@@ -437,7 +437,7 @@ interrupt_entry_0:
     call send_eoi
     addl $4, %esp
     // TODO: temporarily disable signal check for debugging
-    # call check_signal
+    call check_signal
     RESTORE_HW_CONTEXT
     iret  # return from interrupt
 
@@ -450,7 +450,8 @@ interrupt_entry_1:
     call keyboard_interrupt_handler
     pushl $1  # push irq number as argument
     call send_eoi
-    addl $4, %esp 
+    addl $4, %esp
+    call check_signal
     RESTORE_HW_CONTEXT
     iret  # return from interrupt 
 
@@ -463,7 +464,8 @@ interrupt_entry_8:
     call rtc_interrupt_handler
     pushl $8  # push irq number as argument
     call send_eoi
-    addl $4, %esp 
+    addl $4, %esp
+    call check_signal
     RESTORE_HW_CONTEXT
     iret  # return from interrupt 
 
