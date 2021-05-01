@@ -84,6 +84,11 @@ void handle_input(uint8_t input) {
             reset_screen();
         } else if (scan_code_table[input]) {
             // Manage the overflow issue
+            if (flag[CTRL_PRESSED] && flag[C_PRESSED]) {
+                get_showing_task()->terminal->buf_cnt = 0;
+                signal_send(2); // Interrupt
+                return;
+            }
             if (get_showing_task()->terminal->buf_cnt < KEYBOARD_BUF_SIZE - 1) {
                 letter = (input>=0x10&&input<=0x19) | (input>=0x1E&&input<=0x26) | (input>=0x2C&&input<=0x32);   // Check whether the input is letter
                 if (letter) {

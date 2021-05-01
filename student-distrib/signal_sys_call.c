@@ -142,8 +142,8 @@ int32_t signal_send(int32_t signum) {
     int32_t flags;
     cli_and_save(flags);
     if (signum == 2 || signum == 3) {// interrupt or alarm
-        if (focus_task() != NULL)
-            focus_task()->signals.signal_pending |= 1<<signum;
+        if (get_showing_task() != NULL)
+            get_showing_task()->signals.signal_pending |= 1<<signum;
     } else {
         get_cur_process()->signals.signal_pending |= 1<<signum;
     }
