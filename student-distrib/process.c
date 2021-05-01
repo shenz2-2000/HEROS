@@ -7,7 +7,7 @@
 
 pcb_t* pcb_ptrs[N_PCB_LIMIT];
 int32_t n_present_pcb;
-pcb_t *focus_task_ = NULL;
+pcb_t *cur_task = NULL;
 pcb_t *foreground_task[MAX_TERMINAL];
 extern terminal_struct_t null_terminal;
 terminal_struct_t *running_term = &null_terminal;
@@ -23,8 +23,8 @@ void set_running_terminal (terminal_struct_t* cur) {
  * Input: None
  * Output: focus_task
  */
-pcb_t *focus_task() {
-    return focus_task_;
+pcb_t *get_showing_task() {
+    return cur_task;
 }
 
 void process_user_vidmap(pcb_t *process) {
@@ -39,15 +39,14 @@ void process_user_vidmap(pcb_t *process) {
  * Input: terminal_num -- the terminal id want to change to
  * Output: focus_task
  */
-void set_focus_task(pcb_t* target_task) {
+void set_showing_task(pcb_t* target_task) {
     if (target_task!=NULL && target_task->terminal==NULL) return;
     uint32_t flags;
     cli_and_save(flags);
-    terminal_struct_t* old_term, *new_term;
-    if (focus_task()==NULL) old_term = &null_terminal;else old_term=focus_task()->terminal;
-    if (target_task==NULL) new_term = &null_terminal;else new_term=target_task->terminal;
+    terminal_struct_t* old_term = get_showing_task()==NULL?&null_terminal:get_showing_task()->terminal;
+    terminal_struct_t* new_term = target_task==NULL?&null_terminal:target_task->terminal;
     switch_terminal(old_term,new_term);
-    focus_task_ = target_task;
+    cur_task = target_task;
     process_user_vidmap(get_cur_process());
     restore_flags(flags);
 }
@@ -59,13 +58,13 @@ void set_focus_task(pcb_t* target_task) {
  * Output: focus_task
  */
 void change_focus_terminal(int32_t terminal_num) {
-    set_focus_task(foreground_task[terminal_num]);
+    set_showing_task(foreground_task[terminal_num]);
 }
 
 #define execute_user_program_asm(esp_des, esp, eip, ret) asm volatile ("                    \
     pushfl          /* save flags */                                   \n\
     pushl %%ebp     /* save EBP*/                                      \n\
-    pushl $1f       /* return address to label 1 after iret */          \n\
+    pushl $0f                                                               \n\
     movl %%esp, %0                                                        \n\
     pushl $0x002B                                                         \n\
     pushl %2                                                            \n\
@@ -73,7 +72,7 @@ void change_focus_terminal(int32_t terminal_num) {
     pushl $0x0023                                                    \n\
     pushl %3                                                          \n\
     iret                                                              \n\
-1:  popl %%ebp                                                        \n\
+0:  popl %%ebp                                                        \n\
     movl %%eax, %1                                                     \n\
     popfl   "                                              \
     : "=m" (esp_des),                                                            \
@@ -85,14 +84,14 @@ void change_focus_terminal(int32_t terminal_num) {
 #define execute_program_in_kernel_asm(esp_des, esp, eip, ret) asm volatile (" \
     pushfl                                                  \n\
     pushl %%ebp                                                    \n\
-    pushl $1f                                                       \n\
+    pushl $0f                                                       \n\
     movl %%esp, %0                                           \n\
     movl %2, %%esp                                                \n\
     pushl %3                                                   \n\
     pushl $0x206                                                   \n\
     popfl                                                                           \n\
     ret                                                        \n\
-1:  popl %%ebp                                                  \n\
+0:  popl %%ebp                                                  \n\
     movl %%eax, %1                                               \n\
     popfl                           "                                              \
     : "=m" (esp_des), /* must write to memory, or halt() will not get it */      \
@@ -227,7 +226,7 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
         process->pid = pid_ret;
         if (process->terminal != &null_terminal) {
             foreground_task[process->terminal->id] = process; // Become the task using terminal
-            set_focus_task(process);
+            set_showing_task(process);
         }
         terminal_set_running(process->terminal);
         if (separate_terminal) {
@@ -299,17 +298,17 @@ int32_t system_halt(int32_t status) {
     // Perform the deallocation of terminal
     if (cur_task->own_terminal) {
         foreground_task[term_id] = NULL;
-        if (focus_task_->terminal->id == term_id) {
+        if (get_showing_task()->terminal->id == term_id) {
             int new_term_id = get_another_terminal_id(term_id);
             if (new_term_id != -1) {
-                set_focus_task(foreground_task[new_term_id]);
+                set_showing_task(foreground_task[new_term_id]);
             }
         }
         terminal_deallocate(cur_task->terminal);
     } else {
         foreground_task[cur_task->parent->terminal->id] = cur_task->parent;
-        if (focus_task_->terminal->id == cur_task->parent->terminal->id) {
-            set_focus_task(cur_task->parent);
+        if (get_showing_task()->terminal->id == cur_task->parent->terminal->id) {
+            set_showing_task(cur_task->parent);
         }
     }
 
