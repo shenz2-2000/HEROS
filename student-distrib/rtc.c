@@ -2,9 +2,11 @@
 #include "lib.h"
 
 // The rtc counter used to count the number of interrupt
-static int fake_interval = 1;
-static volatile int rtc_interrupt_occured;
+// static int fake_interval = 1;
+// static volatile int rtc_interrupt_occured;
 void rtc_set_freq(int rate);
+static int virtual_ctr[] = {-1, -1, -1, -1, -1, 0};
+static volatile int ticks[] = {0, 0, 0, 0, 0, 0};
 
 /*
  * rtc_init
@@ -15,7 +17,7 @@ void rtc_set_freq(int rate);
  *   SIDE EFFECTS: having rtc Initialized
  */
 void rtc_init() {
-    rtc_interrupt_occured = 0;
+    // rtc_interrupt_occured = 0;
     cli();
     outb(0x8B, RTC_PORT_0); // Select register B, and disable NMI
     char prev = inb(RTC_PORT_1); // Read current value of register B
@@ -36,7 +38,13 @@ void rtc_init() {
  */
 void rtc_interrupt_handler() {
     cli();
-    rtc_interrupt_occured = 1;
+    // rtc_interrupt_occured = 1;
+    ticks[0] = 1;
+    ticks[1] = 1;
+    ticks[2] = 1;
+    ticks[3] = 1;
+    ticks[4] = 1;
+    ticks[5] = 1;
     rtc_restart_interrupt();
     sti();
     //test_interrupts();
@@ -64,7 +72,12 @@ void rtc_restart_interrupt(){
  *   RETURN VALUE: 0 on success and -1 on failure
  *   SIDE EFFECTS: make it available for later open calls
  */
-int32_t rtc_close(int32_t fd) {return 0;}
+int32_t rtc_close(int32_t fd) {
+    pcb_t *cur_pcb = get_cur_process();
+    virtual_ctr[cur_pcb->rtc_id] = -1;
+    cur_pcb->rtc_id = -1;
+    return 0;
+}
 
 /*
  * rtc_open
@@ -75,7 +88,20 @@ int32_t rtc_close(int32_t fd) {return 0;}
  *   SIDE EFFECTS: none
  */
 int32_t rtc_open(const uint8_t* filename) {
-    rtc_init();  // initialize RTC, set default frequency to 2 Hz
+    pcb_t *cur_pcb = get_cur_process();
+    int i;
+    if (cur_pcb->rtc_id == -1) {
+        for (i = 0; i < MAX_CLK; ++i) {
+            if (virtual_ctr[i] == -1) break;
+        }
+        if (i == MAX_CLK) {
+            printf("No available virtual RTC. RTC open failed.\n");
+            return -1;
+        }
+        cur_pcb->rtc_id = i;
+    }
+    virtual_ctr[cur_pcb->rtc_id] = 1;
+    rtc_init();  // initialize RTC, set default frequency to 1024 Hz
     rtc_set_freq(RTC_MIN_RATE);
     return 0;
 }
@@ -106,7 +132,8 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes) {
     if (rate > RTC_MAX_RATE) return -1;
     if (rate <= RTC_MIN_RATE) return -1;
 
-    fake_interval = 1024 >> (pow+1);
+    pcb_t *cur_pcb = get_cur_process();
+    virtual_ctr[cur_pcb->rtc_id] = 1024 >> (pow+2);
 
     return 0;
 }
@@ -139,10 +166,11 @@ void rtc_set_freq(int rate) {
  *   SIDE EFFECTS: none
  */
 int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes) {
-    int ctr = fake_interval;
+    int8_t rid = get_cur_process()->rtc_id;
+    int ctr = virtual_ctr[rid];
     while (ctr > 0) {
-        rtc_interrupt_occured = 0;
-        while (!rtc_interrupt_occured) {};
+        ticks[rid] = 0;
+        while (!ticks[rid]) {};
         ctr--;
     }
     return 0;
@@ -176,9 +204,9 @@ int32_t sleep(uint32_t time_in_ms) {
     rtc_set_freq(RTC_MIN_RATE);
     // loop
     for (i = 0; i < time_in_ms; ++i) {
-        rtc_interrupt_occured = 0;
+        ticks[5] = 0;
         rtc_restart_interrupt();
-        while(!rtc_interrupt_occured) {};
+        while(!ticks[5]) {};
     }
     close(fd);
     return 0;

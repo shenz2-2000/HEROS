@@ -199,6 +199,7 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
     process = create_process();
     if (process==NULL) return -1; // Raise Error
     process->having_child_running=0;
+    process->rtc_id = -1;
     process->init_task=process->kernel_task=process->own_terminal=process->wait_for_child=0;
     // Information Setting
     if (get_n_present_pcb()==1) {

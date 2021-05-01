@@ -36,6 +36,7 @@ struct pcb_t {
     uint32_t time;
     task_node* node;
     terminal_struct_t* terminal;
+    int8_t rtc_id;
 };
 
 

@@ -1,4 +1,5 @@
 #include "types.h"
+#include "process.h"
 
 #ifndef RTC_H
 #define RTC_H
@@ -9,6 +10,7 @@
 /* freq = 32768 >> (rate-1) */
 #define RTC_MIN_RATE  6     // 1khz
 #define RTC_MAX_RATE  15    // 2hz
+#define MAX_CLK 6
 
 void rtc_interrupt_handler();
 void rtc_init();
