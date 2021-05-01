@@ -87,6 +87,7 @@ extern void sys_call_linkage();
 extern void interrupt_entry_0();    // PIT
 extern void interrupt_entry_1();
 extern void interrupt_entry_8();
+extern void interrupt_entry_12();
 
 #endif
 #endif //STUDENT_DISTRIB_IDT_H
