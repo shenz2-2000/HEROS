@@ -22,6 +22,12 @@ extern void user_handler_helper(int32_t signum, signal_handler handler , hw_cont
  */
 ASMLINKAGE void check_signal(hw_context hw){
 
+    // TODO: something wrong with this line
+    if (hw.cs != USER_CS){
+        // if return context is not user space, do nothing
+        return;
+    }
+
     //pcb_t * cur_process;
     int32_t signal_idx;
     int32_t eflag;

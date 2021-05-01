@@ -38,7 +38,7 @@ user_handler_helper:
 
      # ----------------------Set stack frame for user_handler_helper--------------------
 
-     # save callee-saved register
+     # save callee-saved register, for C convention
      pushl %ebp
      movl  %esp, %ebp
 
@@ -159,7 +159,7 @@ copy_loop:
 
       # -----------------------restore signal mask--------------------
 
-      pushl %ebx
+      pushl %edx
       pushl %ecx
       pushl %eax
 
@@ -167,7 +167,7 @@ copy_loop:
 
       popl  %eax
       popl  %ecx
-      popl  %ebx
+      popl  %edx
 
       movl kernel_hw_context_ptr, %esi
 
