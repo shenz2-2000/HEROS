@@ -352,9 +352,6 @@ terminal_struct_t* terminal_allocate() {
     return &terminal_slot[x];
 }
 
-
-
-
 /**
  * terminal_set_running
  * Description: map physical video memory
@@ -408,7 +405,7 @@ void vidmap_init() {
         /* set the backup buffers for kernel and user vid map */
 
         // firstly clear the back up buffers
-        for (j = 0; j < PAGE_TABLE_SIZE; j++) {
+        for (j = 0; j < PAGE_TABLE_SIZE; j++) {     // NOTE!!!: the size is 1024 not 4096! (4 byte)
             k_bb_pt_list[i][j].val = 0;
             u_bb_pt_list[i][j].val = 0;
         }
@@ -525,6 +522,7 @@ int switch_terminal(terminal_struct_t *old_terminal, terminal_struct_t *new_term
         }
     }
 
+    // set the real page table to switch, or in the backup table there is no buffer (page fault)
     int ret;
     ret = PDE_4K_set(&(page_directory[0]), (uint32_t) &(page_table0), 0, 1, 1);
     if (ret == -1) {

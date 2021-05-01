@@ -34,15 +34,6 @@ void process_user_vidmap(pcb_t *process) {
         printf("ERROR in process_user_vidmap(): NULL input");
         return;
     }
-    // if (process->vidmap_enable) {
-    //     if (process->terminal == &null_terminal) {
-    //         printf("ERROR in process_user_vidmap(): the process allocates no terminal but enabled the vidmap");
-    //         return;
-    //     }
-    //     set_video_memory(process->terminal);
-    // } else {
-    //     set_video_memory(&null_terminal); // the process disabled the vidmap
-    // }
     set_video_memory(process->terminal);
 }
 
@@ -204,7 +195,6 @@ int32_t sys_execute(uint8_t *command, int wait_for_child, int separate_terminal,
         if (wait_for_child==1) get_cur_process()->having_child_running=1;
     }
     if (function_address!=NULL) process->kernel_task=1;
-    process->vidmap_enable = 0;
     process->k_esp_base = (uint32_t)process+TASK_KSTK_SIZE_IN_B-1;
     process->k_esp = (uint32_t)process + TASK_KSTK_SIZE_IN_B-1;
     // Parse name and arguments
