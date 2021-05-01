@@ -220,29 +220,29 @@ int deref_test2() {
     return FAIL;
 }
 
-/* RTC Test
- *
- * receive 1024 interrupts
- * Inputs: None
- * Outputs: PASS/FAIL
- * Side Effects: None
- * Coverage: RTC interrupts
- * Files: kernel.c
- */
-int rtc_test() {
-    TEST_HEADER;
-
-    int ref = get_rtc_counter();
-    int ctr;
-    printf("Count for 1 sec...\n");
-    while(1) {
-        ctr = get_rtc_counter();
-        if (ctr - ref > 1024) {
-            break;
-        }
-    }
-    return PASS;
-}
+///* RTC Test
+//// *
+//// * receive 1024 interrupts
+//// * Inputs: None
+//// * Outputs: PASS/FAIL
+//// * Side Effects: None
+//// * Coverage: RTC interrupts
+//// * Files: kernel.c
+//// */
+//int rtc_test() {
+//    TEST_HEADER;
+//
+//    int ref = get_rtc_counter();
+//    int ctr;
+//    printf("Count for 1 sec...\n");
+//    while(1) {
+//        ctr = get_rtc_counter();
+//        if (ctr - ref > 1024) {
+//            break;
+//        }
+//    }
+//    return PASS;
+//}
 
 
 /* System Call Test
@@ -791,7 +791,27 @@ int play_music_test() {
  */
 /* Test suite entry point */
 void launch_tests(){
-//    TEST_OUTPUT("div0_test", div0_test());
+//    int j;
+//    int fd;
+//    int freq = 32;
+//    fd = rtc_open((uint8_t *) "fn");
+//    for (j = 0; j < 4096; j++) {
+//        rtc_read(fd, NULL, 0);
+//        printf("1");
+//    }
+//    printf("\n");
+//
+//    for (j = 0; j < 2048; j++) {
+//        rtc_read(fd, NULL, 0);
+//    }
+//
+//    rtc_write(fd, &freq, 4);
+//    for (j = 0; j < 32*4; j++) {
+//        rtc_read(fd, NULL, 0);
+//        printf("2");
+//    }
+//    printf("\n");
+
 //     TEST_OUTPUT("file_system_test", file_system_test());
 //    TEST_OUTPUT("shell_test", shell_test());
 //    TEST_OUTPUT("fs_err_test", fs_err_test());

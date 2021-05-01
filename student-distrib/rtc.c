@@ -2,7 +2,7 @@
 #include "lib.h"
 
 // The rtc counter used to count the number of interrupt
-static int rtc_counter = 0;
+static int fake_interval = 1;
 static volatile int rtc_interrupt_occured;
 void rtc_set_freq(int rate);
 
@@ -35,15 +35,8 @@ void rtc_init() {
  *   SIDE EFFECTS: none
  */
 void rtc_interrupt_handler() {
-    rtc_interrupt_occured = 1;
     cli();
-    ++rtc_counter;
-    // Virtualize the RTC and change the frequency
-    if (rtc_counter>=RTC_LIMIT){
-//        printf("RECEIVE %d RTC Interrupts\n", rtc_counter);
-        rtc_counter = 0;
-    }
-    // Restart so it can send interrupt again
+    rtc_interrupt_occured = 1;
     rtc_restart_interrupt();
     sti();
     //test_interrupts();
@@ -62,18 +55,6 @@ void rtc_restart_interrupt(){
     inb(RTC_PORT_1);
 }
 
-/*
- * get_rtc_counter
- *   DESCRIPTION: Return the rtc_counter when external request
- *   INPUTS: none
- *   OUTPUTS: rtc_counter
- *   RETURN VALUE: none
- *   SIDE EFFECTS: none
- */
-// TODO: delete this function after testing
-extern int get_rtc_counter(){
-    return rtc_counter;
-}
 
 /*
  * rtc_close
@@ -95,7 +76,7 @@ int32_t rtc_close(int32_t fd) {return 0;}
  */
 int32_t rtc_open(const uint8_t* filename) {
     rtc_init();  // initialize RTC, set default frequency to 2 Hz
-    rtc_set_freq(RTC_MAX_RATE);
+    rtc_set_freq(RTC_MIN_RATE);
     return 0;
 }
 
@@ -123,8 +104,9 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes) {
 
     int rate = RTC_MAX_RATE - pow + 1;    // freq = 32768 >> (rate-1)
     if (rate > RTC_MAX_RATE) return -1;
-    if (rate < RTC_MIN_RATE) return -1;
-    rtc_set_freq(rate);
+    if (rate <= RTC_MIN_RATE) return -1;
+
+    fake_interval = 1024 >> (pow+1);
 
     return 0;
 }
@@ -157,9 +139,12 @@ void rtc_set_freq(int rate) {
  *   SIDE EFFECTS: none
  */
 int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes) {
-    rtc_interrupt_occured = 0;
-    rtc_restart_interrupt();
-    while (!rtc_interrupt_occured) {};
+    int ctr = fake_interval;
+    while (ctr > 0) {
+        rtc_interrupt_occured = 0;
+        while (!rtc_interrupt_occured) {};
+        ctr--;
+    }
     return 0;
 }
 
