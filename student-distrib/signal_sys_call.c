@@ -238,7 +238,7 @@ int32_t sig_seg_default() {
 int32_t sig_interrupt_default() {
     int32_t flags;
     cli_and_save(flags);
-    system_halt(15);
+    system_halt(0);
     restore_flags(flags);
 
     return -1; // It should not return
