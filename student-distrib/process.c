@@ -7,6 +7,7 @@
 #include "mouse_driver.h"
 #include "gui.h"
 #include "wav_player.h"
+#include "mouse_driver.h"
 
 pcb_t* pcb_ptrs[N_PCB_LIMIT];
 int32_t n_present_pcb;
