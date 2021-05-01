@@ -21,6 +21,6 @@
 #define MOUSE_RESET       0xFF
 
 extern void set_mouse_cursor(int x, int y);
-
+void initialize_mouse();
 
 #endif //MP3_GROUP_14_MOUSE_DRIVER_H

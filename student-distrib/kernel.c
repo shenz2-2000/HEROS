@@ -262,7 +262,7 @@ void entry(unsigned long magic, unsigned long addr) {
 
     /* Init Mouse */
     initialize_mouse();
-
+    enable_irq(12); // Enable irq for mouse
     /* Enable interrupts */
 
     /* execute shell */
