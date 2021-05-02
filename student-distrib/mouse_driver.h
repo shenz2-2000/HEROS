@@ -25,16 +25,28 @@
 extern void mouse_init();
 extern void mouse_interrupt_handler();
 //--------------------------
-#define MOUSE_PORT_60 0x60
-#define PORT_64 0x64
-#define ACK 0xFA
+//#define MOUSE_PORT_60 0x60
+//#define PORT_64 0x64
+//#define ACK 0xFA
+#define MOUSE_DATA_PORT 0x60
+#define MOUSE_CHECK_PORT 0x64
+#define MOUSE_ACKNOWLEDGE 0xFA
 #define RESET 0xFF
-#define VGA_WIDTH 1024
-#define VGA_HEIGHT 768
-#define BLACK 0xFF000000
-#define WHITE 0xFFFFFFFF
+#define Y_OVERFLOW 0x080
+#define X_OVERFLOW 0x40
+#define Y_SIGN 0x20
+#define X_SIGN 0x10
+#define VERIFY_ONE 0x08
+#define MID_BUTTON 0x04
+#define RIGHT_BUTTON 0x02
+#define LEFT_BUTTON 0x01
+#define RESET 0xFF
+#define PRE_COMMAND 0xD4
+//#define VGA_WIDTH 1024
+//#define VGA_HEIGHT 768
+//#define BLACK 0xFF000000
+//#define WHITE 0xFFFFFFFF
 extern void set_mouse_cursor(int x, int y);
-void initialize_mouse();
 extern void mouse_init();
 
 #endif //MP3_GROUP_14_MOUSE_DRIVER_H
