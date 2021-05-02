@@ -465,7 +465,7 @@ interrupt_entry_8:
     pushl $8  # push irq number as argument
     call send_eoi
     addl $4, %esp
-    call check_signal
+    #call check_signal
     RESTORE_HW_CONTEXT
     iret  # return from interrupt 
 
@@ -474,7 +474,7 @@ interrupt_entry_12:
     pushl $0
     pushl $12
     SET_HW_CONTEXT
-    call mouse_handler
+    call mouse_interrupt_handler
     pushl $12  # push irq number as argument
     call send_eoi
     addl $4, %esp

@@ -20,6 +20,11 @@
 //#define MOUSE_ACKNOWLEDGE 0xFA
 //#define MOUSE_RESET       0xFF
 
+
+#define MOUSE_IRQ_NUM 12
+extern void mouse_init();
+extern void mouse_interrupt_handler();
+//--------------------------
 #define MOUSE_PORT_60 0x60
 #define PORT_64 0x64
 #define ACK 0xFA
@@ -30,5 +35,6 @@
 #define WHITE 0xFFFFFFFF
 extern void set_mouse_cursor(int x, int y);
 void initialize_mouse();
+extern void mouse_init();
 
 #endif //MP3_GROUP_14_MOUSE_DRIVER_H
