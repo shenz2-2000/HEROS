@@ -23,7 +23,7 @@ void rtc_init() {
     char prev = inb(RTC_PORT_1); // Read current value of register B
     outb(0x8B, RTC_PORT_0); // Set the index again
     outb(prev|0x40, RTC_PORT_1); // write the previous value ORed with 0x40. This turns on bit 6 of register B
-//    sti();
+    //sti();
 
     //Reference: https://wiki.osdev.org/RTC
 }
