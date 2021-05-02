@@ -277,6 +277,7 @@ void entry(unsigned long magic, unsigned long addr) {
 
 
 
+
     uint32_t flags;
     sti();
     send_eoi(12);
