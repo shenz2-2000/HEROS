@@ -20,7 +20,7 @@ void system_time();
  */
 void rtc_init() {
     // rtc_interrupt_occured = 0;
-    //cli();
+   // cli();
     outb(0x8B, RTC_PORT_0); // Select register B, and disable NMI
     char prev1 = inb(RTC_PORT_1); // Read current value of register B
     outb(0x8B, RTC_PORT_0); // Set the index again

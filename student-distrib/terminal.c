@@ -145,6 +145,19 @@ void handle_input(uint8_t input) {
  *   SIDE EFFECTS: interrupt
  */
 ASMLINKAGE void keyboard_interrupt_handler(hw_context hw) {
+//    if(mouse_in_use) return;
+//
+//    /**
+//   * Firstly, we need to check two things:
+//   * 1. Whether port 60 is ready for read (check bit 1 of port 64)
+//   * 2. Whether port 60 gives data for keyboard or mouse (check bit 5 of port 64)
+//   */
+//    if (0 == (inb(0x64) & 0x1)) {
+//        return;
+//    }
+//    if (0 == inb(0x64) & 0x20) {
+//        return;
+//    }
 
     uint8_t input = inb(KEYBOARD_PORT);
     uint32_t flags;
