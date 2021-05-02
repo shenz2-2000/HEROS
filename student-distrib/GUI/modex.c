@@ -197,61 +197,6 @@ static unsigned char original_palette[64][3] = {
 };
 
 // -----------------------------------------------------Functions----------------------------------------------------
-
-
-/*
- * find_block
- *   DESCRIPTION: Find the appropriate image to be used for a given maze
- *                lattice point.
- *   INPUTS: (x,y) -- the maze lattice point
- *   OUTPUTS: none
- *   RETURN VALUE: a pointer to an image of a BLOCK_X_DIM x BLOCK_Y_DIM
- *                 block of data with one byte per pixel laid out as a
- *                 C array of dimension [BLOCK_Y_DIM][BLOCK_X_DIM]
- *   SIDE EFFECTS: none
- */
-//static unsigned char* find_block(int x, int y) {
-//    int fnum;     /* fruit found                           */
-//    int pattern;  /* stencil pattern for surrounding walls */
-//
-//    /* Record whether fruit is present. */
-//    fnum = (maze[MAZE_INDEX(x, y)] & MAZE_FRUIT) / MAZE_FRUIT_1;
-//
-//    /* The exit is always visible once the last fruit is collected. */
-//    if (n_fruits == 0 && (maze[MAZE_INDEX(x, y)] & MAZE_EXIT) != 0)
-//        return (unsigned char*)blocks[BLOCK_EXIT];
-//
-//    /*
-//     * Everything else not reached is shrouded in mist, although fruits
-//     * show up as bumps.
-//     */
-//    if ((maze[MAZE_INDEX(x, y)] & MAZE_REACH) == 0) {
-//        if (fnum != 0)
-//            return (unsigned char*)blocks[BLOCK_FRUIT_SHADOW];
-//        return (unsigned char*)blocks[BLOCK_SHADOW];
-//    }
-//
-//    /* Show fruit. */
-//    if (fnum != 0)
-//        return (unsigned char*)blocks[BLOCK_FRUIT_1 + fnum - 1];
-//
-//    /* Show empty space. */
-//    if ((maze[MAZE_INDEX(x, y)] & MAZE_WALL) == 0)
-//        return (unsigned char*)blocks[BLOCK_EMPTY];
-//
-//    /* Show different types of walls. */
-//    pattern = (((maze[MAZE_INDEX(x, y - 1)] & MAZE_WALL) != 0) << 0) |
-//              (((maze[MAZE_INDEX(x + 1, y)] & MAZE_WALL) != 0) << 1) |
-//              (((maze[MAZE_INDEX(x, y + 1)] & MAZE_WALL) != 0) << 2) |
-//              (((maze[MAZE_INDEX(x - 1, y)] & MAZE_WALL) != 0) << 3);
-//    return (unsigned char*)blocks[pattern];
-//}
-
-
-
-
-
-
 void fill_horiz_buffer(int x, int y, unsigned char buf[SCROLL_X_DIM]) {
     int map_x, map_y;     /* maze lattice point of the first block on line */
     int sub_x, sub_y;     /* sub-block address                             */
@@ -336,7 +281,7 @@ static void set_memory_for_modex(){
         cur_addr_in_mem = start_addr_in_mem + i * 4096;
 
         // currently, set US to 1 (user could access)
-        PTE_set(page_table0,cur_addr_in_mem,1,1,1);
+        PTE_set(page_table0+cur_idx_in_table,cur_addr_in_mem,1,1,1);
     }
 
     mem_image = (unsigned char *) 0xA0000;
@@ -651,7 +596,7 @@ static void set_graphics_registers(unsigned short table[NUM_GRAPHICS_REGS]) {
 static void fill_palette() {
     /* 6-bit RGB (red, green, blue) values for first 64 colors */
     static unsigned char palette_RGB[64][3] = {
-            { 0x00, 0x00, 0x00 },{ 0x00, 0x00, 0x2A },   /* palette 0x00 - 0x0F    */
+            { 0xDC, 0x14, 0x3C },{ 0x00, 0x00, 0x2A },   /* palette 0x00 - 0x0F    */
             { 0x00, 0x2A, 0x00 },{ 0x00, 0x2A, 0x2A },   /* basic VGA colors       */
             { 0x2A, 0x00, 0x00 },{ 0x2A, 0x00, 0x2A },
             { 0x2A, 0x15, 0x00 },{ 0x2A, 0x2A, 0x2A },
@@ -731,8 +676,8 @@ void test_video_with_garbage(){
     int i;
     unsigned char* addr;
     addr = img3 + (show_x >> 2) + show_y * SCROLL_X_WIDTH;
-    for(i=0; i < (200*200); i++){
-        *(addr+i) = 0x15;
+    for(i=0; i < (300*200); i++){
+        *(addr+i) = 0x0;
     }
 
 }
