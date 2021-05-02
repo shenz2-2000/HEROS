@@ -149,7 +149,7 @@ ASMLINKAGE void keyboard_interrupt_handler(hw_context hw) {
     uint8_t input = inb(KEYBOARD_PORT);
     uint32_t flags;
     send_eoi(hw.irq);
-    cli_and_save(flags);
+//    cli_and_save(flags);
     {
 
         if (get_showing_task()) {
@@ -158,7 +158,7 @@ ASMLINKAGE void keyboard_interrupt_handler(hw_context hw) {
     }
     handle_input(input);
     terminal_set_running(get_cur_process()->terminal);
-    restore_flags(flags);
+//    restore_flags(flags);
 }
 
 
