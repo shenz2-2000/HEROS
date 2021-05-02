@@ -198,6 +198,7 @@ static unsigned char original_palette[64][3] = {
 
 // -----------------------------------------------------Functions----------------------------------------------------
 
+
 /*
  * find_block
  *   DESCRIPTION: Find the appropriate image to be used for a given maze
@@ -337,6 +338,8 @@ static void set_memory_for_modex(){
         // currently, set US to 1 (user could access)
         PTE_set(page_table0,cur_addr_in_mem,1,1,1);
     }
+
+    mem_image = (unsigned char *) 0xA0000;
 
 }
 
@@ -489,7 +492,8 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
 
     /* One display page goes at the start of video memory. */
     /* we spare 18*80 (18 is the height of the text, 80 is the width of status bar) memory locations for status bar */
-    target_img = 0x05A0;
+//    target_img = 0x05A0;
+    target_img = 0;
 
     /* Map video memory and obtain permission for VGA port access. */
 //    if (open_memory_and_ports() == -1)
@@ -517,6 +521,8 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
     clear_screens();                            /* zero video memory     */
     VGA_blank(0);                               /* unblank the screen    */
 
+    test_video_with_garbage();
+    show_screen();
     /* Return success. */
     return 0;
 }
@@ -688,3 +694,45 @@ static void fill_palette() {
 
 
 
+
+void show_screen() {
+    unsigned char* addr;    /* source address for copy             */
+    int p_off;              /* plane offset of first display plane */
+    int i;                  /* loop index over video planes        */
+
+    /*
+     * Calculate offset of build buffer plane to be mapped into plane 0
+     * of display.
+     */
+    p_off = (3 - (show_x & 3));
+
+    /* Switch to the other target screen in video memory. */
+    target_img ^= 0x4000;
+
+    /* Calculate the source address. */
+    addr = img3 + (show_x >> 2) + show_y * SCROLL_X_WIDTH;
+
+    /* Draw to each plane in the video memory. */
+    for (i = 0; i < 4; i++) {
+        SET_WRITE_MASK(1 << (i + 8));
+        copy_image(addr + ((p_off - i + 4) & 3) * SCROLL_SIZE + (p_off < i), target_img);
+    }
+
+    /*
+     * Change the VGA registers to point the top left of the screen
+     * to the video memory that we just filled.
+     */
+    OUTW(0x03D4, (target_img & 0xFF00) | 0x0C);
+    OUTW(0x03D4, ((target_img & 0x00FF) << 8) | 0x0D);
+}
+
+
+void test_video_with_garbage(){
+    int i;
+    unsigned char* addr;
+    addr = img3 + (show_x >> 2) + show_y * SCROLL_X_WIDTH;
+    for(i=0; i < (200*200); i++){
+        *(addr+i) = 0x15;
+    }
+
+}

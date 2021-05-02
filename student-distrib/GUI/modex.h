@@ -41,7 +41,8 @@ extern int set_mode_X(
         void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
         void (*vert_fill_fn)(int, int, unsigned char[SCROLL_Y_DIM]));
 
-
+extern void test_video_with_garbage();
+extern  void show_screen();
 
 
 #endif //MIAO_MODEX_H
