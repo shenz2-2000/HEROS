@@ -478,7 +478,6 @@ interrupt_entry_12:
     pushl $12  # push irq number as argument
     call send_eoi
     addl $4, %esp
-    call check_signal
     RESTORE_HW_CONTEXT
     iret  # return from interrupt
 
