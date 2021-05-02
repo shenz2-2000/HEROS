@@ -272,15 +272,6 @@ void entry(unsigned long magic, unsigned long addr) {
     /* play the boot music */
     play_song(0);
 
-
-
-
-
-
-    uint32_t flags;
-    sti();
-    send_eoi(12);
-    send_eoi(1);
     sys_execute((uint8_t *) "init_task", 0, 0, init_task_main);
         printf("Error: return from the init_task, which should not happen");
 

@@ -93,6 +93,7 @@ void mouse_init() {
 //    }
     // Enable Packet Streaming
     send_command_to_60(0xF4);
+    set_blue_cursor(mouse_x, mouse_y);
 }
 void mouse_interrupt_handler() {
     /**
@@ -103,7 +104,7 @@ void mouse_interrupt_handler() {
     if (0 == (inb(PORT_64) & 0x1)) {
         return;
     }
-    if (0 == inb(PORT_64) & 0x20) {
+    if (0 == (inb(PORT_64) & 0x20)) {
         return;
     }
     uint8_t flags = inb(MOUSE_PORT_60);
@@ -133,6 +134,7 @@ void mouse_interrupt_handler() {
         if (flags & X_SIGN) {
             x_movement |= 0xFFFFFF00;
         }
+        x_movement /= 2; y_movement/=8;
         if (mouse_x + x_movement < 0) {
             mouse_x = 0;
         } else if (mouse_x + x_movement > 80 - 1) {
@@ -140,19 +142,20 @@ void mouse_interrupt_handler() {
         } else {
             mouse_x += x_movement;
         }
-        printf("X movement = %d mouse_x = %d\n", x_movement, mouse_x);
+//        printf("X movement = %d mouse_x = %d\n", x_movement, mouse_x);
         if (flags & Y_SIGN) {
             y_movement |= 0xFFFFFF00;
         }
         // TODO: For y_movement, should negate the result, don't know why.
         if (mouse_y - y_movement < 0) {
             mouse_y = 0;
-        } else if (mouse_y - y_movement > 200 - 1) {
-            mouse_y = 200 - 1;
+        } else if (mouse_y - y_movement > 25 - 1) {
+            mouse_y = 25 - 1;
         } else {
             mouse_y -= y_movement;
         }
-        printf("Y movement is %d mouse_y = %d\n", y_movement, mouse_y);
+//        printf("Y movement is %d mouse_y = %d\n", y_movement, mouse_y);
+        set_blue_cursor(mouse_x, mouse_y);
     }
 }
 

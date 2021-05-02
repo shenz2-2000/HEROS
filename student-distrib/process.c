@@ -71,7 +71,7 @@ void set_showing_task(pcb_t* target_task) {
  * change_focus_terminal
  * Description: switch terminal
  * Input: terminal_num -- the terminal id want to change to
- * Output: focus_task
+ * Output: showing_task
  */
 void change_focus_terminal(int32_t terminal_num) {
     set_showing_task(foreground_task[terminal_num]);
