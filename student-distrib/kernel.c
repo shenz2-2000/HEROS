@@ -232,7 +232,6 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
     enable_irq(1);   // Keyboard is IRQ1
-
     /*Init RTC*/
     rtc_init();
     enable_irq(8); // RTC is IRQ8
@@ -261,7 +260,7 @@ void entry(unsigned long magic, unsigned long addr) {
     signal_init();
 
     /* Init Mouse */
-    initialize_mouse();
+    mouse_init();
     enable_irq(12); // Enable irq for mouse
     /* Enable interrupts */
 
@@ -272,12 +271,12 @@ void entry(unsigned long magic, unsigned long addr) {
     // play_song(0);
 
     uint32_t flags;
-    cli_and_save(flags);
-    {
-        sys_execute((uint8_t *) "init_task", 0, 0, init_task_main);
+    sti();
+    send_eoi(12);
+    send_eoi(1);
+    sys_execute((uint8_t *) "init_task", 0, 0, init_task_main);
         printf("Error: return from the init_task, which should not happen");
-    }
-    restore_flags(flags);
+
 
     // for test use
     // sys_execute((uint8_t *) "bibi");
