@@ -145,24 +145,11 @@ void handle_input(uint8_t input) {
  *   SIDE EFFECTS: interrupt
  */
 ASMLINKAGE void keyboard_interrupt_handler(hw_context hw) {
-//    if(mouse_in_use) return;
-//
-//    /**
-//   * Firstly, we need to check two things:
-//   * 1. Whether port 60 is ready for read (check bit 1 of port 64)
-//   * 2. Whether port 60 gives data for keyboard or mouse (check bit 5 of port 64)
-//   */
-//    if (0 == (inb(0x64) & 0x1)) {
-//        return;
-//    }
-//    if (0 == inb(0x64) & 0x20) {
-//        return;
-//    }
 
     uint8_t input = inb(KEYBOARD_PORT);
     uint32_t flags;
     send_eoi(hw.irq);
-//    cli_and_save(flags);
+    cli_and_save(flags);
     {
 
         if (get_showing_task()) {
@@ -171,7 +158,7 @@ ASMLINKAGE void keyboard_interrupt_handler(hw_context hw) {
     }
     handle_input(input);
     terminal_set_running(get_cur_process()->terminal);
-//    restore_flags(flags);
+    restore_flags(flags);
 }
 
 
@@ -387,11 +374,11 @@ terminal_struct_t* terminal_allocate() {
 void terminal_set_running(terminal_struct_t *terminal) {
     // sanity check
     if (get_running_terminal() == NULL) {
-        printf("ERROR for terminal_set_running(): running_terminal is NULL\n");
+//        printf("ERROR for terminal_set_running(): running_terminal is NULL\n");
         return;
     }
     if (terminal == NULL) {
-        printf("ERROR in terminal_set_running(): NULL terminal input\n");
+//        printf("ERROR in terminal_set_running(): NULL terminal input\n");
         return;
     }
     uint32_t flags;

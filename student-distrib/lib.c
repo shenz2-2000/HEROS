@@ -3,6 +3,7 @@
 
 #include "lib.h"
 #include "terminal.h"
+#include "process.h"
 #define VIDEO       0xB8000
 #define NUM_COLS    80
 #define NUM_ROWS    25
@@ -38,6 +39,11 @@ void update_cursor(int x, int y){
 
 
 void set_blue_cursor(int32_t x, int32_t y){
+    uint32_t flags;
+    cli_and_save(flags);
+    terminal_struct_t* running_terminal = get_running_terminal();
+    if (get_showing_task())
+        terminal_set_running(get_showing_task()->terminal);
 
     *(uint8_t *)(video_mem + ((x + y*NUM_COLS) << 1) + 1) = BULE_SCREEN;
 
@@ -49,6 +55,8 @@ void set_blue_cursor(int32_t x, int32_t y){
         prev_mouse_y = y;
     }
 
+    terminal_set_running(running_terminal);
+    restore_flags(flags);
 }
 
 /* void set_blue_screen(void);
