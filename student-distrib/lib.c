@@ -16,7 +16,7 @@ int screen_y;
 int prev_mouse_x = 0;
 int prev_mouse_y = 0;
 static char* video_mem = (char *)VIDEO;
-
+uint8_t mouse_in_use = 0;
 
 
 
