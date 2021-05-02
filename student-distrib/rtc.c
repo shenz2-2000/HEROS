@@ -203,6 +203,7 @@ int32_t sleep(uint32_t time_in_ms) {
     // set the frequence to 1024 (close to 1000 and is the max freq)
     rtc_set_freq(RTC_MIN_RATE);
     // loop
+    // TODO: it is a waste for kernel to use a slot
     for (i = 0; i < time_in_ms; ++i) {
         ticks[5] = 0;
         rtc_restart_interrupt();
