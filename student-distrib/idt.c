@@ -154,14 +154,6 @@ ASMLINKAGE int32_t close_sys_call(int32_t fd){
  *         nbytes: number of bytes we want to write
  * Return Value: ret: whether the write is successful
  */
-
-
-// extern int sys_execute(uint8_t *command);
-
-ASMLINKAGE int dummy_sys_call(){
-    return invalid_sys_call();
-}
-
 ASMLINKAGE int32_t write_sys_call(int32_t fd, const void* buf, int32_t nbytes){
     uint32_t flags;
     int32_t ret;
@@ -171,6 +163,15 @@ ASMLINKAGE int32_t write_sys_call(int32_t fd, const void* buf, int32_t nbytes){
     return ret;
 }
 
+ASMLINKAGE int32_t ioctl_sys_call(int32_t fd, int32_t cmd) {
+    return sys_ioctl(fd, cmd);
+}
+
+// extern int sys_execute(uint8_t *command);
+
+ASMLINKAGE int dummy_sys_call(){
+    return invalid_sys_call();
+}
 
 ASMLINKAGE int32_t halt_sys_call(int8_t status){
 

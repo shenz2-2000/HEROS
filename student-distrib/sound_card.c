@@ -132,4 +132,29 @@ int32_t audio_write(uint32_t *pos, const void *buf, int32_t bufsize) {
     return bufsize;
 }
 
+/**
+ * audio_ioctl
+ * Description: io control - send commend to the device
+ * Input: cmd - the command
+ * Output: 0 if success
+ */
+int32_t audio_ioctl(uint8_t cmd) {
+    if (dsp_status == DSP_OFF) {
+        printf("WARNING in audio_ioctl: the sound card is inactive.\n");
+        return -1;
+    }
+    outb(cmd, DSP_WRITE_PORT);
+    return 0;
+}
 
+/**
+ * dsp_interrupt_handler
+ * Description: DSP interrupt handler
+ * Input: None
+ * Output: None
+ */
+void dsp_interrupt_handler() {
+    dsp_int_cnt++;
+    inb(DSP_READ_STATUS_PORT);
+    send_eoi(DSP_IRQ_NUM);
+}

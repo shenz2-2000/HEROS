@@ -23,6 +23,10 @@ int32_t sys_open(const uint8_t *f_name) {
 
     cur_pcb = get_cur_process();
 
+    if (cur_pcb == NULL) {
+        printf("ERROR [SYS FILE] in sys_open: the current process is NULL");
+        return -1;
+    }
     if (cur_pcb->file_arr.n_opend_files >= N_FILE_LIMIT) {
         printf("ERROR [SYS FILE] in sys_open: cannot OPEN file [%s] because the max number of files is reached\n", f_name);
         return -1;
@@ -83,6 +87,14 @@ int32_t sys_close(int32_t fd) {
     // get the current process
     cur_pcb = get_cur_process();
 
+    if (cur_pcb == NULL) {
+        printf("ERROR [SYS FILE] in sys_close: the current process is NULL");
+        return -1;
+    }
+    if (cur_pcb->file_arr.files[fd].f_op == NULL) {
+        printf("ERROR [SYS FILE] in sys_close: the file has no file operation. fd: %d\n", fd);
+        return -1;
+    }
     if (cur_pcb->file_arr.files[fd].flags == AVAILABLE) {
         printf("WARNING [FILE]: cannot CLOSE a file that is not opened. fd: %d\n", fd);
         return -1;
@@ -121,8 +133,16 @@ int32_t sys_read(int32_t fd, void *buf, int32_t bufsize) {
         printf("ERROR [SYS FILE] in sys_read: read buffer size should be positive\n");
         return -1;
     }
+    if (cur_pcb == NULL) {
+        printf("ERROR [SYS FILE] in sys_read: the current process is NULL");
+        return -1;
+    }
     if (cur_pcb->file_arr.files[fd].flags == AVAILABLE) {
         printf("WARNING [SYS FILE] in sys_read: cannot READ a file that is not opened. fd: %d\n", fd);
+        return -1;
+    }
+    if (cur_pcb->file_arr.files[fd].f_op == NULL) {
+        printf("ERROR [SYS FILE] in sys_read: the file has no file operation. fd: %d\n", fd);
         return -1;
     }
     // stdout is write-only
@@ -163,6 +183,14 @@ int32_t sys_write(int32_t fd, const void *buf, int32_t bufsize) {
         printf("ERROR [SYS FILE] in sys_write: write buffer size should be non-negative\n");
         return -1;
     }
+    if (cur_pcb == NULL) {
+        printf("ERROR [SYS FILE] in sys_write: the current process is NULL");
+        return -1;
+    }
+    if (cur_pcb->file_arr.files[fd].f_op == NULL) {
+        printf("ERROR [SYS FILE] in sys_write: the file has no file operation. fd: %d\n", fd);
+        return -1;
+    }
     if (cur_pcb->file_arr.files[fd].flags == AVAILABLE) {
         printf("WARNING [SYS FILE] in sys_write: the file is not opened. fd: %d\n", fd);
         return -1;
@@ -176,15 +204,47 @@ int32_t sys_write(int32_t fd, const void *buf, int32_t bufsize) {
 }
 
 /**
+ * sys_ioctl
+ * Description: system call: system io control for the device
+ * Input: fd - the file descriptor
+          cmd - the command sent to the device
+ * Output: -1: fail
+ * Side effect: a command is sent to the device
+ */
+int32_t sys_ioctl(int32_t fd, int32_t cmd) {
+    pcb_t *cur_pcb = get_cur_process();
+
+    if (fd < 0 || fd > N_FILE_LIMIT) {
+        printf("ERROR [SYS FILE] in sys_ioctl: invalid fd\n");
+        return -1;
+    }
+    if (cur_pcb == NULL) {
+        printf("ERROR [SYS FILE] in sys_ioctl: the current process is NULL");
+        return -1;
+    }
+    if (cur_pcb->file_arr.files[fd].flags == AVAILABLE) {
+        printf("WARNING [SYS FILE] in sys_ioctl: the file is not opened. fd: %d\n", fd);
+        return -1;
+    }
+    if (cur_pcb->file_arr.files[fd].f_op == NULL) {
+        printf("ERROR [SYS FILE] in sys_ioctl: the file has no file operation. fd: %d\n", fd);
+        return -1;
+    }
+    if (cur_pcb->file_arr.files[fd].f_op->ioctl == NULL) {
+        printf("ERROR [SYS FILE] in sys_ioctl: the file has no ioctl operation. fd: %d\n", fd);
+        return -1;
+    }
+    return cur_pcb->file_arr.files[fd].f_op->ioctl(fd, cmd);
+}
+
+/**
  * invalid_sys_call
  * Description: for invalid system call number
  * Input: None
  * Output: None
  * Side effect: None
  */
-
-int
-invalid_sys_call(){
+int invalid_sys_call(){
      printf("The system call is invalid!!!! Please check the call number!!! \n");
      return -1;
 }
