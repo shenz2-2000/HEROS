@@ -14,6 +14,7 @@
 #include "sys_call.h"
 #include "signal_sys_call.h"
 #include "gensound.h"
+#include "svga/vga.h"
 
 #define RUN_TESTS
 
@@ -285,7 +286,18 @@ void entry(unsigned long magic, unsigned long addr) {
 
 #ifdef RUN_TESTS
     /* Run tests */
-    launch_tests();
+    vga_init();
+    int x, y;
+    for (x = 492; x < 533; x++) {
+        for (y = 360; y <= 374; y++) {
+            vga_pdraw(x, y, 0x0000FF);
+        }
+        for (y = 374; y <= 388; y++) {;
+            vga_pdraw(x, y, 0xFF0000);
+        }
+    }
+    while(1) {}
+    // launch_tests();
 #endif
     /* Execute the first program ("shell") ... */
 
