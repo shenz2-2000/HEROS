@@ -231,6 +231,11 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
     enable_irq(1);   // Keyboard is IRQ1
+
+    /* Init Mouse */
+    mouse_init();
+    enable_irq(12);
+
     /*Init RTC*/
     rtc_init();
     enable_irq(8); // RTC is IRQ8
@@ -258,9 +263,7 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Init Signal */
     signal_init();
 
-    /* Init Mouse */
-    mouse_init();
-    enable_irq(12); // Enable irq for mouse
+    // Enable irq for mouse
     /* Enable interrupts */
 
     /* execute shell */
@@ -268,6 +271,10 @@ void entry(unsigned long magic, unsigned long addr) {
 
     /* play the boot music */
     play_song(0);
+
+
+
+
 
     uint32_t flags;
     sti();

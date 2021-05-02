@@ -15,7 +15,7 @@
 #define IDT_ENTRY_PIT      0x20
 #define IDT_ENTRY_KEYBOARD 0x21
 #define IDT_ENTRY_RTC 0x28
-#define IDT_ENTRY_MOUSE 0x2c
+#define IDT_ENTRY_MOUSE 0x2C
 #define IDT_SYSTEM_CALL 0x80
 
 

@@ -13,7 +13,7 @@ kernel.o: kernel.c multiboot.h types.h x86_desc.h lib.h i8259.h debug.h \
 lib.o: lib.c lib.h types.h terminal.h
 mouse_driver.o: mouse_driver.c lib.h types.h mouse_driver.h link.h \
   process.h file_sys.h multiboot.h x86_desc.h signal_sys_call.h idt.h \
-  terminal.h
+  terminal.h i8259.h
 page_lib.o: page_lib.c page_lib.h x86_desc.h types.h file_sys.h \
   multiboot.h terminal.h lib.h process.h signal_sys_call.h idt.h link.h
 paging.o: paging.c x86_desc.h types.h
