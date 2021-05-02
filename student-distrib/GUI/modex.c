@@ -209,42 +209,42 @@ static unsigned char original_palette[64][3] = {
  *                 C array of dimension [BLOCK_Y_DIM][BLOCK_X_DIM]
  *   SIDE EFFECTS: none
  */
-static unsigned char* find_block(int x, int y) {
-    int fnum;     /* fruit found                           */
-    int pattern;  /* stencil pattern for surrounding walls */
-
-    /* Record whether fruit is present. */
-    fnum = (maze[MAZE_INDEX(x, y)] & MAZE_FRUIT) / MAZE_FRUIT_1;
-
-    /* The exit is always visible once the last fruit is collected. */
-    if (n_fruits == 0 && (maze[MAZE_INDEX(x, y)] & MAZE_EXIT) != 0)
-        return (unsigned char*)blocks[BLOCK_EXIT];
-
-    /*
-     * Everything else not reached is shrouded in mist, although fruits
-     * show up as bumps.
-     */
-    if ((maze[MAZE_INDEX(x, y)] & MAZE_REACH) == 0) {
-        if (fnum != 0)
-            return (unsigned char*)blocks[BLOCK_FRUIT_SHADOW];
-        return (unsigned char*)blocks[BLOCK_SHADOW];
-    }
-
-    /* Show fruit. */
-    if (fnum != 0)
-        return (unsigned char*)blocks[BLOCK_FRUIT_1 + fnum - 1];
-
-    /* Show empty space. */
-    if ((maze[MAZE_INDEX(x, y)] & MAZE_WALL) == 0)
-        return (unsigned char*)blocks[BLOCK_EMPTY];
-
-    /* Show different types of walls. */
-    pattern = (((maze[MAZE_INDEX(x, y - 1)] & MAZE_WALL) != 0) << 0) |
-              (((maze[MAZE_INDEX(x + 1, y)] & MAZE_WALL) != 0) << 1) |
-              (((maze[MAZE_INDEX(x, y + 1)] & MAZE_WALL) != 0) << 2) |
-              (((maze[MAZE_INDEX(x - 1, y)] & MAZE_WALL) != 0) << 3);
-    return (unsigned char*)blocks[pattern];
-}
+//static unsigned char* find_block(int x, int y) {
+//    int fnum;     /* fruit found                           */
+//    int pattern;  /* stencil pattern for surrounding walls */
+//
+//    /* Record whether fruit is present. */
+//    fnum = (maze[MAZE_INDEX(x, y)] & MAZE_FRUIT) / MAZE_FRUIT_1;
+//
+//    /* The exit is always visible once the last fruit is collected. */
+//    if (n_fruits == 0 && (maze[MAZE_INDEX(x, y)] & MAZE_EXIT) != 0)
+//        return (unsigned char*)blocks[BLOCK_EXIT];
+//
+//    /*
+//     * Everything else not reached is shrouded in mist, although fruits
+//     * show up as bumps.
+//     */
+//    if ((maze[MAZE_INDEX(x, y)] & MAZE_REACH) == 0) {
+//        if (fnum != 0)
+//            return (unsigned char*)blocks[BLOCK_FRUIT_SHADOW];
+//        return (unsigned char*)blocks[BLOCK_SHADOW];
+//    }
+//
+//    /* Show fruit. */
+//    if (fnum != 0)
+//        return (unsigned char*)blocks[BLOCK_FRUIT_1 + fnum - 1];
+//
+//    /* Show empty space. */
+//    if ((maze[MAZE_INDEX(x, y)] & MAZE_WALL) == 0)
+//        return (unsigned char*)blocks[BLOCK_EMPTY];
+//
+//    /* Show different types of walls. */
+//    pattern = (((maze[MAZE_INDEX(x, y - 1)] & MAZE_WALL) != 0) << 0) |
+//              (((maze[MAZE_INDEX(x + 1, y)] & MAZE_WALL) != 0) << 1) |
+//              (((maze[MAZE_INDEX(x, y + 1)] & MAZE_WALL) != 0) << 2) |
+//              (((maze[MAZE_INDEX(x - 1, y)] & MAZE_WALL) != 0) << 3);
+//    return (unsigned char*)blocks[pattern];
+//}
 
 
 
@@ -267,11 +267,11 @@ void fill_horiz_buffer(int x, int y, unsigned char buf[SCROLL_X_DIM]) {
     for (idx = 0; idx < SCROLL_X_DIM; ) {
 
         /* Find address of block to be drawn. */
-        block = find_block(map_x++, map_y) + sub_y * BLOCK_X_DIM + sub_x;
+//        block = find_block(map_x++, map_y) + sub_y * BLOCK_X_DIM + sub_x;
 
         /* Write block colors from one line into buffer. */
         for (; idx < SCROLL_X_DIM && sub_x < BLOCK_X_DIM; idx++, sub_x++)
-            buf[idx] = *block++;
+            buf[idx] = 1;
 
         /*
          * All subsequent blocks are copied starting from the left side
@@ -297,13 +297,13 @@ void fill_vert_buffer(int x, int y, unsigned char buf[SCROLL_Y_DIM]) {
     /* Loop over pixels in line. */
     for (idx = 0; idx < SCROLL_Y_DIM; ) {
 
-        /* Find address of block to be drawn. */
-        block = find_block(map_x, map_y++) + sub_y * BLOCK_X_DIM + sub_x;
+//        /* Find address of block to be drawn. */
+//        block = find_block(map_x, map_y++) + sub_y * BLOCK_X_DIM + sub_x;
 
         /* Write block colors from one line into buffer. */
         for (; idx < SCROLL_Y_DIM && sub_y < BLOCK_Y_DIM;
-               idx++, sub_y++, block += BLOCK_X_DIM)
-            buf[idx] = *block;
+               idx++, sub_y++)
+            buf[idx] = 1;
 
         /*
          * All subsequent blocks are copied starting from the top
