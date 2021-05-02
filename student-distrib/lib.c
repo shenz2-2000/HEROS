@@ -664,6 +664,20 @@ int32_t close(int32_t fd) {
     return ret;
 }
 
+/* int32_t ioctl(int32_t fd)
+ * Inputs: fd : the target file
+ *         cmd : the command to send
+ * Return Value: ret: whether the close is successful
+ */
+int32_t ioctl(int32_t fd, int32_t cmd) {
+    long ret;
+    asm volatile ("INT $0x80"
+    : "=a" (ret)
+    : "a" (0x0D), "b" (fd), "c" (cmd)
+    : "memory", "cc");
+    return ret;
+}
+
 /* sleep
  * Description: it sleep for roughly a certain time
  * Inputs: time_in_ms - duration in ms unit

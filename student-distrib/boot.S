@@ -535,7 +535,7 @@ sys_jump_table:
           .long sys_sig_return
           .long play_sound_sys_call
           .long nosound_sys_call
-
+          .long ioctl_sys_call
 
 /**
  * init_page_register

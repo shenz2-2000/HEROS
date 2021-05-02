@@ -21,31 +21,36 @@ static file_operations_t file_op = {    // the op table for regular file
     .open = file_open,
     .close = file_close,
     .read = file_read,
-    .write = file_write
+    .write = file_write,
+    .ioctl = NULL
 };
 static file_operations_t terminal_op = {    // the op table for terminal
     .open =  terminal_open,
     .read =  terminal_read,
     .write =  terminal_write,
-    .close =  terminal_close
+    .close =  terminal_close,
+    .ioctl = NULL
 };
 static file_operations_t rtc_op = { // the op table for rtc file
     .open =  file_rtc_open,
     .read =  file_rtc_read,
     .write =  file_rtc_write,
-    .close =  file_rtc_close
+    .close =  file_rtc_close,
+    .ioctl = NULL
 };
 static file_operations_t dir_op = { // thr op table for directory
     .open =  dir_open,
     .read =  dir_read,
     .write =  dir_write,
-    .close =  dir_close
+    .close =  dir_close,
+    .ioctl = NULL
 };
 static file_operations_t audio_op = {   // thr op table for sound card
     .open = file_audio_open,
     .read = file_audio_read,
     .write = file_audio_write,
-    .close = file_audio_close
+    .close = file_audio_close,
+    .ioctl = file_audio_ioctl
 };
 
 /**
@@ -621,4 +626,15 @@ int32_t file_audio_read(int32_t fd, void *buf, int32_t bufsize) {
  */
 int32_t file_audio_write(int32_t fd, const void *buf, int32_t bufsize) {
     return audio_write(&(get_cur_process()->file_arr.files[fd].f_pos), buf, bufsize);
+}
+
+/**
+ * file_audio_ioctl
+ * Description: call audio_ioctl
+ * Input: fd - the file descriptor
+          cmd - the command sent to the device
+ * Output: 0 if success
+ */
+int32_t file_audio_ioctl(int32_t fd, int32_t cmd) {
+    return audio_ioctl((uint8_t) cmd);
 }
