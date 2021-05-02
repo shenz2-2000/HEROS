@@ -304,6 +304,8 @@ int PTE_set(PTE* pte, uint32_t page_addr, uint32_t US, uint32_t RW, uint32_t P) 
         return -1;
     }
 
+    pte->val = 0;
+
     pte->P = P;
     pte->US = US;
     pte->RW = RW;
@@ -331,6 +333,8 @@ int PDE_4K_set(PDE *pde, uint32_t pt_addr, uint32_t US, uint32_t RW, uint32_t P)
     if ((!check_flag(US)) || (!check_flag(RW)) || (!check_flag(P))) {
         return -1;
     }
+
+    pde->val = 0;
 
     pde->P = P;
     pde->US = US;

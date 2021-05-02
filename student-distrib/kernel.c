@@ -15,6 +15,8 @@
 #include "signal_sys_call.h"
 #include "gensound.h"
 #include "svga/vga.h"
+#include "GUI/modex.h"
+#include "GUI/maze.h"
 
 #define RUN_TESTS
 
@@ -267,11 +269,13 @@ void entry(unsigned long magic, unsigned long addr) {
     /* play the boot music */
     play_song(0);
 
+    set_mode_X(fill_horiz_buffer,fill_vert_buffer);
+
     uint32_t flags;
     cli_and_save(flags);
     {
-        sys_execute((uint8_t *) "init_task", 0, 0, init_task_main);
-        printf("Error: return from the init_task, which should not happen");
+//        sys_execute((uint8_t *) "init_task", 0, 0, init_task_main);
+//        printf("Error: return from the init_task, which should not happen");
     }
     restore_flags(flags);
 

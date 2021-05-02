@@ -4,40 +4,14 @@
 
 #include "modex.h"
 #include "../lib.h"
-
-
+#include "../x86_desc.h"
+#include "../page_lib.h"
+#include "blocks.h"
+#include "maze.h"
 
 // ------------------------------Macros and Function Declaration------------------------------------
 
-// TODO: need modification here
-#define IMAGE_X_DIM     320   /* pixels; must be divisible by 4             */
-#define IMAGE_Y_DIM     200   /* pixels                                     */
-#define IMAGE_X_WIDTH   (IMAGE_X_DIM / 4)          /* addresses (bytes)     */
-#define SCROLL_X_DIM    IMAGE_X_DIM                /* full image width      */
-#define SCROLL_Y_DIM    IMAGE_Y_DIM - 18               /* full image width      */
-#define SCROLL_X_WIDTH  (IMAGE_X_DIM / 4)          /* addresses (bytes)     */
-#define SCROLL_SIZE             (SCROLL_X_WIDTH * SCROLL_Y_DIM)
-#define SCREEN_SIZE             (SCROLL_SIZE * 4 + 1)
-#define BUILD_BUF_SIZE          (SCREEN_SIZE + 20000)
-#define BUILD_BASE_INIT         ((BUILD_BUF_SIZE - SCREEN_SIZE) / 2)
 
-// register numbers
-#define NUM_SEQUENCER_REGS      5
-#define NUM_CRTC_REGS           25
-#define NUM_GRAPHICS_REGS       9
-#define NUM_ATTR_REGS           22
-
-// memory fence
-#define MEM_FENCE_WIDTH         256
-#define MEM_FENCE_MAGIC         0xF3
-
-/* Mode X and general VGA parameters */
-#define VID_MEM_SIZE            131072
-#define MODE_X_MEM_SIZE         65536
-#define NUM_SEQUENCER_REGS      5
-#define NUM_CRTC_REGS           25
-#define NUM_GRAPHICS_REGS       9
-#define NUM_ATTR_REGS           22
 
 // buffer and important variables
 static unsigned char build[BUILD_BUF_SIZE + 2 * MEM_FENCE_WIDTH];
@@ -49,11 +23,21 @@ static int show_x, show_y;          /* logical view coordinates     */
 static unsigned char* mem_image;    /* pointer to start of video memory */
 static unsigned short target_img;   /* offset of displayed screen image */
 
+
+// for maze
+static unsigned char maze[2 * MAZE_MAX_X_DIM * (2 * MAZE_MAX_Y_DIM + 3) + 1];
+static int maze_x_dim;          /* horizontal dimension of maze */
+static int maze_y_dim;          /* vertical dimension of maze   */
+static int n_fruits;            /* number of fruits in maze     */
+static int exit_x, exit_y;      /* lattice point of maze exit   */
+
+#define MAZE_INDEX(a,b) ((a) + ((b) + 1) * maze_x_dim * 2)
+
 // two function pointers
 static void (*horiz_line_fn)(int, int, unsigned char[SCROLL_X_DIM]);
 static void (*vert_line_fn)(int, int, unsigned char[SCROLL_Y_DIM]);
 
-static int open_memory_and_ports();
+//static int open_memory_and_ports();
 static void VGA_blank(int blank_bit);
 static void set_seq_regs_and_reset(unsigned short table[NUM_SEQUENCER_REGS], unsigned char val);
 static void set_CRTC_registers(unsigned short table[NUM_CRTC_REGS]);
@@ -61,10 +45,15 @@ static void set_attr_registers(unsigned char table[NUM_ATTR_REGS * 2]);
 static void set_graphics_registers(unsigned short table[NUM_GRAPHICS_REGS]);
 static void fill_palette();
 static void copy_image(unsigned char* img, unsigned short scr_addr);
-
+static void set_memory_for_modex();
+void fill_horiz_buffer(int x, int y, unsigned char buf[SCROLL_X_DIM]);
+static unsigned char* find_block(int x, int y);
 
 
 // ---------------------------------------Useful arrays---------------------------------------------
+
+
+
 
 // The three palette for wall and player
 static unsigned  char  player_palette[10][3] = {
@@ -208,6 +197,149 @@ static unsigned char original_palette[64][3] = {
 };
 
 // -----------------------------------------------------Functions----------------------------------------------------
+
+/*
+ * find_block
+ *   DESCRIPTION: Find the appropriate image to be used for a given maze
+ *                lattice point.
+ *   INPUTS: (x,y) -- the maze lattice point
+ *   OUTPUTS: none
+ *   RETURN VALUE: a pointer to an image of a BLOCK_X_DIM x BLOCK_Y_DIM
+ *                 block of data with one byte per pixel laid out as a
+ *                 C array of dimension [BLOCK_Y_DIM][BLOCK_X_DIM]
+ *   SIDE EFFECTS: none
+ */
+static unsigned char* find_block(int x, int y) {
+    int fnum;     /* fruit found                           */
+    int pattern;  /* stencil pattern for surrounding walls */
+
+    /* Record whether fruit is present. */
+    fnum = (maze[MAZE_INDEX(x, y)] & MAZE_FRUIT) / MAZE_FRUIT_1;
+
+    /* The exit is always visible once the last fruit is collected. */
+    if (n_fruits == 0 && (maze[MAZE_INDEX(x, y)] & MAZE_EXIT) != 0)
+        return (unsigned char*)blocks[BLOCK_EXIT];
+
+    /*
+     * Everything else not reached is shrouded in mist, although fruits
+     * show up as bumps.
+     */
+    if ((maze[MAZE_INDEX(x, y)] & MAZE_REACH) == 0) {
+        if (fnum != 0)
+            return (unsigned char*)blocks[BLOCK_FRUIT_SHADOW];
+        return (unsigned char*)blocks[BLOCK_SHADOW];
+    }
+
+    /* Show fruit. */
+    if (fnum != 0)
+        return (unsigned char*)blocks[BLOCK_FRUIT_1 + fnum - 1];
+
+    /* Show empty space. */
+    if ((maze[MAZE_INDEX(x, y)] & MAZE_WALL) == 0)
+        return (unsigned char*)blocks[BLOCK_EMPTY];
+
+    /* Show different types of walls. */
+    pattern = (((maze[MAZE_INDEX(x, y - 1)] & MAZE_WALL) != 0) << 0) |
+              (((maze[MAZE_INDEX(x + 1, y)] & MAZE_WALL) != 0) << 1) |
+              (((maze[MAZE_INDEX(x, y + 1)] & MAZE_WALL) != 0) << 2) |
+              (((maze[MAZE_INDEX(x - 1, y)] & MAZE_WALL) != 0) << 3);
+    return (unsigned char*)blocks[pattern];
+}
+
+
+
+
+
+
+void fill_horiz_buffer(int x, int y, unsigned char buf[SCROLL_X_DIM]) {
+    int map_x, map_y;     /* maze lattice point of the first block on line */
+    int sub_x, sub_y;     /* sub-block address                             */
+    int idx;              /* loop index over pixels in the line            */
+    unsigned char* block; /* pointer to current maze block image           */
+
+    /* Find the maze lattice point and the pixel address within that block. */
+    map_x = x / BLOCK_X_DIM;
+    map_y = y / BLOCK_Y_DIM;
+    sub_x = x - map_x * BLOCK_X_DIM;
+    sub_y = y - map_y * BLOCK_Y_DIM;
+
+    /* Loop over pixels in line. */
+    for (idx = 0; idx < SCROLL_X_DIM; ) {
+
+        /* Find address of block to be drawn. */
+        block = find_block(map_x++, map_y) + sub_y * BLOCK_X_DIM + sub_x;
+
+        /* Write block colors from one line into buffer. */
+        for (; idx < SCROLL_X_DIM && sub_x < BLOCK_X_DIM; idx++, sub_x++)
+            buf[idx] = *block++;
+
+        /*
+         * All subsequent blocks are copied starting from the left side
+         * of the block.
+         */
+        sub_x = 0;
+    }
+}
+
+
+void fill_vert_buffer(int x, int y, unsigned char buf[SCROLL_Y_DIM]) {
+    int map_x, map_y;     /* maze lattice point of the first block on line */
+    int sub_x, sub_y;     /* sub-block address                             */
+    int idx;              /* loop index over pixels in the line            */
+    unsigned char* block; /* pointer to current maze block image           */
+
+    /* Find the maze lattice point and the pixel address within that block. */
+    map_x = x / BLOCK_X_DIM;
+    map_y = y / BLOCK_Y_DIM;
+    sub_x = x - map_x * BLOCK_X_DIM;
+    sub_y = y - map_y * BLOCK_Y_DIM;
+
+    /* Loop over pixels in line. */
+    for (idx = 0; idx < SCROLL_Y_DIM; ) {
+
+        /* Find address of block to be drawn. */
+        block = find_block(map_x, map_y++) + sub_y * BLOCK_X_DIM + sub_x;
+
+        /* Write block colors from one line into buffer. */
+        for (; idx < SCROLL_Y_DIM && sub_y < BLOCK_Y_DIM;
+               idx++, sub_y++, block += BLOCK_X_DIM)
+            buf[idx] = *block;
+
+        /*
+         * All subsequent blocks are copied starting from the top
+         * of the block.
+         */
+        sub_y = 0;
+    }
+
+    return;
+}
+
+
+
+
+
+
+static void set_memory_for_modex(){
+
+    int i;
+
+    uint32_t cur_idx_in_table;
+    uint32_t cur_addr_in_mem;
+
+    uint32_t start_idx_in_table = 160;
+    uint32_t start_addr_in_mem = 50331648;
+
+    for(i = 0; i <= 31; i++){
+        cur_idx_in_table = start_idx_in_table + i;
+        cur_addr_in_mem = start_addr_in_mem + i * 4096;
+
+        // currently, set US to 1 (user could access)
+        PTE_set(page_table0,cur_addr_in_mem,1,1,1);
+    }
+
+}
+
 
 /*
  * copy_image
@@ -360,8 +492,9 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
     target_img = 0x05A0;
 
     /* Map video memory and obtain permission for VGA port access. */
-    if (open_memory_and_ports() == -1)
-        return -1;
+//    if (open_memory_and_ports() == -1)
+//        return -1;
+    set_memory_for_modex();
 
     /*
      * The code below was produced by recording a call to set mode 0013h
