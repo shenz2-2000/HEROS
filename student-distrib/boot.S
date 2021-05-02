@@ -436,12 +436,10 @@ interrupt_entry_0:
     #pushl $0  # push irq number as argument
     #call send_eoi
     #addl $4, %esp
-    // TODO: temporarily disable signal check for debugging
     call check_signal
     RESTORE_HW_CONTEXT
     iret  # return from interrupt
 
-// TODO: change interrupt linkage to support signal
  .globl interrupt_entry_1
 interrupt_entry_1:
     pushl $0
@@ -455,6 +453,18 @@ interrupt_entry_1:
     RESTORE_HW_CONTEXT
     iret  # return from interrupt 
 
+ .globl interrupt_entry_5
+interrupt_entry_5:
+    pushl $0
+    pushl $1
+    SET_HW_CONTEXT
+    call dsp_interrupt_handler
+    pushl $5  # push irq number as argument
+    call send_eoi
+    addl $4, %esp
+    call check_signal
+    RESTORE_HW_CONTEXT
+    iret  # return from interrupt 
 
 .globl interrupt_entry_8
 interrupt_entry_8:
