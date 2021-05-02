@@ -54,6 +54,7 @@
 #define DMA_MODE_AUTO_PB        0x58
 
 // the address of sound data
+// TODO: to be determined!!!
 #define DSP_BUF_ADDR            0x100000    // 1 Mb
 #define DSP_BUF_LEN             0x20000     // 128 kb
 
