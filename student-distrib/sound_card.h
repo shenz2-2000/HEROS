@@ -1,6 +1,8 @@
 #ifndef _SOUND_CARD_H
 #define _SOUND_CARD_H
 
+#include "lib.h"
+
 /* Digital Signal Processor */
 // Port
 #define DSP_MIX_PORT            0x224
@@ -61,5 +63,12 @@
 /* DSP status */
 #define DSP_ON  1
 #define DSP_OFF 0
+
+int32_t audio_open();
+int32_t audio_close();
+int32_t audio_read();
+int32_t audio_write(uint32_t *pos, const void *buf, int32_t bufsize);
+int32_t audio_ioctl(uint8_t cmd);
+void dsp_interrupt_handler();
 
 #endif

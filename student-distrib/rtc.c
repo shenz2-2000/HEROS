@@ -74,7 +74,7 @@ void rtc_restart_interrupt(){
  */
 int32_t rtc_close(int32_t fd) {
     pcb_t *cur_pcb = get_cur_process();
-    virtual_ctr[cur_pcb->rtc_id] = -1;
+    virtual_ctr[(int) cur_pcb->rtc_id] = -1;
     cur_pcb->rtc_id = -1;
     return 0;
 }
@@ -100,7 +100,7 @@ int32_t rtc_open(const uint8_t* filename) {
         }
         cur_pcb->rtc_id = i;
     }
-    virtual_ctr[cur_pcb->rtc_id] = 1;
+    virtual_ctr[(int)cur_pcb->rtc_id] = 1;
     rtc_init();  // initialize RTC, set default frequency to 1024 Hz
     rtc_set_freq(RTC_MIN_RATE);
     return 0;
@@ -133,7 +133,7 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes) {
     if (rate <= RTC_MIN_RATE) return -1;
 
     pcb_t *cur_pcb = get_cur_process();
-    virtual_ctr[cur_pcb->rtc_id] = 1024 >> (pow+2);
+    virtual_ctr[(int)cur_pcb->rtc_id] = 1024 >> (pow+2);
 
     return 0;
 }
@@ -167,10 +167,10 @@ void rtc_set_freq(int rate) {
  */
 int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes) {
     int8_t rid = get_cur_process()->rtc_id;
-    int ctr = virtual_ctr[rid];
+    int ctr = virtual_ctr[(int)rid];
     while (ctr > 0) {
-        ticks[rid] = 0;
-        while (!ticks[rid]) {};
+        ticks[(int)rid] = 0;
+        while (!ticks[(int)rid]) {};
         ctr--;
     }
     return 0;

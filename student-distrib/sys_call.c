@@ -35,7 +35,7 @@ int32_t sys_open(const uint8_t *f_name) {
     if (f_name == NULL) {
         printf("ERROR [SYS FILE] in sys_open: f_name NULL pointer\n");
         return -1;
-    } else if (strncmp("audio", f_name, 6) == 0) {
+    } else if (strncmp((int8_t*) "audio", (int8_t*) f_name, (uint32_t) 6) == 0) {
         fd = file_audio_open(f_name);
     } else {
         // obtain the dentry to know the file type
