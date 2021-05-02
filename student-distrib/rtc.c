@@ -1,13 +1,13 @@
 #include "rtc.h"
 #include "lib.h"
-
+#include "cmos.h"
 // The rtc counter used to count the number of interrupt
 // static int fake_interval = 1;
 // static volatile int rtc_interrupt_occured;
 void rtc_set_freq(int rate);
 static int virtual_ctr[] = {-1, -1, -1, -1, -1, 0};
 static volatile int ticks[] = {0, 0, 0, 0, 0, 0};
-
+void system_time();
 /*
  * rtc_init
  *   DESCRIPTION: Initialize rtc
@@ -38,6 +38,7 @@ void rtc_init() {
  */
 void rtc_interrupt_handler() {
     cli();
+    system_time();
     // rtc_interrupt_occured = 1;
     ticks[0] = 1;
     ticks[1] = 1;
@@ -211,3 +212,4 @@ int32_t sleep(uint32_t time_in_ms) {
     close(fd);
     return 0;
 }
+
