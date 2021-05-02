@@ -5,6 +5,7 @@
 #include "tests.h"
 #include "signal_sys_call.h"
 #include "scheduler.h"
+#include "sound_card.h"
 
 #define FILE_CLOSED_TEST 1
 
@@ -19,12 +20,7 @@ int32_t sys_open(const uint8_t *f_name) {
     dentry_t dentry;
     int32_t fd = -1;
     pcb_t *cur_pcb;
-//    int i;
-//    i = 1/0;
 
-    // For error test, we can return back to shell!
-//    int i = 1;
-//    i = i / 0;
     cur_pcb = get_cur_process();
 
     if (cur_pcb->file_arr.n_opend_files >= N_FILE_LIMIT) {
@@ -35,27 +31,29 @@ int32_t sys_open(const uint8_t *f_name) {
     if (f_name == NULL) {
         printf("ERROR [SYS FILE] in sys_open: f_name NULL pointer\n");
         return -1;
-    }
-
-    // obtain the dentry to know the file type
-    if (read_dentry_by_name(f_name, &dentry) == -1) {
-        printf("WARNING [SYS FILE] in sys_open: cannot OPEN file with name: [%s]\n", f_name);
-        return -1;
-    }
-
-    // invoke the different open op according to file type
-    switch (dentry.f_type) {
-        case 0: {   // RTC file
-            fd = file_rtc_open(f_name);
-            break;
+    } else if (strncmp("audio", f_name, 6) == 0) {
+        fd = file_audio_open(f_name);
+    } else {
+        // obtain the dentry to know the file type
+        if (read_dentry_by_name(f_name, &dentry) == -1) {
+            printf("WARNING [SYS FILE] in sys_open: cannot OPEN file with name: [%s]\n", f_name);
+            return -1;
         }
-        case 1: {   // directory file
-            fd = dir_open(f_name);
-            break;
-        }
-        case 2: {   // regulary file
-            fd = file_open(f_name);
-            break;
+
+        // invoke the different open op according to file type
+        switch (dentry.f_type) {
+            case 0: {   // RTC file
+                fd = file_rtc_open(f_name);
+                break;
+            }
+            case 1: {   // directory file
+                fd = dir_open(f_name);
+                break;
+            }
+            case 2: {   // regulary file
+                fd = file_open(f_name);
+                break;
+            }
         }
     }
 
@@ -142,20 +140,6 @@ int32_t sys_read(int32_t fd, void *buf, int32_t bufsize) {
 }
 
 /**
- * invalid_sys_call
- * Description: for invalid system call number
- * Input: None
- * Output: None
- * Side effect: None
- */
-
-int
-invalid_sys_call(){
-     printf("The system call is invalid!!!! Please check the call number!!! \n");
-     return -1;
-}
-
-/**
  * sys_write
  * Description: system call: write to a file (NOTE: read-only file system!)
  * Input: fd - the file descriptor
@@ -191,7 +175,19 @@ int32_t sys_write(int32_t fd, const void *buf, int32_t bufsize) {
     return cur_pcb->file_arr.files[fd].f_op->write(fd, buf, bufsize);
 }
 
+/**
+ * invalid_sys_call
+ * Description: for invalid system call number
+ * Input: None
+ * Output: None
+ * Side effect: None
+ */
 
+int
+invalid_sys_call(){
+     printf("The system call is invalid!!!! Please check the call number!!! \n");
+     return -1;
+}
 
 /**
  * sys_vidmap
