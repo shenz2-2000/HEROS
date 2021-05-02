@@ -18,6 +18,30 @@ static int16_t mouse_x = 0;
 static int16_t mouse_y = 0;
 
 
+// set sample rate
+void set_sample_rate(uint8_t sample_rate){
+
+    uint8_t ack;
+
+    outb(0xD4,MOUSE_CHECK_PORT);
+    outb(0xF3,MOUSE_DATA_PORT);
+
+    // wait until we can read
+    while( !(inb(MOUSE_CHECK_PORT) & 1));
+
+    ack = inb(MOUSE_DATA_PORT);
+    outb(0xD4,MOUSE_CHECK_PORT);
+    outb(sample_rate,MOUSE_DATA_PORT);
+
+    // wait until we can read
+    while( !(inb(MOUSE_CHECK_PORT) & 1));
+
+    ack = inb(MOUSE_DATA_PORT);
+
+}
+
+
+
 void set_mouse_cursor(int x, int y) {
     x = (x << 5) | 0x0010;
     outw(x, 0x3c4);
@@ -81,6 +105,9 @@ void mouse_init() {
     // TODO: delete this after enabling VGA
     command_mouse(0xF4);
     set_blue_cursor(mouse_x, mouse_y);
+
+    // set sample rate to slow down mouse
+    set_sample_rate(20);
 }
 
 void mouse_interrupt_handler() {
