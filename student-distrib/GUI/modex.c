@@ -774,26 +774,27 @@ void show_status_bar() {
 void compute_status_bar() {
     int i,j,k,l,cur_plane,cur_i;;
     uint8_t cur_char;
-    char terminal_bar[40] = "  TERMINAL 1   TERMINAL 2   TERMINAL 3  ";
-    char status_bar[40] = "  TERMINAL 1   TERMINAL 2   TERMINAL 3  ";
-//    for (i = 0; i < 1; ++i) {
-//        for (j = 0; j < MODEX_TER_COLS; ++j)
-//            for (k = 0; k < FONT_HEIGHT; ++k)
-//                for (l = 0; l < FONT_WIDTH; ++l) {
-//                    cur_char = terminal_bar[j];
-//                    status_buffer[i * MODEX_TER_COLS * FONT_HEIGHT * FONT_WIDTH + k * MODEX_TER_COLS + j * FONT_WIDTH + l] =
-//                            ((font8x8[cur_char][k] & (1 << (8 - l))) > 0)?5:0;
-//                }
-//    }
+    char terminal_bar[41] = "  TERMINAL 1   TERMINAL 2   TERMINAL 3  ";
+    char status_bar[41] = "    aAAaaaaaaaaaaaaa    ";
+    for (i = 0; i < 1; ++i) {
+        for (j = 0; j < MODEX_TER_COLS; ++j)
+            for (k = 0; k < FONT_HEIGHT; ++k)
+                for (l = 0; l < FONT_WIDTH; ++l) {
+                    cur_char = terminal_bar[j];
+                    status_buffer[i * MODEX_TER_COLS * FONT_HEIGHT * FONT_WIDTH + k * SCROLL_X_DIM + j * FONT_WIDTH + l] =
+                            ((font8x8[cur_char][k] & (1 << (l))) > 0)?5:0;
+                }
+    }
     for (i = 1; i < 2; ++i) {
         for (j = 0; j < MODEX_TER_COLS; ++j)
             for (k = 0; k < FONT_HEIGHT; ++k)
                 for (l = 0; l < FONT_WIDTH; ++l) {
                     cur_char = status_bar[j];
-                    status_buffer[i * MODEX_TER_COLS * FONT_HEIGHT * FONT_WIDTH + k * MODEX_TER_COLS + j * FONT_WIDTH + l] =
-                            ((font8x8[cur_char][k] & (1 << (8 - l))) > 0)?5:0;
+                    status_buffer[i * MODEX_TER_COLS * FONT_HEIGHT * FONT_WIDTH + k * SCROLL_X_DIM + j * FONT_WIDTH + l] =
+                            ((font8x8[cur_char][k] & (1 << (l))) > 0)?5:0;
                 }
     }
+
     for(j = 0; j < 16; j++){
         for(i = 0; i < SCROLL_X_DIM; i++){
             cur_plane = i & 3;

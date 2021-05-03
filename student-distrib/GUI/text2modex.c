@@ -155,7 +155,7 @@ void text_to_graphic() {
             for (k = 0; k < FONT_HEIGHT; ++k)
                 for (l = 0; l < FONT_WIDTH; ++l) {
                     cur_char = *(uint8_t *)(video_cache + ((MODEX_TER_COLS * i + j) << 1));
-                    draw_text_buffer[i * MODEX_TER_COLS * FONT_HEIGHT * FONT_WIDTH + k * MODEX_TER_COLS + j * FONT_WIDTH + l] =
+                    draw_text_buffer[i * MODEX_TER_COLS * FONT_HEIGHT * FONT_WIDTH + k * SCROLL_X_DIM + j * FONT_WIDTH + l] =
                             (font8x8[cur_char][k] & (1 << (8 - l))) > 0;
                 }
     }
