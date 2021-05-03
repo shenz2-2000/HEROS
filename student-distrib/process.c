@@ -296,6 +296,8 @@ int32_t system_halt(int32_t status) {
 
     pcb_t * cur_task = get_cur_process();
 
+    if(cur_task == NULL) return -1;
+
     // remove cur_task from task list
     delete_task_from_list(cur_task);
 
