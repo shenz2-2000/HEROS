@@ -24,4 +24,8 @@ typedef struct wave_file_struct {
     uint32_t subchunk2Size; // NumSamples * NumChannels * BitsPerSample/8
 } wave_file_struct;
 
+int32_t wave_file_parse(int32_t wav_fd, wave_file_struct *wav_file);
+int32_t sound_card_init(int32_t dsp_fd, wave_file_struct *wav_file);
+int32_t play_wav(int32_t file_num);
+
 #endif
