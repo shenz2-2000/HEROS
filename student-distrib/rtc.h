@@ -1,5 +1,6 @@
 #include "types.h"
 #include "process.h"
+#include "vga.h"
 
 #ifndef RTC_H
 #define RTC_H

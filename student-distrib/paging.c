@@ -2,6 +2,7 @@
 // Created by BOURNE on 2021/3/20.
 //
 #include "x86_desc.h"
+#include "vbe.h"
 
 /**
  * fill_page
@@ -13,6 +14,8 @@
 void fill_page(){
     // --------------------------Fill the Page Directory--------------------
     int i;
+    uint32_t vbe = (REG_VBE >> 22);
+    uint32_t vbe_nxt = vbe + 1;
     for(i = 0; i < PAGE_DIRECTORY_SIZE; i++){
         // for the first entry (map to video memory)
         if(i == 0){
@@ -69,6 +72,25 @@ void fill_page(){
 
     }
 
+    // VBE regions
+    page_directory[vbe].P = 1;
+    page_directory[vbe].US = 0;
+    page_directory[vbe].RW = 1;
+    page_directory[vbe].G = 1;
+    page_directory[vbe].PS = 1;
+    page_directory[vbe].PAT = 0;
+    page_directory[vbe].reserved = 0;
+    page_directory[vbe].Base_address = vbe;
+    // next
+    page_directory[vbe_nxt].P = 1;
+    page_directory[vbe_nxt].US = 0;
+    page_directory[vbe_nxt].RW = 1;
+    page_directory[vbe_nxt].G = 1;
+    page_directory[vbe_nxt].PS = 1;
+    page_directory[vbe_nxt].PAT = 0;
+    page_directory[vbe_nxt].reserved = 0;
+    page_directory[vbe_nxt].Base_address = vbe_nxt;
+
     // --------------------------Fill the video Page Table (for kernel)--------------------
     for(i = 0; i < PAGE_TABLE_SIZE; i++){
         // points to the start of vedio memory
@@ -86,6 +108,20 @@ void fill_page(){
             page_table0[i].Base_address = VIDEO_MEMORY_INDEX;
             continue;
         }
+//        if(i >= 0xA0 && i <= 0xBF){
+//            page_table0[i].P = 1;
+//            page_table0[i].RW = 1;
+//            page_table0[i].US = 0;
+//            page_table0[i].PWT = 0;
+//            page_table0[i].PCD = 0;
+//            page_table0[i].A = 0;
+//            page_table0[i].D = 0;
+//            page_table0[i].PAT = 0;
+//            page_table0[i].G = 1;
+//            page_table0[i].AVAIAL = 0;
+//            page_table0[i].Base_address = i;
+//            continue;
+//        }
 
         // else, just filled with 0
         else{
@@ -105,38 +141,38 @@ void fill_page(){
     }
 
     // --------------------------Fill the video Page Table--------------------
-    for(i = 0; i < PAGE_TABLE_SIZE; i++){
-        // points to the start of vedio memory
-        if(i == VIDEO_MEMORY_INDEX){
-            video_page_table0[i].P = 1;
-            video_page_table0[i].RW = 1;
-            video_page_table0[i].US = 1;
-            video_page_table0[i].PWT = 0;
-            video_page_table0[i].PCD = 0;
-            video_page_table0[i].A = 0;
-            video_page_table0[i].D = 0;
-            video_page_table0[i].PAT = 0;
-            video_page_table0[i].G = 0;
-            video_page_table0[i].AVAIAL = 0;
-            video_page_table0[i].Base_address = VIDEO_MEMORY_INDEX;
-            continue;
-        }
-
-            // else, just filled with 0
-        else{
-            video_page_table0[i].P = 0;
-            video_page_table0[i].RW = 0;
-            video_page_table0[i].US = 0;
-            video_page_table0[i].PWT = 0;
-            video_page_table0[i].PCD = 0;
-            video_page_table0[i].A = 0;
-            video_page_table0[i].D = 0;
-            video_page_table0[i].PAT = 0;
-            video_page_table0[i].G = 0;
-            video_page_table0[i].AVAIAL = 0;
-            video_page_table0[i].Base_address = 0;
-            continue;
-        }
-    }
+//    for(i = 0; i < PAGE_TABLE_SIZE; i++){
+//        // points to the start of vedio memory
+//        if(i == VIDEO_MEMORY_INDEX){
+//            video_page_table0[i].P = 1;
+//            video_page_table0[i].RW = 1;
+//            video_page_table0[i].US = 1;
+//            video_page_table0[i].PWT = 0;
+//            video_page_table0[i].PCD = 0;
+//            video_page_table0[i].A = 0;
+//            video_page_table0[i].D = 0;
+//            video_page_table0[i].PAT = 0;
+//            video_page_table0[i].G = 0;
+//            video_page_table0[i].AVAIAL = 0;
+//            video_page_table0[i].Base_address = VIDEO_MEMORY_INDEX;
+//            continue;
+//        }
+//
+//            // else, just filled with 0
+//        else{
+//            video_page_table0[i].P = 0;
+//            video_page_table0[i].RW = 0;
+//            video_page_table0[i].US = 0;
+//            video_page_table0[i].PWT = 0;
+//            video_page_table0[i].PCD = 0;
+//            video_page_table0[i].A = 0;
+//            video_page_table0[i].D = 0;
+//            video_page_table0[i].PAT = 0;
+//            video_page_table0[i].G = 0;
+//            video_page_table0[i].AVAIAL = 0;
+//            video_page_table0[i].Base_address = 0;
+//            continue;
+//        }
+//    }
 }
 

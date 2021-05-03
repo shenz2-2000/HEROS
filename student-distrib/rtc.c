@@ -38,7 +38,7 @@ void rtc_init() {
  */
 void rtc_interrupt_handler() {
     cli();
-    system_time();
+    // system_time();
     // rtc_interrupt_occured = 1;
     ticks[0] = 1;
     ticks[1] = 1;
@@ -48,6 +48,7 @@ void rtc_interrupt_handler() {
     ticks[5] = 1;
     rtc_restart_interrupt();
     sti();
+    show_screen();
     //test_interrupts();
 }
 
@@ -103,7 +104,7 @@ int32_t rtc_open(const uint8_t* filename) {
     }
     virtual_ctr[(int) cur_pcb->rtc_id] = 1;
     rtc_init();  // initialize RTC, set default frequency to 1024 Hz
-    rtc_set_freq(RTC_MIN_RATE);
+    rtc_set_freq(8);
     return 0;
 }
 
