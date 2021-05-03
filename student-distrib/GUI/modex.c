@@ -43,10 +43,10 @@ static unsigned char plane2[SCROLL_X_DIM * SCROLL_Y_DIM / 4];
 static unsigned char plane3[SCROLL_X_DIM * SCROLL_Y_DIM / 4];
 
 static unsigned char status_bar_buffer[16*80];
-static unsigned char status_plane0[16*80/4];
-static unsigned char status_plane1[16*80/4];
-static unsigned char status_plane2[16*80/4];
-static unsigned char status_plane3[16*80/4];
+static unsigned char status_plane0[16*80];
+static unsigned char status_plane1[16*80];
+static unsigned char status_plane2[16*80];
+static unsigned char status_plane3[16*80];
 
 
 // two function pointers

@@ -10,7 +10,7 @@
 
 // TODO: need modification here
 #define IMAGE_X_DIM     320   /* pixels; must be divisible by 4             */
-#define IMAGE_Y_DIM     200   /* pixels                                     */
+#define IMAGE_Y_DIM     200 -16  /* pixels                                     */
 #define IMAGE_X_WIDTH   (IMAGE_X_DIM / 4)          /* addresses (bytes)     */
 #define SCROLL_X_DIM    IMAGE_X_DIM                /* full image width      */
 // TODO:
