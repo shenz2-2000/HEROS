@@ -680,12 +680,26 @@ void test_video_with_garbage(){
 }
 
 void draw_textmode_terminal() {
-    int *res = draw_text_buffer;
-    int dy,dx,pos_y=0,pos_x=0;
-    for (dy = 0; dy < FONT_HEIGHT*MODEX_TER_ROWS; dy++, pos_y++) {
-        for (dx = 0; dx < MODEX_TER_COLS*FONT_WIDTH; dx++, pos_x++, res++)
-            *(img3 + (pos_x >> 2) + pos_y * SCROLL_X_WIDTH +
-              (3 - (pos_x & 3)) * SCROLL_SIZE) = (*res)?0x01:0x00;
+    int cur_plane, cur_i;
+    for(j = 0; j < SCROLL_Y_DIM; j++){
+        for(i = 0; i < SCROLL_X_DIM; i++){
+            cur_plane = i & 3;
+            cur_i = i / 4;
+            switch (cur_plane) {
+                case 0:
+                    plane0[j * (SCROLL_X_DIM / 4) + cur_i] = draw_text_buffer[j * (SCROLL_X_DIM) + i];
+                    break;
+                case 1:
+                    plane1[j * (SCROLL_X_DIM / 4) + cur_i] = draw_text_buffer[j * (SCROLL_X_DIM) + i];
+                    break;
+                case 2:
+                    plane2[j * (SCROLL_X_DIM / 4) + cur_i] = draw_text_buffer[j * (SCROLL_X_DIM) + i];
+                    break;
+                case 3:
+                    plane3[j * (SCROLL_X_DIM / 4) + cur_i] = draw_text_buffer[j * (SCROLL_X_DIM) + i];
+                    break;
+            }
+        }
     }
 }
 
@@ -694,7 +708,7 @@ void update_four_planes(){
     for(j = 0; j < SCROLL_Y_DIM+16; j++){
         for(i = 0; i < SCROLL_X_DIM; i++){
             cur_plane = i & 3;
-            cur_i = i % 3;
+            cur_i = i / 4;
             switch (cur_plane) {
                 case 0:
                     plane0[j * (SCROLL_X_DIM / 4) + cur_i] = main_buffer[j * (SCROLL_X_DIM) + i];

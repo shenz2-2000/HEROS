@@ -14,7 +14,7 @@
 #define IMAGE_X_WIDTH   (IMAGE_X_DIM / 4)          /* addresses (bytes)     */
 #define SCROLL_X_DIM    IMAGE_X_DIM                /* full image width      */
 // TODO:
-#define SCROLL_Y_DIM    IMAGE_Y_DIM - 16 + 16              /* full image width      */
+#define SCROLL_Y_DIM    IMAGE_Y_DIM - 16             /* full image width      */
 #define SCROLL_X_WIDTH  (IMAGE_X_DIM / 4)          /* addresses (bytes)     */
 #define SCROLL_SIZE             (SCROLL_X_WIDTH * SCROLL_Y_DIM)
 #define SCREEN_SIZE             (SCROLL_SIZE * 4 + 1)
