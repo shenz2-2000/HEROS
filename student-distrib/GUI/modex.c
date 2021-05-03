@@ -605,7 +605,7 @@ static void set_graphics_registers(unsigned short table[NUM_GRAPHICS_REGS]) {
 static void fill_palette() {
     /* 6-bit RGB (red, green, blue) values for first 64 colors */
     static unsigned char palette_RGB[64][3] = {
-            { 0xDC, 0x14, 0x3C },{ 0x00, 0x00, 0x2A },   /* palette 0x00 - 0x0F    */
+            { 0x00, 0x00, 0x00 },{ 0xDC, 0x14, 0x3C },   /* palette 0x00 - 0x0F    */
             { 0x00, 0x2A, 0x00 },{ 0x00, 0x2A, 0x2A },   /* basic VGA colors       */
             { 0x2A, 0x00, 0x00 },{ 0x2A, 0x00, 0x2A },
             { 0x2A, 0x15, 0x00 },{ 0x2A, 0x2A, 0x2A },
@@ -650,7 +650,6 @@ static void fill_palette() {
 
 
 void show_screen() {
-    int i;                  /* loop index over video planes        */
 
     update_four_planes();
 
@@ -680,7 +679,7 @@ void test_video_with_garbage(){
     addr = mem_image;
     for(i = 0; i < SCROLL_X_DIM; i++){
         for(j = 0; j < SCROLL_Y_DIM; j++){
-            main_buffer[j * SCROLL_X_DIM + i] = 0x10;
+            main_buffer[j * SCROLL_X_DIM + i] = 2;
         }
     }
 }
