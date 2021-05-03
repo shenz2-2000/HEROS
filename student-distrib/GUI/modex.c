@@ -8,7 +8,7 @@
 #include "../page_lib.h"
 #include "blocks.h"
 #include "maze.h"
-
+#include "text2modex.h"
 // ------------------------------Macros and Function Declaration------------------------------------
 
 
@@ -162,7 +162,7 @@ static unsigned short text_graphics[NUM_GRAPHICS_REGS] = {
 };
 
 static unsigned char original_palette[64][3] = {
-        { 0x00, 0x00, 0x00 },{ 0x00, 0x00, 0x2A },   /* palette 0x00 - 0x0F    */
+        { 0x00, 0x00, 0x00 },{ 0xFF, 0xFF, 0xFF },   /* palette 0x00 - 0x0F    */
         { 0x00, 0x2A, 0x00 },{ 0x00, 0x2A, 0x2A },   /* basic VGA colors       */
         { 0x2A, 0x00, 0x00 },{ 0x2A, 0x00, 0x2A },
         { 0x2A, 0x15, 0x00 },{ 0x2A, 0x2A, 0x2A },
@@ -679,5 +679,14 @@ void test_video_with_garbage(){
     for(i=0; i < (300*200); i++){
         *(addr+i) = 0x0;
     }
+}
 
+void draw_textmode_terminal() {
+    int *res = draw_text_buffer;
+    int dy,dx,pos_y=0,pos_x=0;
+    for (dy = 0; dy < FONT_HEIGHT*MODEX_TER_ROWS; dy++, pos_y++) {
+        for (dx = 0; dx < MODEX_TER_COLS*FONT_WIDTH; dx++, pos_x++, res++)
+            *(img3 + (pos_x >> 2) + pos_y * SCROLL_X_WIDTH +
+              (3 - (pos_x & 3)) * SCROLL_SIZE) = (*res)?0x01:0x00;
+    }
 }

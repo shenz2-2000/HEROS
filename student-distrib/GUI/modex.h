@@ -12,7 +12,7 @@
 #define IMAGE_Y_DIM     200   /* pixels                                     */
 #define IMAGE_X_WIDTH   (IMAGE_X_DIM / 4)          /* addresses (bytes)     */
 #define SCROLL_X_DIM    IMAGE_X_DIM                /* full image width      */
-#define SCROLL_Y_DIM    IMAGE_Y_DIM - 18               /* full image width      */
+#define SCROLL_Y_DIM    IMAGE_Y_DIM - 16               /* full image width      */
 #define SCROLL_X_WIDTH  (IMAGE_X_DIM / 4)          /* addresses (bytes)     */
 #define SCROLL_SIZE             (SCROLL_X_WIDTH * SCROLL_Y_DIM)
 #define SCREEN_SIZE             (SCROLL_SIZE * 4 + 1)
@@ -43,6 +43,6 @@ extern int set_mode_X(
 
 extern void test_video_with_garbage();
 extern  void show_screen();
-
-
+void draw_textmode_terminal();
+extern int draw_text_buffer[MODEX_TER_ROWS*MODEX_TER_COLS*FONT_WIDTH*FONT_HEIGHT];;
 #endif //MIAO_MODEX_H
