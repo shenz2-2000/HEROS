@@ -145,11 +145,13 @@ void handle_input(uint8_t input) {
  *   SIDE EFFECTS: interrupt
  */
 ASMLINKAGE void keyboard_interrupt_handler(hw_context hw) {
+
     uint8_t input = inb(KEYBOARD_PORT);
     uint32_t flags;
+    send_eoi(hw.irq);
     cli_and_save(flags);
     {
-        send_eoi(hw.irq);
+
         if (get_showing_task()) {
             terminal_set_running(get_showing_task()->terminal);
         }
@@ -372,11 +374,11 @@ terminal_struct_t* terminal_allocate() {
 void terminal_set_running(terminal_struct_t *terminal) {
     // sanity check
     if (get_running_terminal() == NULL) {
-        printf("ERROR for terminal_set_running(): running_terminal is NULL\n");
+//        printf("ERROR for terminal_set_running(): running_terminal is NULL\n");
         return;
     }
     if (terminal == NULL) {
-        printf("ERROR in terminal_set_running(): NULL terminal input\n");
+//        printf("ERROR in terminal_set_running(): NULL terminal input\n");
         return;
     }
     uint32_t flags;

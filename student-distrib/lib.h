@@ -8,6 +8,7 @@
 #include "types.h"
 extern int screen_x;
 extern int screen_y;
+extern uint8_t mouse_in_use;
 int32_t printf(int8_t *format, ...);
 void putc(uint8_t c);
 int32_t puts(int8_t *s);
@@ -51,9 +52,11 @@ int32_t write(int32_t fd, const void* buf, int32_t nbytes);
 // cursor function
 void update_cursor(int x, int y);
 
-
+// mouse cursor function
+void set_blue_cursor(int32_t x, int32_t y);
 
 int max(int a, int b);
+int min(int a, int b);
 /* Port read functions */
 /* Inb reads a byte and returns its value as a zero-extended 32-bit
  * unsigned int */

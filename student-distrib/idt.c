@@ -15,6 +15,7 @@
 #define IDT_ENTRY_PIT      0x20
 #define IDT_ENTRY_KEYBOARD 0x21
 #define IDT_ENTRY_RTC 0x28
+#define IDT_ENTRY_MOUSE 0x2C
 #define IDT_SYSTEM_CALL 0x80
 
 
@@ -101,6 +102,10 @@ void init_IDT(){
     // Set RTC handler (defined in boot.S)
     SET_IDT_ENTRY(idt[IDT_ENTRY_RTC], interrupt_entry_8);
     idt[IDT_ENTRY_RTC].present = 1;
+
+    // Set mouse handler
+    SET_IDT_ENTRY(idt[IDT_ENTRY_MOUSE], interrupt_entry_12);
+    idt[IDT_ENTRY_MOUSE].present = 1;
 
     // set the system call entry
     SET_IDT_ENTRY(idt[IDT_SYSTEM_CALL],sys_call_linkage);

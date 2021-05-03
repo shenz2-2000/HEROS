@@ -14,6 +14,7 @@
 #include "sys_call.h"
 #include "signal_sys_call.h"
 #include "gensound.h"
+#include "mouse_driver.h"
 
 #define RUN_TESTS
 
@@ -231,6 +232,10 @@ void entry(unsigned long magic, unsigned long addr) {
      * PIC, any other initialization stuff... */
     enable_irq(1);   // Keyboard is IRQ1
 
+    /* Init Mouse */
+    mouse_init();
+    enable_irq(12);
+
     /*Init RTC*/
     rtc_init();
     enable_irq(8); // RTC is IRQ8
@@ -258,6 +263,7 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Init Signal */
     signal_init();
 
+    // Enable irq for mouse
     /* Enable interrupts */
 
     /* execute shell */
@@ -266,13 +272,9 @@ void entry(unsigned long magic, unsigned long addr) {
     /* play the boot music */
     play_song(0);
 
-    uint32_t flags;
-    cli_and_save(flags);
-    {
-        sys_execute((uint8_t *) "init_task", 0, 0, init_task_main);
+    sys_execute((uint8_t *) "init_task", 0, 0, init_task_main);
         printf("Error: return from the init_task, which should not happen");
-    }
-    restore_flags(flags);
+
 
     // for test use
     // sys_execute((uint8_t *) "bibi");
