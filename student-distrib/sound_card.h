@@ -14,15 +14,17 @@
 #define DSP_16B_INT_ACK_PORT    0x22F
 
 // Command for DSP Write
-#define DSP_TIME_CNST_CMD       0x40
-#define DSP_SAMPLE_RATE_CMD     0x41
-#define DSP_SPEAKER_ON_CMD      0xD1
-#define DSP_SPEAKER_OFF_CMD     0xD3
-#define DSP_STOP_PLAY_8B_CMD    0xD0
-#define DSP_RESUME_PLAY_8B_CMD  0xD4
-#define DSP_STOP_PLAY_16B_CMD   0xD5
-#define DSP_RESUME_PLAY_16B_CMD 0xD6
-#define DSP_GET_DSP_VER_CMD     0xE1
+#define DSP_TIME_CNST_CMD           0x40
+#define DSP_SAMPLE_RATE_CMD         0x41
+#define DSP_SPEAKER_ON_CMD          0xD1
+#define DSP_SPEAKER_OFF_CMD         0xD3
+#define DSP_STOP_PLAY_8B_CMD        0xD0
+#define DSP_RESUME_PLAY_8B_CMD      0xD4
+#define DSP_STOP_PLAY_16B_CMD       0xD5
+#define DSP_RESUME_PLAY_16B_CMD     0xD6
+#define DSP_EXIT_16B_AUTO_BLOCK_CMD 0xD9
+#define DSP_EXIT_8B_AUTO_BLOCK_CMD  0xDA
+#define DSP_GET_DSP_VER_CMD         0xE1
 
 // Command for Mixer Port
 #define DSP_MASTER_VOL_CMD      0x22
