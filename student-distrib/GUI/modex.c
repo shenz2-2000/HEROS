@@ -33,6 +33,14 @@ static int exit_x, exit_y;      /* lattice point of maze exit   */
 
 #define MAZE_INDEX(a,b) ((a) + ((b) + 1) * maze_x_dim * 2)
 
+
+// our main buffer
+static unsigned char main_buffer[SCROLL_X_DIM * SCROLL_Y_DIM ];
+static unsigned char plane0[SCROLL_X_DIM * SCROLL_Y_DIM / 4];
+static unsigned char plane1[SCROLL_X_DIM * SCROLL_Y_DIM / 4];
+static unsigned char plane2[SCROLL_X_DIM * SCROLL_Y_DIM / 4];
+static unsigned char plane3[SCROLL_X_DIM * SCROLL_Y_DIM / 4];
+
 // two function pointers
 static void (*horiz_line_fn)(int, int, unsigned char[SCROLL_X_DIM]);
 static void (*vert_line_fn)(int, int, unsigned char[SCROLL_Y_DIM]);
@@ -415,30 +423,31 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
     /* loop index for filling memory fence with magic numbers */
     int i;
 
-    /*
-     * Record callback functions for obtaining horizontal and vertical
-     * line images.
-     */
-    if (horiz_fill_fn == NULL || vert_fill_fn == NULL)
-        return -1;
-    horiz_line_fn = horiz_fill_fn;
-    vert_line_fn = vert_fill_fn;
-
-    /* Initialize the logical view window to position (0,0). */
-    show_x = show_y = 0;
-    img3_off = BUILD_BASE_INIT;
-    img3 = build + img3_off + MEM_FENCE_WIDTH;
-
-    /* Set up the memory fence on the build buffer. */
-    for (i = 0; i < MEM_FENCE_WIDTH; i++) {
-        build[i] = MEM_FENCE_MAGIC;
-        build[BUILD_BUF_SIZE + MEM_FENCE_WIDTH + i] = MEM_FENCE_MAGIC;
-    }
+//    /*
+//     * Record callback functions for obtaining horizontal and vertical
+//     * line images.
+//     */
+//    if (horiz_fill_fn == NULL || vert_fill_fn == NULL)
+//        return -1;
+//    horiz_line_fn = horiz_fill_fn;
+//    vert_line_fn = vert_fill_fn;
+//
+//    /* Initialize the logical view window to position (0,0). */
+//    show_x = show_y = 0;
+//    img3_off = BUILD_BASE_INIT;
+//    img3 = build + img3_off + MEM_FENCE_WIDTH;
+//
+//    /* Set up the memory fence on the build buffer. */
+//    for (i = 0; i < MEM_FENCE_WIDTH; i++) {
+//        build[i] = MEM_FENCE_MAGIC;
+//        build[BUILD_BUF_SIZE + MEM_FENCE_WIDTH + i] = MEM_FENCE_MAGIC;
+//    }
 
     /* One display page goes at the start of video memory. */
-    /* we spare 18*80 (18 is the height of the text, 80 is the width of status bar) memory locations for status bar */
+    /* we spare 16*80 (18 is the height of the text, 80 is the width of status bar) memory locations for status bar */
 //    target_img = 0x05A0;
-    target_img = 0;
+     target_img = 0;
+
 
     /* Map video memory and obtain permission for VGA port access. */
 //    if (open_memory_and_ports() == -1)
@@ -641,27 +650,18 @@ static void fill_palette() {
 
 
 void show_screen() {
-    unsigned char* addr;    /* source address for copy             */
-    int p_off;              /* plane offset of first display plane */
     int i;                  /* loop index over video planes        */
 
-    /*
-     * Calculate offset of build buffer plane to be mapped into plane 0
-     * of display.
-     */
-    p_off = (3 - (show_x & 3));
+    update_four_planes();
 
-    /* Switch to the other target screen in video memory. */
-    target_img ^= 0x4000;
-
-    /* Calculate the source address. */
-    addr = img3 + (show_x >> 2) + show_y * SCROLL_X_WIDTH;
-
-    /* Draw to each plane in the video memory. */
-    for (i = 0; i < 4; i++) {
-        SET_WRITE_MASK(1 << (i + 8));
-        copy_image(addr + ((p_off - i + 4) & 3) * SCROLL_SIZE + (p_off < i), target_img);
-    }
+    SET_WRITE_MASK(1 << (0 + 8));
+    copy_image(plane0, target_img);
+    SET_WRITE_MASK(1<<  (1 + 8));
+    copy_image(plane1, target_img);
+    SET_WRITE_MASK(1<<  (2 + 8));
+    copy_image(plane2, target_img);
+    SET_WRITE_MASK(1<<  (3 + 8));
+    copy_image(plane3, target_img);
 
     /*
      * Change the VGA registers to point the top left of the screen
@@ -672,12 +672,16 @@ void show_screen() {
 }
 
 
+
+
 void test_video_with_garbage(){
-    int i;
+    int i,j;
     unsigned char* addr;
-    addr = img3 + (show_x >> 2) + show_y * SCROLL_X_WIDTH;
-    for(i=0; i < (300*200); i++){
-        *(addr+i) = 0x0;
+    addr = mem_image;
+    for(i = 0; i < SCROLL_X_DIM; i++){
+        for(j = 0; j < SCROLL_Y_DIM; j++){
+            main_buffer[j * SCROLL_X_DIM + i] = 0x10;
+        }
     }
 }
 
@@ -690,3 +694,29 @@ void draw_textmode_terminal() {
               (3 - (pos_x & 3)) * SCROLL_SIZE) = (*res)?0x01:0x00;
     }
 }
+
+void update_four_planes(){
+    int i,j,cur_plane,cur_i;
+    for(j = 0; j < SCROLL_Y_DIM; j++){
+        for(i = 0; i < SCROLL_X_DIM; i++){
+            cur_plane = i & 3;
+            cur_i = i % 3;
+            switch (cur_plane) {
+                case 0:
+                    plane0[j * (SCROLL_X_DIM / 4) + cur_i] = main_buffer[j * (SCROLL_X_DIM) + i];
+                    break;
+                case 1:
+                    plane1[j * (SCROLL_X_DIM / 4) + cur_i] = main_buffer[j * (SCROLL_X_DIM) + i];
+                    break;
+                case 2:
+                    plane2[j * (SCROLL_X_DIM / 4) + cur_i] = main_buffer[j * (SCROLL_X_DIM) + i];
+                    break;
+                case 3:
+                    plane3[j * (SCROLL_X_DIM / 4) + cur_i] = main_buffer[j * (SCROLL_X_DIM) + i];
+                    break;
+
+            }
+        }
+    }
+}
+

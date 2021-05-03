@@ -5,6 +5,7 @@
 #ifndef MIAO_MODEX_H
 #define MIAO_MODEX_H
 
+#include "text2modex.h"
 
 
 // TODO: need modification here
@@ -43,6 +44,7 @@ extern int set_mode_X(
 
 extern void test_video_with_garbage();
 extern  void show_screen();
+extern  void update_four_planes();
 void draw_textmode_terminal();
-extern int draw_text_buffer[MODEX_TER_ROWS*MODEX_TER_COLS*FONT_WIDTH*FONT_HEIGHT];;
+extern int draw_text_buffer[MODEX_TER_ROWS*MODEX_TER_COLS*FONT_WIDTH*FONT_HEIGHT];
 #endif //MIAO_MODEX_H
