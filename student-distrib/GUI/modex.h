@@ -47,5 +47,7 @@ extern void test_video_with_garbage();
 extern  void show_screen();
 extern  void update_four_planes();
 void draw_textmode_terminal();
+void compute_status_bar();
+extern char font8x8[128][8];
 extern int draw_text_buffer[MODEX_TER_ROWS*MODEX_TER_COLS*FONT_WIDTH*FONT_HEIGHT];
 #endif //MIAO_MODEX_H

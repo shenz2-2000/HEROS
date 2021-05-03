@@ -14,6 +14,7 @@
 
 
 // buffer and important variables
+int status_buffer[2*MODEX_TER_COLS*FONT_WIDTH*FONT_HEIGHT];
 static unsigned char build[BUILD_BUF_SIZE + 2 * MEM_FENCE_WIDTH];
 static int img3_off;                /* offset of upper left pixel   */
 static unsigned char* img3;         /* pointer to upper left pixel  */
@@ -479,6 +480,7 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
 
     test_video_with_garbage();
     show_screen();
+    //compute_status_bar();
     /* Return success. */
     return 0;
 }
@@ -735,6 +737,7 @@ void update_four_planes(){
     }
 }
 
+
 void show_status_bar() {
 
 
@@ -751,7 +754,51 @@ void show_status_bar() {
      * Change the VGA registers to point the top left of the screen
      * to the video memory that we just filled.
      */
-    OUTW(0x03D4, (target_img & 0xFF00) | 0x0C);
-    OUTW(0x03D4, ((target_img & 0x00FF) << 8) | 0x0D);
 }
 
+void compute_status_bar() {
+    int i,j,k,l,cur_plane,cur_i;;
+    uint8_t cur_char;
+    char terminal_bar[40] = "  TERMINAL 1   TERMINAL 2   TERMINAL 3  ";
+    char status_bar[40] = "  TERMINAL 1   TERMINAL 2   TERMINAL 3  ";
+    for (i = 0; i < 1; ++i) {
+        for (j = 0; j < MODEX_TER_COLS; ++j)
+            for (k = 0; k < FONT_HEIGHT; ++k)
+                for (l = 0; l < FONT_WIDTH; ++l) {
+                    cur_char = terminal_bar[j];
+                    status_buffer[i * MODEX_TER_COLS * FONT_HEIGHT * FONT_WIDTH + k * MODEX_TER_COLS + j * FONT_WIDTH + l] =
+                            (font8x8[cur_char][k] & (1 << (8 - l))) > 0;
+                }
+    }
+    for (i = 1; i < 2; ++i) {
+        for (j = 0; j < MODEX_TER_COLS; ++j)
+            for (k = 0; k < FONT_HEIGHT; ++k)
+                for (l = 0; l < FONT_WIDTH; ++l) {
+                    cur_char = status_bar[j];
+                    status_buffer[i * MODEX_TER_COLS * FONT_HEIGHT * FONT_WIDTH + k * MODEX_TER_COLS + j * FONT_WIDTH + l] =
+                            (font8x8[cur_char][k] & (1 << (8 - l))) > 0;
+                }
+    }
+    for(j = 0; j < 16; j++){
+        for(i = 0; i < SCROLL_X_DIM; i++){
+            cur_plane = i & 3;
+            cur_i = i / 4;
+            switch (cur_plane) {
+                case 0:
+                    status_plane0[j * (SCROLL_X_DIM / 4) + cur_i] = main_buffer[j * (SCROLL_X_DIM) + i];
+                    break;
+                case 1:
+                    status_plane1[j * (SCROLL_X_DIM / 4) + cur_i] = main_buffer[j * (SCROLL_X_DIM) + i];
+                    break;
+                case 2:
+                    status_plane2[j * (SCROLL_X_DIM / 4) + cur_i] = main_buffer[j * (SCROLL_X_DIM) + i];
+                    break;
+                case 3:
+                    status_plane3[j * (SCROLL_X_DIM / 4) + cur_i] = main_buffer[j * (SCROLL_X_DIM) + i];
+                    break;
+
+            }
+        }
+    }
+    show_status_bar();
+}
