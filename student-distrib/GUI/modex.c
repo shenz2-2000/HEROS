@@ -41,6 +41,13 @@ static unsigned char plane1[SCROLL_X_DIM * SCROLL_Y_DIM / 4];
 static unsigned char plane2[SCROLL_X_DIM * SCROLL_Y_DIM / 4];
 static unsigned char plane3[SCROLL_X_DIM * SCROLL_Y_DIM / 4];
 
+static unsigned char status_bar_buffer[16*80];
+static unsigned char status_plane0[16*80/4];
+static unsigned char status_plane1[16*80/4];
+static unsigned char status_plane2[16*80/4];
+static unsigned char status_plane3[16*80/4];
+
+
 // two function pointers
 static void (*horiz_line_fn)(int, int, unsigned char[SCROLL_X_DIM]);
 static void (*vert_line_fn)(int, int, unsigned char[SCROLL_Y_DIM]);
@@ -109,12 +116,12 @@ static unsigned short mode_X_seq[NUM_SEQUENCER_REGS] = {
         0x0100, 0x2101, 0x0F02, 0x0003, 0x0604
 };
 
-static unsigned short mode_X_CRTC[NUM_CRTC_REGS] = {
-    0x5F00, 0x4F01, 0x5002, 0x8203, 0x5404, 0x8005, 0xBF06, 0x1F07,
-    0x0008, 0x4109, 0x000A, 0x000B, 0x000C, 0x000D, 0x000E, 0x000F,
-    0x9C10, 0x8E11, 0x8F12, 0x2813, 0x0014, 0x9615, 0xB916, 0xE317,
-    0xB618
-};
+//static unsigned short mode_X_CRTC[NUM_CRTC_REGS] = {
+//    0x5F00, 0x4F01, 0x5002, 0x8203, 0x5404, 0x8005, 0xBF06, 0x1F07,
+//    0x0008, 0x4109, 0x000A, 0x000B, 0x000C, 0x000D, 0x000E, 0x000F,
+//    0x9C10, 0x8E11, 0x8F12, 0x2813, 0x0014, 0x9615, 0xB916, 0xE317,
+//    0xB618
+//};
 
 /*here we need to modify MAX_SCAN_LINE(09) to 01 (bit 9 of line compare)
                          LINE_COMPARE_REGISTER(18) to 6C (182 * 2 - 1 - 256)
@@ -124,12 +131,12 @@ static unsigned short mode_X_CRTC[NUM_CRTC_REGS] = {
   we put 363 - 256 in port 18 to ensure the correct position of status bar*/
 /*The reason why is 0109 is that the 9th bit of line compare field is in max scan line. We need to
   clear that bit*/
-//static unsigned short mode_X_CRTC[NUM_CRTC_REGS] = {
-//        0x5F00, 0x4F01, 0x5002, 0x8203, 0x5404, 0x8005, 0xBF06, 0x1F07,
-//        0x0008, 0x0109, 0x000A, 0x000B, 0x000C, 0x000D, 0x000E, 0x000F,
-//        0x9C10, 0x8E11, 0x8F12, 0x2813, 0x0014, 0x9615, 0xB916, 0xE317,
-//        0x6B18
-//};
+static unsigned short mode_X_CRTC[NUM_CRTC_REGS] = {
+        0x5F00, 0x4F01, 0x5002, 0x8203, 0x5404, 0x8005, 0xBF06, 0x1F07,
+        0x0008, 0x0109, 0x000A, 0x000B, 0x000C, 0x000D, 0x000E, 0x000F,
+        0x9C10, 0x8E11, 0x8F12, 0x2813, 0x0014, 0x9615, 0xB916, 0xE317,
+        0x6F18
+};
 
 static unsigned char mode_X_attr[NUM_ATTR_REGS * 2] = {
         0x00, 0x00, 0x01, 0x01, 0x02, 0x02, 0x03, 0x03,
@@ -440,8 +447,8 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
 
     /* One display page goes at the start of video memory. */
     /* we spare 16*80 (18 is the height of the text, 80 is the width of status bar) memory locations for status bar */
-//    target_img = 0x05A0;
-     target_img = 0;
+    target_img = 0x0500;
+//     target_img = 0;
 
 
     /* Map video memory and obtain permission for VGA port access. */
@@ -680,7 +687,7 @@ void test_video_with_garbage(){
 }
 
 void draw_textmode_terminal() {
-    int cur_plane, cur_i;
+    int cur_plane, cur_i,i,j;
     for(j = 0; j < SCROLL_Y_DIM; j++){
         for(i = 0; i < SCROLL_X_DIM; i++){
             cur_plane = i & 3;
@@ -726,5 +733,25 @@ void update_four_planes(){
             }
         }
     }
+}
+
+void show_status_bar() {
+
+
+    SET_WRITE_MASK(1 << (0 + 8));
+    copy_image(status_plane0, 0);
+    SET_WRITE_MASK(1<<  (1 + 8));
+    copy_image(status_plane1, 0);
+    SET_WRITE_MASK(1<<  (2 + 8));
+    copy_image(status_plane2, 0);
+    SET_WRITE_MASK(1<<  (3 + 8));
+    copy_image(status_plane3, 0);
+
+    /*
+     * Change the VGA registers to point the top left of the screen
+     * to the video memory that we just filled.
+     */
+    OUTW(0x03D4, (target_img & 0xFF00) | 0x0C);
+    OUTW(0x03D4, ((target_img & 0x00FF) << 8) | 0x0D);
 }
 
