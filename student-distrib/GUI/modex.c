@@ -35,7 +35,7 @@ static int exit_x, exit_y;      /* lattice point of maze exit   */
 
 
 // our main buffer
-static unsigned char main_buffer[SCROLL_X_DIM * SCROLL_Y_DIM ];
+static unsigned char main_buffer[SCROLL_X_DIM * SCROLL_Y_DIM];
 static unsigned char plane0[SCROLL_X_DIM * SCROLL_Y_DIM / 4];
 static unsigned char plane1[SCROLL_X_DIM * SCROLL_Y_DIM / 4];
 static unsigned char plane2[SCROLL_X_DIM * SCROLL_Y_DIM / 4];
@@ -276,23 +276,18 @@ void fill_vert_buffer(int x, int y, unsigned char buf[SCROLL_Y_DIM]) {
 
 static void set_memory_for_modex(){
 
-    int i;
+    uint32_t i;
+    uint32_t j;
 
-    uint32_t cur_idx_in_table;
-    uint32_t cur_addr_in_mem;
+    PDE_4K_set(page_directory+2,(uint32_t) modex_page_table,1,1,1);
 
-    uint32_t start_idx_in_table = 160;
-    uint32_t start_addr_in_mem = 50331648;
-
-    for(i = 0; i <= 31; i++){
-        cur_idx_in_table = start_idx_in_table + i;
-        cur_addr_in_mem = start_addr_in_mem + i * 4096;
-
-        // currently, set US to 1 (user could access)
-        PTE_set(page_table0+cur_idx_in_table,cur_addr_in_mem,1,1,1);
+    for(i = 160; i <= 191; i++){
+        j = i << 12;
+        PTE_set(modex_page_table+i,j,1,1,1);
     }
 
-    mem_image = (unsigned char *) 0xA0000;
+    mem_image = (uint8_t*) 9043968;
+
 
 }
 
@@ -606,7 +601,7 @@ static void fill_palette() {
     /* 6-bit RGB (red, green, blue) values for first 64 colors */
     static unsigned char palette_RGB[64][3] = {
             { 0x00, 0x00, 0x00 },{ 0xDC, 0x14, 0x3C },   /* palette 0x00 - 0x0F    */
-            { 0x00, 0x2A, 0x00 },{ 0x00, 0x2A, 0x2A },   /* basic VGA colors       */
+            { 0x00, 0x2A, 0x00 },{ 0x00, 0x00, 0xFF },   /* basic VGA colors       */
             { 0x2A, 0x00, 0x00 },{ 0x2A, 0x00, 0x2A },
             { 0x2A, 0x15, 0x00 },{ 0x2A, 0x2A, 0x2A },
             { 0x15, 0x15, 0x15 },{ 0x15, 0x15, 0x3F },
@@ -678,8 +673,8 @@ void test_video_with_garbage(){
     unsigned char* addr;
     addr = mem_image;
     for(i = 0; i < SCROLL_X_DIM; i++){
-        for(j = 0; j < SCROLL_Y_DIM; j++){
-            main_buffer[j * SCROLL_X_DIM + i] = 2;
+        for(j = 0; j < SCROLL_Y_DIM+16; j++){
+            main_buffer[j * SCROLL_X_DIM + i] = 3;
         }
     }
 }
@@ -696,7 +691,7 @@ void draw_textmode_terminal() {
 
 void update_four_planes(){
     int i,j,cur_plane,cur_i;
-    for(j = 0; j < SCROLL_Y_DIM; j++){
+    for(j = 0; j < SCROLL_Y_DIM+16; j++){
         for(i = 0; i < SCROLL_X_DIM; i++){
             cur_plane = i & 3;
             cur_i = i % 3;

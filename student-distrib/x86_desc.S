@@ -152,5 +152,12 @@ video_page_table0:
       .endr
 video_page_table0_bottom:
 
-page_table_bottom:
 
+.globl modex_page_table
+modex_page_table:
+      .rept PAGE_TABLE_SIZE
+      .long 0
+      .endr
+modex_page_table_bottom:
+
+page_table_bottom:

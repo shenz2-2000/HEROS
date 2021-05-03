@@ -237,6 +237,7 @@ typedef union PTE {
 extern PDE page_directory[PAGE_DIRECTORY_SIZE] __attribute__ ((aligned (ALIGN_4K)));    // the main kernel page directory
 extern PTE page_table0[PAGE_TABLE_SIZE]__attribute__ ((aligned (ALIGN_4K)));    // the first page table (pde), containing the physical vidmem
 extern PTE video_page_table0[PAGE_TABLE_SIZE]__attribute__ ((aligned (ALIGN_4K)));  // user 132MB + 0xB8000
+extern PTE modex_page_table[PAGE_TABLE_SIZE]__attribute__ ((aligned (ALIGN_4K)));  // user 132MB + 0xB8000
 
 /* The IDT itself (declared in x86_desc.S */
 extern idt_desc_t idt[NUM_VEC];
