@@ -318,7 +318,7 @@ static void copy_image(unsigned char* img, unsigned short scr_addr) {
      */
     asm volatile ("                                             \n\
         cld                                                     \n\
-        movl $16000,%%ecx                                       \n\
+        movl $14720,%%ecx                                       \n\
         rep movsb    /* copy ECX bytes from M[ESI] to M[EDI] */ \n\
         "
     : /* no outputs */
@@ -327,7 +327,22 @@ static void copy_image(unsigned char* img, unsigned short scr_addr) {
     );
 }
 
-
+static void copy_status(unsigned char* img, unsigned short scr_addr) {
+    /*
+     * memcpy is actually probably good enough here, and is usually
+     * implemented using ISA-specific features like those below,
+     * but the code here provides an example of x86 string moves
+     */
+    asm volatile ("                                             \n\
+        cld                                                     \n\
+        movl $1280,%%ecx                                       \n\
+        rep movsb    /* copy ECX bytes from M[ESI] to M[EDI] */ \n\
+        "
+    : /* no outputs */
+    : "S"(img), "D"(mem_image + scr_addr)
+    : "eax", "ecx", "memory"
+    );
+}
 
 
 /*
@@ -480,7 +495,7 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
 
     test_video_with_garbage();
     show_screen();
-    //compute_status_bar();
+    compute_status_bar();
     /* Return success. */
     return 0;
 }
@@ -611,7 +626,7 @@ static void fill_palette() {
     static unsigned char palette_RGB[64][3] = {
             { 0x00, 0x00, 0x00 },{ 0xDC, 0x14, 0x3C },   /* palette 0x00 - 0x0F    */
             { 0x00, 0x2A, 0x00 },{ 0x00, 0x00, 0xFF },   /* basic VGA colors       */
-            { 0x2A, 0x00, 0x00 },{ 0x2A, 0x00, 0x2A },
+            { 0x2A, 0x00, 0x00 },{ 0xFF, 0xFF, 0xFF },
             { 0x2A, 0x15, 0x00 },{ 0x2A, 0x2A, 0x2A },
             { 0x15, 0x15, 0x15 },{ 0x15, 0x15, 0x3F },
             { 0x15, 0x3F, 0x15 },{ 0x15, 0x3F, 0x3F },
@@ -742,13 +757,13 @@ void show_status_bar() {
 
 
     SET_WRITE_MASK(1 << (0 + 8));
-    copy_image(status_plane0, 0);
+    copy_status(status_plane0, 0);
     SET_WRITE_MASK(1<<  (1 + 8));
-    copy_image(status_plane1, 0);
+    copy_status(status_plane1, 0);
     SET_WRITE_MASK(1<<  (2 + 8));
-    copy_image(status_plane2, 0);
+    copy_status(status_plane2, 0);
     SET_WRITE_MASK(1<<  (3 + 8));
-    copy_image(status_plane3, 0);
+    copy_status(status_plane3, 0);
 
     /*
      * Change the VGA registers to point the top left of the screen
@@ -761,22 +776,22 @@ void compute_status_bar() {
     uint8_t cur_char;
     char terminal_bar[40] = "  TERMINAL 1   TERMINAL 2   TERMINAL 3  ";
     char status_bar[40] = "  TERMINAL 1   TERMINAL 2   TERMINAL 3  ";
-    for (i = 0; i < 1; ++i) {
-        for (j = 0; j < MODEX_TER_COLS; ++j)
-            for (k = 0; k < FONT_HEIGHT; ++k)
-                for (l = 0; l < FONT_WIDTH; ++l) {
-                    cur_char = terminal_bar[j];
-                    status_buffer[i * MODEX_TER_COLS * FONT_HEIGHT * FONT_WIDTH + k * MODEX_TER_COLS + j * FONT_WIDTH + l] =
-                            (font8x8[cur_char][k] & (1 << (8 - l))) > 0;
-                }
-    }
+//    for (i = 0; i < 1; ++i) {
+//        for (j = 0; j < MODEX_TER_COLS; ++j)
+//            for (k = 0; k < FONT_HEIGHT; ++k)
+//                for (l = 0; l < FONT_WIDTH; ++l) {
+//                    cur_char = terminal_bar[j];
+//                    status_buffer[i * MODEX_TER_COLS * FONT_HEIGHT * FONT_WIDTH + k * MODEX_TER_COLS + j * FONT_WIDTH + l] =
+//                            ((font8x8[cur_char][k] & (1 << (8 - l))) > 0)?5:0;
+//                }
+//    }
     for (i = 1; i < 2; ++i) {
         for (j = 0; j < MODEX_TER_COLS; ++j)
             for (k = 0; k < FONT_HEIGHT; ++k)
                 for (l = 0; l < FONT_WIDTH; ++l) {
                     cur_char = status_bar[j];
                     status_buffer[i * MODEX_TER_COLS * FONT_HEIGHT * FONT_WIDTH + k * MODEX_TER_COLS + j * FONT_WIDTH + l] =
-                            (font8x8[cur_char][k] & (1 << (8 - l))) > 0;
+                            ((font8x8[cur_char][k] & (1 << (8 - l))) > 0)?5:0;
                 }
     }
     for(j = 0; j < 16; j++){
@@ -785,16 +800,16 @@ void compute_status_bar() {
             cur_i = i / 4;
             switch (cur_plane) {
                 case 0:
-                    status_plane0[j * (SCROLL_X_DIM / 4) + cur_i] = main_buffer[j * (SCROLL_X_DIM) + i];
+                    status_plane0[j * (SCROLL_X_DIM / 4) + cur_i] = status_buffer[j * (SCROLL_X_DIM) + i];
                     break;
                 case 1:
-                    status_plane1[j * (SCROLL_X_DIM / 4) + cur_i] = main_buffer[j * (SCROLL_X_DIM) + i];
+                    status_plane1[j * (SCROLL_X_DIM / 4) + cur_i] = status_buffer[j * (SCROLL_X_DIM) + i];
                     break;
                 case 2:
-                    status_plane2[j * (SCROLL_X_DIM / 4) + cur_i] = main_buffer[j * (SCROLL_X_DIM) + i];
+                    status_plane2[j * (SCROLL_X_DIM / 4) + cur_i] = status_buffer[j * (SCROLL_X_DIM) + i];
                     break;
                 case 3:
-                    status_plane3[j * (SCROLL_X_DIM / 4) + cur_i] = main_buffer[j * (SCROLL_X_DIM) + i];
+                    status_plane3[j * (SCROLL_X_DIM / 4) + cur_i] = status_buffer[j * (SCROLL_X_DIM) + i];
                     break;
 
             }
