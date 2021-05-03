@@ -690,11 +690,11 @@ void draw_textmode_terminal() {
 }
 
 void update_four_planes(){
-    int i,j,cur_plane,cur_i;
-    for(j = 0; j < SCROLL_Y_DIM+16; j++){
+    uint32_t i,j,cur_plane,cur_i;
+    for(j = 0; j < SCROLL_Y_DIM; j++){
         for(i = 0; i < SCROLL_X_DIM; i++){
             cur_plane = i & 3;
-            cur_i = i % 3;
+            cur_i = i / 4;
             switch (cur_plane) {
                 case 0:
                     plane0[j * (SCROLL_X_DIM / 4) + cur_i] = main_buffer[j * (SCROLL_X_DIM) + i];
