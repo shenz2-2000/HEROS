@@ -474,8 +474,8 @@ void init_task_main() {
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
 //    initialize_mouse();
 //    enable_irq(12);
-    mouse_init();
-    enable_irq(12);
+//    mouse_init();
+//    enable_irq(12);
     restore_flags(flags);
     while(1) {
         for (i = 0; i<MAX_TERMINAL;++i) if (foreground_task[i]==NULL) {

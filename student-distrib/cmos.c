@@ -7,7 +7,7 @@
 #include "lib.h"
 #include "terminal.h"
 /*The following parts are concerning CMOS system time*/
-// Reference Comes from: https://wiki.osdev.org/CMOS#Getting_Current_Date_and_Time_from_RTC\
+/*Reference Comes from: https://wiki.osdev.org/CMOS#Getting_Current_Date_and_Time_from_RTC\ */
 
 int32_t sec, mins, hour, day, month, year;
 #define CMOS_address 0x70

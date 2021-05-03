@@ -263,7 +263,7 @@ ASMLINKAGE void pit_interrupt_handler(hw_context hw) {
     }
     // check overflow
     if( ( cur_task->k_esp < ( (uint32_t)cur_task + MEM_FENCE + sizeof(pcb_t) ) ) || ( cur_task->k_esp > TASK_KSTK_SIZE_IN_B + (uint32_t)cur_task)){
-        printf("Kernel stack overflow is happening!!\n");
+//        printf("Kernel stack overflow is happening!!\n");
         return;
     }
 

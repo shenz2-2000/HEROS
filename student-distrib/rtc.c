@@ -38,7 +38,7 @@ void rtc_init() {
  */
 void rtc_interrupt_handler() {
     cli();
-    system_time();
+    // system_time();
     // rtc_interrupt_occured = 1;
     ticks[0] = 1;
     ticks[1] = 1;
