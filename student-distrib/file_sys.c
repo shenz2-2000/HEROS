@@ -576,10 +576,17 @@ int32_t file_audio_open(const uint8_t *f_name) {
     int32_t fd;
     pcb_t *cur_pcb;
     
-    if (audio_open() != 0) return -1;
+    if (audio_open() != 0) {
+        printf("ERROR in file_audio_open: sound car open fail\n");
+        return -1;
+    }
 
     // get the current pcb
     cur_pcb = get_cur_process();
+    if (cur_pcb == NULL) {
+        printf("ERROR in file_audio_open(): cur_pcb NULL pointer\n");
+        return -1;
+    }
 
     // obtain an available fd number
     fd = allocate_fd(cur_pcb);
@@ -587,7 +594,7 @@ int32_t file_audio_open(const uint8_t *f_name) {
     // populate the block
     cur_pcb->file_arr.files[fd].f_op = &audio_op;
     cur_pcb->file_arr.files[fd].inode_idx = 0;
-    cur_pcb->file_arr.files[fd].f_pos = 0;  // the global cursor is at the beginning
+    cur_pcb->file_arr.files[fd].f_pos = 0;  // the cursor of the sound card buffer is begging
     cur_pcb->file_arr.files[fd].flags = OCCUPIED;
 
     return fd;

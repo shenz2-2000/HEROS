@@ -9,6 +9,7 @@
 #include "sound_card.h"
 #include "lib.h"
 #include "i8259.h"
+#include "link.h"
 
 static int32_t dsp_status = DSP_OFF;
 
@@ -153,7 +154,7 @@ int32_t audio_ioctl(uint8_t cmd) {
  * Input: None
  * Output: None
  */
-void dsp_interrupt_handler() {
+ASMLINKAGE void dsp_interrupt_handler() {
     dsp_int_cnt++;
     inb(DSP_READ_STATUS_PORT);
     send_eoi(DSP_IRQ_NUM);

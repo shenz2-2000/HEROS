@@ -129,8 +129,8 @@ int32_t sys_read(int32_t fd, void *buf, int32_t bufsize) {
         printf("ERROR [SYS FILE] in sys_read: read buffer NULL pointer\n");
         return -1;
     }
-    if (bufsize <= 0) {
-        printf("ERROR [SYS FILE] in sys_read: read buffer size should be positive\n");
+    if (bufsize < 0) {
+        printf("ERROR [SYS FILE] in sys_read: read buffer size should not be negative\n");
         return -1;
     }
     if (cur_pcb == NULL) {
