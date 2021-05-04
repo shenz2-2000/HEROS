@@ -6,7 +6,7 @@
 #include "scheduler.h"
 #include "mouse_driver.h"
 #include "gui.h"
-
+#include "wav_player.h"
 
 pcb_t* pcb_ptrs[N_PCB_LIMIT];
 int32_t n_present_pcb;
@@ -518,7 +518,7 @@ void init_task_main() {
 //    uint32_t copy_pa;
 //    uint8_t *copy_va;
 
-
+    play_wav(1);
 
     sys_execute((uint8_t *) "shell", 0  , 1, NULL);
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
