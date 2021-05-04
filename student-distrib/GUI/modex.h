@@ -10,7 +10,7 @@
 
 // TODO: need modification here
 #define IMAGE_X_DIM     320   /* pixels; must be divisible by 4             */
-#define IMAGE_Y_DIM     200 -16  /* pixels                                     */
+#define IMAGE_Y_DIM     200  /* pixels                                     */
 #define IMAGE_X_WIDTH   (IMAGE_X_DIM / 4)          /* addresses (bytes)     */
 #define SCROLL_X_DIM    IMAGE_X_DIM                /* full image width      */
 // TODO:
@@ -50,4 +50,5 @@ void draw_textmode_terminal();
 void compute_status_bar();
 extern char font8x8[128][8];
 extern int draw_text_buffer[MODEX_TER_ROWS*MODEX_TER_COLS*FONT_WIDTH*FONT_HEIGHT];
+extern int sec, mins, hour, day, month, year;
 #endif //MIAO_MODEX_H

@@ -42,7 +42,6 @@ static unsigned char plane1[SCROLL_X_DIM * SCROLL_Y_DIM / 4];
 static unsigned char plane2[SCROLL_X_DIM * SCROLL_Y_DIM / 4];
 static unsigned char plane3[SCROLL_X_DIM * SCROLL_Y_DIM / 4];
 
-static unsigned char status_bar_buffer[16*80];
 static unsigned char status_plane0[16*80];
 static unsigned char status_plane1[16*80];
 static unsigned char status_plane2[16*80];
@@ -136,7 +135,7 @@ static unsigned short mode_X_CRTC[NUM_CRTC_REGS] = {
         0x5F00, 0x4F01, 0x5002, 0x8203, 0x5404, 0x8005, 0xBF06, 0x1F07,
         0x0008, 0x0109, 0x000A, 0x000B, 0x000C, 0x000D, 0x000E, 0x000F,
         0x9C10, 0x8E11, 0x8F12, 0x2813, 0x0014, 0x9615, 0xB916, 0xE317,
-        0x4F18
+        0x6B18 // 0x6718
 };
 
 static unsigned char mode_X_attr[NUM_ATTR_REGS * 2] = {
@@ -463,7 +462,7 @@ int set_mode_X(void (*horiz_fill_fn)(int, int, unsigned char[SCROLL_X_DIM]),
 
     /* One display page goes at the start of video memory. */
     /* we spare 16*80 (18 is the height of the text, 80 is the width of status bar) memory locations for status bar */
-    target_img = 0x0500;
+    target_img = 0x05A0;
 //     target_img = 0;
 
 
@@ -774,8 +773,18 @@ void show_status_bar() {
 void compute_status_bar() {
     int i,j,k,l,cur_plane,cur_i;;
     uint8_t cur_char;
-    char terminal_bar[41] = "  TERMINAL 1   TERMINAL 2   TERMINAL 3  ";
-    char status_bar[41] = "    aAAaaaaaaaaaaaaa    ";
+    char terminal_bar[41] = "  TERMINAL 1   TERMINAL 2   TERMINAL 3   ";
+    char status_bar[41] = "  xxOS        UTC+0:2021-00-00 00:00:00";
+    status_bar[25] = month/10+48;
+    status_bar[26] = month%10+48;
+    status_bar[28] = day/10+48;
+    status_bar[29] = day%10+48;
+    status_bar[31] = hour/10+48;
+    status_bar[32] = hour%10+48;
+    status_bar[34] = mins/10+48;
+    status_bar[35] = mins%10+48;
+    status_bar[37] = sec/10+48;
+    status_bar[38] = sec%10+48;
     for (i = 0; i < 1; ++i) {
         for (j = 0; j < MODEX_TER_COLS; ++j)
             for (k = 0; k < FONT_HEIGHT; ++k)

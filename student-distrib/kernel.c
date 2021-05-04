@@ -14,7 +14,6 @@
 #include "sys_call.h"
 #include "signal_sys_call.h"
 #include "gensound.h"
-#include "svga/vga.h"
 #include "GUI/modex.h"
 #include "GUI/maze.h"
 #include "mouse_driver.h"
@@ -273,10 +272,10 @@ void entry(unsigned long magic, unsigned long addr) {
     // sys_execute((uint8_t *) "shell");
 
     /* play the boot music */
-    play_song(0);
-
-    sys_execute((uint8_t *) "init_task", 0, 0, init_task_main);
-        printf("Error: return from the init_task, which should not happen");
+//    play_song(0);
+    set_mode_X(fill_horiz_buffer,fill_vert_buffer);
+//    sys_execute((uint8_t *) "init_task", 0, 0, init_task_main);
+//        printf("Error: return from the init_task, which should not happen");
 
 
     // for test use
@@ -285,8 +284,8 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
      * without showing you any output */
-    /*printf("Enabling Interrupts\n");
-    sti();*/
+    /*printf("Enabling Interrupts\n"); */
+    sti();
 
 #ifdef RUN_TESTS
     /* Run tests */

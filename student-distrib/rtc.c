@@ -1,6 +1,7 @@
 #include "rtc.h"
 #include "lib.h"
 #include "cmos.h"
+#include "GUI/modex.h"
 // The rtc counter used to count the number of interrupt
 // static int fake_interval = 1;
 // static volatile int rtc_interrupt_occured;
@@ -38,7 +39,8 @@ void rtc_init() {
  */
 void rtc_interrupt_handler() {
     cli();
-    // system_time();
+    system_time();
+    compute_status_bar();
     // rtc_interrupt_occured = 1;
     ticks[0] = 1;
     ticks[1] = 1;
