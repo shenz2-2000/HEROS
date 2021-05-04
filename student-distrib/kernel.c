@@ -14,6 +14,7 @@
 #include "sys_call.h"
 #include "signal_sys_call.h"
 #include "gensound.h"
+// #include "wav_player.h"
 
 #define RUN_TESTS
 
@@ -264,7 +265,7 @@ void entry(unsigned long magic, unsigned long addr) {
     // sys_execute((uint8_t *) "shell");
 
     /* play the boot music */
-    play_song(0);
+    // play_song(0);
 
     uint32_t flags;
     cli_and_save(flags);

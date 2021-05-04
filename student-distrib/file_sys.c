@@ -632,7 +632,8 @@ int32_t file_audio_read(int32_t fd, void *buf, int32_t bufsize) {
  * Output: 0 if success
  */
 int32_t file_audio_write(int32_t fd, const void *buf, int32_t bufsize) {
-    return audio_write(&(get_cur_process()->file_arr.files[fd].f_pos), buf, bufsize);
+    pcb_t* cur_pcb = get_cur_process();
+    return audio_write(&(cur_pcb->file_arr.files[fd].f_pos), buf, bufsize);
 }
 
 /**

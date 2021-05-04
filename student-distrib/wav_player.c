@@ -4,7 +4,7 @@
  * http://soundfile.sapp.org/doc/WaveFormat/
  * http://www.topherlee.com/software/pcm-tut-wavformat.html
  * 
- * Converse the wav file to the desired format
+ * Convert the wav file to the desired format
  * https://jingyan.baidu.com/article/c74d6000dcadee0f6a595dd2.html
  */
 
@@ -13,7 +13,7 @@
 #include "lib.h"
 #include "sys_call.h"
 
-const uint8_t *wav_file_list[] = {"macOS_startup.wav"};
+const char *wav_file_list[] = {"macOS_startup.wav", "halloffame.wav"};
 uint8_t sound_card_buf[DMA_CHUNK_SIZE_BYTES];
 
 int32_t wave_file_parse(int32_t wav_fd, wave_file_struct *wav_file) {
@@ -21,7 +21,7 @@ int32_t wave_file_parse(int32_t wav_fd, wave_file_struct *wav_file) {
         printf("ERROR in wave_file_parse: NULL input.\n");
         return -1;
     }
-    sys_read(wav_fd, wav_file, sizeof(wav_file));
+    sys_read(wav_fd, wav_file, sizeof(*wav_file));
     // check the validity of the file
     if (wav_file->chunkID != 0x46464952 ||
         wav_file->format != 0x45564157 ||
@@ -83,7 +83,7 @@ int32_t play_wav(int32_t file_num) {
     int32_t length, i, ret, temp;
     wave_file_struct wav_file;
 
-    wav_fd = sys_open(wav_file_list[file_num]);
+    wav_fd = sys_open((uint8_t*) wav_file_list[file_num]);
     if (wav_fd == -1) return -1;
 
     if (wave_file_parse(wav_fd, &wav_file) != 0) {
@@ -132,7 +132,7 @@ int32_t play_wav(int32_t file_num) {
         i++;
 
         // wait until one block finished
-        if (sys_read(dsp_fd, temp, 0) == -1) return -1;
+        if (sys_read(dsp_fd, &temp, 0) == -1) return -1;
         // exit after the end of the current block (stop for a while)
         if (sys_ioctl(dsp_fd, DSP_EXIT_8B_AUTO_BLOCK_CMD) == -1)  return -1;
 
@@ -158,7 +158,7 @@ int32_t play_wav(int32_t file_num) {
             }
             // handle early stop
             if (length < DMA_CHUNK_SIZE_BYTES) {
-                if (sys_read(dsp_fd, temp, 1) == -1) return -1;
+                if (sys_read(dsp_fd, &temp, 1) == -1) return -1;
                 if (sys_ioctl(dsp_fd, DSP_EXIT_8B_AUTO_BLOCK_CMD) == -1) return -1;
                 break;
             }

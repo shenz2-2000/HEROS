@@ -2,8 +2,9 @@
 
 /*
  * TODO:
- * 1. [-] initialize the mem area of DSP page (in paging.c)
- * 2. [-] analyze the wav file
+ * 1. [-] initialize the mem area of DSP page (in paging.c) (also support user space visit!)
+ * 2. [x] analyze the wav file
+ * 3. [-] modify the file image
  */
 
 #include "sound_card.h"
@@ -110,8 +111,8 @@ int32_t audio_read() {
  * Output: the length of copy of this activity
  */
 int32_t audio_write(uint32_t *pos, const void *buf, int32_t bufsize) {
-    uint32_t cutoff;
-    int32_t ret;
+    uint32_t cutoff, i;
+    int32_t ret, sub_bufsize = 0x2000;
     if (dsp_status == DSP_OFF) {
         printf("WARNING in audio_write: cannot write with an inactive sound card.\n");
         return -1;
@@ -122,12 +123,38 @@ int32_t audio_write(uint32_t *pos, const void *buf, int32_t bufsize) {
     }
     if (*pos + bufsize > DSP_BUF_LEN) {
         cutoff = DSP_BUF_LEN - *pos;
+
         memcpy((uint8_t*) (DSP_BUF_ADDR + *pos), buf, bufsize);
+        
+        // for (i = 0; i < 4; i++) {
+        //     memcpy((uint8_t*) (DSP_BUF_ADDR + *pos + i * sub_bufsize), 
+        //         (uint8_t*)((uint8_t*)buf + i * sub_bufsize), sub_bufsize);
+        // }
+
+        // for (i = 0; i < (bufsize >> 4); i++) {
+        //     *(uint32_t*)(DSP_BUF_ADDR + *pos + 4*i) = *(uint32_t*)((uint8_t*)buf + 4*i);
+        // }
+
+        // copy_chunk((uint8_t*) (DSP_BUF_ADDR + *pos), (uint8_t*)buf);
+
         *pos = 0;
         ret = audio_write(pos, (uint8_t*) buf + cutoff, bufsize - cutoff);
         if (ret != bufsize - cutoff) return -1;
     } else {
+
         memcpy((uint8_t*) (DSP_BUF_ADDR + *pos), buf, bufsize);
+
+        // for (i = 0; i < 4; i++) {
+        //     memcpy((uint8_t*) (DSP_BUF_ADDR + *pos + i * sub_bufsize), 
+        //         (uint8_t*)((uint8_t*)buf + i * sub_bufsize), sub_bufsize);
+        // }
+
+        // for (i = 0; i < (bufsize >> 4); i++) {
+        //     *(uint32_t*)(DSP_BUF_ADDR + *pos + 4*i) = *(uint32_t*)((uint8_t*)buf + 4*i);
+        // }
+
+        // copy_chunk((uint8_t*) (DSP_BUF_ADDR + *pos), (uint8_t*)buf);
+
         *pos = *pos + bufsize;
     }
     return bufsize;
@@ -158,4 +185,21 @@ ASMLINKAGE void dsp_interrupt_handler() {
     dsp_int_cnt++;
     inb(DSP_READ_STATUS_PORT);
     send_eoi(DSP_IRQ_NUM);
+}
+
+void copy_chunk(uint8_t* dest, uint8_t* src) {
+    /*
+     * memcpy is actually probably good enough here, and is usually
+     * implemented using ISA-specific features like those below,
+     * but the code here provides an example of x86 string moves
+     */
+    asm volatile ("                                             \n\
+        cld                                                     \n\
+        movl $32768, %%ecx                                       \n\
+        rep movsb    /* copy ECX bytes from M[ESI] to M[EDI] */ \n\
+        "
+        : /* no outputs */
+        : "S"(src), "D"(dest)
+        : "eax", "ecx", "memory"
+    );
 }

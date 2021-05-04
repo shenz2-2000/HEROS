@@ -4,6 +4,7 @@
 #include "lib.h"
 #include "sys_call.h"
 #include "scheduler.h"
+#include "wav_player.h"
 
 pcb_t* pcb_ptrs[N_PCB_LIMIT];
 int32_t n_present_pcb;
@@ -457,6 +458,8 @@ void init_task_main() {
     int32_t i;
     uint32_t flags;
     cli_and_save(flags);
+
+    play_wav(1);
 
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
     sys_execute((uint8_t *) "shell", 0, 1, NULL);

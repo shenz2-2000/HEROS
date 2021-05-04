@@ -33,6 +33,12 @@
 #define VIDEO_MEMORY_ADDRESS 0xB8000
 #define VIDEO_MEMORY_INDEX 0xB8
 
+// support for wav player
+#define AUDIO_BUF_ADDR      0xA000000
+#define AUDIO_BUF_LEN       0x20000
+#define AUDIO_BUF_PD_INDEX     0x28        // page directory index
+#define AUDIO_BUF_PT_INDEX     0x00
+#define AUDIO_BUF_PT_INDEX_LEN 0x20
 
 // the partition of IDT
 #define IDT_END_OF_EXCEPTION 0x20
@@ -237,6 +243,7 @@ typedef union PTE {
 extern PDE page_directory[PAGE_DIRECTORY_SIZE] __attribute__ ((aligned (ALIGN_4K)));    // the main kernel page directory
 extern PTE page_table0[PAGE_TABLE_SIZE]__attribute__ ((aligned (ALIGN_4K)));    // the first page table (pde), containing the physical vidmem
 extern PTE video_page_table0[PAGE_TABLE_SIZE]__attribute__ ((aligned (ALIGN_4K)));  // user 132MB + 0xB8000
+extern PTE audio_page_table0[PAGE_TABLE_SIZE]__attribute__ ((aligned (ALIGN_4K)));
 
 /* The IDT itself (declared in x86_desc.S */
 extern idt_desc_t idt[NUM_VEC];

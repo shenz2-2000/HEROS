@@ -68,8 +68,8 @@
 
 // the address of sound data
 // TODO: to be determined!!!
-#define DSP_BUF_ADDR            0x100000    // 1 Mb
-#define DSP_BUF_LEN             0x20000     // 128 kb
+#define DSP_BUF_ADDR            0xA000000    // pos at 160 MB
+#define DSP_BUF_LEN             0x20000     // number of bytes. 128 kB = 0x100000-0x120000
 
 /* DSP status */
 #define DSP_ON  1
@@ -81,5 +81,6 @@ int32_t audio_read();
 int32_t audio_write(uint32_t *pos, const void *buf, int32_t bufsize);
 int32_t audio_ioctl(uint8_t cmd);
 void dsp_interrupt_handler();
+void copy_chunk(uint8_t* dest, uint8_t* src);
 
 #endif
