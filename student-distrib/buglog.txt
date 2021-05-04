@@ -106,18 +106,23 @@
              cause an internal detachment of our linked list since we use both of two functions.
     * FIX  - stop using insert_to_list_head. Only using delete_from_list and append_to_list_end
 
-
     * BUG2 - in signal_sys_call.c, when we do signal check, we forget to check whether there is a switch from kernel to user or not. That will damage the system since signal
              should only be check when return from Exception Interrupt and System call.
-
     * FIX  - we check whether cs of hardware context on stack is USER_CS, otherwise we just return.
 
     * BUG3 - In terminal.c, when we do ctrl+c, the screen will output a "c" character. This problem is caused by I input the c character in the line buffer.
-    * FIX -  Before putting anything into the line buffer, I first check whether ctrl+c is happening. If so, just return.
+    * FIX  - Before putting anything into the line buffer, I first check whether ctrl+c is happening. If so, just return.
 
     * BUG4 - When we execute hello, and input our name, the input will also gives it to shell.
              This is caused by we are both executing shell and hello, so they all receive our input and respond.
-    * FIX -  In execute, we keep track of the current task's parent, and make it wait for the child to return.
+    * FIX  - In execute, we keep track of the current task's parent, and make it wait for the child to return.
 
+    * BUG5 - When initializing the backup buffer page tables, we mistakenly thought that the size of a page table is 4KB so we iterated 4096 times. So some page 
+             tables are overwritten and therefore cause the page fault.
+    * FIX  - When the page fault occurs, we use the gdb command "list *(eip)" to find the place where it comes from. It turns out the address 0xB8000 is not valid,
+             which is very weird. Then we start from the beginning and check the initialization and find out this problem. It works after we change the iteration
+             back to 1024 times.
 
-
+    * BUG6 - In terminal.c, when we start to switch betweent the backup buffers and the virtual video memory, we forgot to load the real video memory page table first.
+             If so, the entries indicating the backup buffers are empty and may cause page fault.
+    * FIX  - We trace back to the place where it causes page fault and realize this problem. Then we add the part of loading the page_table0 first.
