@@ -28,7 +28,7 @@ void rtc_init() {
     outb(0x8A, RTC_PORT_0);  //
     char prev2 = inb(RTC_PORT_1);  //
     outb(0x8A, RTC_PORT_0);  //
-    outb((prev2 & 0xF0) | 8, RTC_PORT_1);
+    outb((prev2 & 0xF0) | RTC_MIN_RATE, RTC_PORT_1);
     //Reference: https://wiki.osdev.org/RTC
 }
 
@@ -43,23 +43,23 @@ void rtc_init() {
 void rtc_interrupt_handler() {
     cli();
     // rtc_interrupt_occured = 1;
-    ticks[0] = 1;
-    ticks[1] = 1;
-    ticks[2] = 1;
-    ticks[3] = 1;
-    ticks[4] = 1;
+    ticks[0]--;
+    ticks[1]--;
+    ticks[2]--;
+    ticks[3]--;
+    ticks[4]--;
     ticks[5]--;
     ticks[6]--;
     rtc_restart_interrupt();
     sti();
-    // send_eoi(8);
-    if (ticks[5] <= 0) {
-        show_screen();
-        ticks[5] = 50;
-    }
     if (ticks[6] <= 0) {
         system_time();
         ticks[6] = 500;
+    }
+    //send_eoi(8);
+    if (ticks[5] <= 0) {
+        show_screen();
+        ticks[5] = 50;
     }
     //test_interrupts();
 }
@@ -114,9 +114,7 @@ int32_t rtc_open(const uint8_t* filename) {
         }
         cur_pcb->rtc_id = i;
     }
-    virtual_ctr[(int) cur_pcb->rtc_id] = 1;
-    // rtc_init();  // initialize RTC, set default frequency to 1024 Hz
-    // rtc_set_freq(8);
+    virtual_ctr[(int) cur_pcb->rtc_id] = 1; // set default frequency to 1024 Hz
     return 0;
 }
 
@@ -147,7 +145,7 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes) {
     if (rate <= RTC_MIN_RATE) return -1;
 
     pcb_t *cur_pcb = get_cur_process();
-    virtual_ctr[(int) cur_pcb->rtc_id] = 1024 >> (pow+2);
+    virtual_ctr[(int) cur_pcb->rtc_id] = 1024 >> (pow+1);
 
     return 0;
 }
@@ -181,12 +179,8 @@ void rtc_set_freq(int rate) {
  */
 int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes) {
     int rid = (int) get_cur_process()->rtc_id;
-    int ctr = virtual_ctr[rid];
-    while (ctr > 0) {
-        ticks[rid] = 0;
-        while (!ticks[rid]) {};
-        ctr--;
-    }
+    ticks[rid] = virtual_ctr[rid];
+    while (ticks[rid] > 0);
     return 0;
 }
 

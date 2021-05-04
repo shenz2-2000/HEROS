@@ -25,7 +25,8 @@ unsigned get_data_from_register(int reg) {
 }
 
 void system_time(){
-    while (waiting_for_ack());
+    int cnt = 0;
+    while (waiting_for_ack() || cnt>=10000) ++cnt;
     sec = get_data_from_register(0x00);
     mins = get_data_from_register(0x02);
     hour = get_data_from_register(0x04);
