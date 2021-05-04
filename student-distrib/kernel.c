@@ -247,9 +247,6 @@ void entry(unsigned long magic, unsigned long addr) {
     init_page_register();
 
     init_gui();
-    render_string(100,200,"hello!!!!",0xFFFFFF);
-    render_string(100,300,"jlsjdflsjlfsjdlkf",0xDC143C);
-    render_window(100,400,600,600,"welcom to ",1);
 
 
     /* Init Mouse */

@@ -136,8 +136,28 @@ void init_gui() {
     init_vga();
 
     Rdraw(VGA_DIMX, VGA_DIMY, 0, 0, 0x3E9092);
-    render_window(100, 100, 600, 400, "Welcome to ECE391", 1);
+    Rdraw(VGA_DIMX, 36, 0, VGA_DIMY-36, 0xAFEEEE);
 
+    setup_status_bar();
+
+}
+
+void setup_status_bar(){
+    Rdraw(VGA_DIMX, 36, 0, VGA_DIMY-36, 0xAFEEEE);
+    char status_bar[26] = "UTC+0:2021-00-00 00:00:00";
+    status_bar[11] = month/10+48;
+    status_bar[12] = month%10+48;
+    status_bar[14] = day/10+48;
+    status_bar[15] = day%10+48;
+    status_bar[17] = hour/10+48;
+    status_bar[18] = hour%10+48;
+    status_bar[20] = mins/10+48;
+    status_bar[21] = mins%10+48;
+    status_bar[23] = sec/10+48;
+    status_bar[24] = sec%10+48;
+    render_string(5, VGA_DIMY-30 , "Welcome to Group14-OS", 0x0000);
+    render_string(VGA_DIMX-400, VGA_DIMY-30 , status_bar, 0x0000);
+    need_update = 1;
 }
 //
 void render_font(int x_start, int y_start, char ch, uint32_t color) {

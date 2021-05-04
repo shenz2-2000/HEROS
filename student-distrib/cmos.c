@@ -6,6 +6,7 @@
 #include "rtc.h"
 #include "lib.h"
 #include "terminal.h"
+#include "gui.h"
 /*The following parts are concerning CMOS system time*/
 // Reference Comes from: https://wiki.osdev.org/CMOS#Getting_Current_Date_and_Time_from_RTC\
 
@@ -43,12 +44,13 @@ void system_time(){
     }
 
     if (!(Mode&0x02) && (hour&0x80)) hour = ((hour & 0x7F) + 12) % 24;
-    uint32_t flags;
-    cli_and_save(flags);
-    terminal_struct_t* running_terminal = get_running_terminal();
-    if (get_showing_task())
-        terminal_set_running(get_showing_task()->terminal);
-    // printf("UTC+0: 2021/%d/%d %d:%d:%d\n", month, day, hour, mins, sec);
-    terminal_set_running(running_terminal);
-    restore_flags(flags);
+//    uint32_t flags;
+//    cli_and_save(flags);
+//    terminal_struct_t* running_terminal = get_running_terminal();
+//    if (get_showing_task())
+//        terminal_set_running(get_showing_task()->terminal);
+//    // printf("UTC+0: 2021/%d/%d %d:%d:%d\n", month, day, hour, mins, sec);
+//    terminal_set_running(running_terminal);
+    setup_status_bar();
+//    restore_flags(flags);
 }
