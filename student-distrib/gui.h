@@ -5,6 +5,7 @@
 
 #define COPY_NUM 4096
 
+
 void init_gui();
 
 void render_window(int x, int y, int width, int height, char* title, uint8_t is_focus);
@@ -21,5 +22,7 @@ void render_mouse(int x, int y);
 void erase_mouse(int x, int y);
 
 void copy_vedio_mem(void* dest);
+
+uint32_t mouse_click_check(int32_t x, int32_t y);
 
 #endif

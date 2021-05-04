@@ -49,4 +49,14 @@ extern void mouse_interrupt_handler();
 extern void set_mouse_cursor(int x, int y);
 extern void mouse_init();
 
+extern int16_t mouse_x;
+extern int16_t mouse_y;
+extern int16_t prev_mouse_x;
+extern int16_t prev_mouse_y;
+
+// several global indicators
+extern uint32_t left_pressed;
+extern uint32_t right_pressed;
+extern uint32_t middle_pressed;
+
 #endif //MP3_GROUP_14_MOUSE_DRIVER_H

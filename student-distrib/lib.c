@@ -4,6 +4,7 @@
 #include "lib.h"
 #include "terminal.h"
 #include "process.h"
+#include "mouse_driver.h"
 #define VIDEO       0xB8000
 #define NUM_COLS    80
 #define NUM_ROWS    25
@@ -14,8 +15,8 @@
 
 int screen_x;
 int screen_y;
-int prev_mouse_x = 0;
-int prev_mouse_y = 0;
+//int prev_mouse_x = 0;
+//int prev_mouse_y = 0;
 static char* video_mem = (char *)VIDEO;
 uint8_t mouse_in_use = 0;
 

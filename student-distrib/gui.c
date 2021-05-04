@@ -1,6 +1,7 @@
 #include "gui.h"
 #include "x86_desc.h"
 #include "page_lib.h"
+#include "mouse_driver.h"
 
 char font8x8_basic[128][8] = {
         { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
@@ -141,6 +142,10 @@ void init_gui() {
     Rdraw(VGA_DIMX, 36, 0, VGA_DIMY-36, 0xAFEEEE);
 
     setup_status_bar();
+
+//    for(i = 0; i < 50; i++){
+//        render_string(100,i*10,"test",0xDC143C);
+//    }
 
 }
 
@@ -291,7 +296,7 @@ void render_mouse(int x, int y) {
     for(idx_y = 0; idx_y < 16; idx_y++)
         for(idx_x = 0; idx_x < 16; idx_x++) {
             if(shape1[idx_y][idx_x] == '*')
-                Pdraw(x+idx_x, y+idx_y, 0xDC143C);
+                Pdraw(x+idx_x, y+idx_y, 0xFFFFFF);
             else if(shape1[idx_y][idx_x] == '1')
                 Pdraw(x+idx_x,y+idx_y,0x000000);
         }
@@ -311,5 +316,17 @@ void copy_vedio_mem(void* dest){
     restore_flags(eflag);
 }
 
-//uint32_t mouse_click_check()
+// return 1 if inside, otherwise 0
+uint32_t mouse_click_check(int32_t x, int32_t y){
+
+     // if target is in the upper region (finger) of mouse
+     if(x >= mouse_x && x <= (mouse_x + 15) && y >= mouse_y && y <= (mouse_y + 7) && left_pressed){
+         return 1;
+     }
+
+     else{
+         return 0;
+     }
+
+}
 

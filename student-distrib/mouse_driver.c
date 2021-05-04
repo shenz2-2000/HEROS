@@ -16,15 +16,17 @@
 uint8_t mouse_port_read();
 void port_write(uint8_t byte, uint8_t port);
 void command_mouse(uint8_t command);
-static int16_t mouse_x = 0;
-static int16_t mouse_y = 0;
-static int16_t prev_mouse_x = 0;
-static int16_t prev_mouse_y = 0;
+int16_t mouse_x = 0;
+int16_t mouse_y = 0;
+int16_t prev_mouse_x = 0;
+int16_t prev_mouse_y = 0;
 
 // several global indicators
-uint32_t left_pressed;
-uint32_t right_pressed;
-uint32_t middle_pressed;
+uint32_t left_pressed = 0;
+uint32_t right_pressed = 0;
+uint32_t middle_pressed = 0;
+
+static uint8_t prev_flag = 0;
 
 
 // set sample rate
@@ -116,7 +118,7 @@ void mouse_init() {
     set_blue_cursor(mouse_x, mouse_y);
 
     // set sample rate to slow down mouse
-    set_sample_rate(20);
+    set_sample_rate(10);
 
     left_pressed = 0;
     right_pressed = 0;
@@ -149,25 +151,27 @@ void mouse_interrupt_handler() {
             //printf("mouse overflow!\n");
             return;
         }
-        if (flags & LEFT_BUTTON) {
+        if ((flags & LEFT_BUTTON) && !(prev_flag & LEFT_BUTTON) ) {
            // printf("left button pressed\n");
            left_pressed = 1;
         }
-        else{
+        if(!(flags & LEFT_BUTTON) && (prev_flag & LEFT_BUTTON)){
             left_pressed = 0;
         }
-        if (flags & MID_BUTTON) {
-           // printf("middle button pressed\n");
-           middle_pressed = 1;
+
+        if ((flags & MID_BUTTON) && !(prev_flag & MID_BUTTON) ) {
+            // printf("left button pressed\n");
+            middle_pressed = 1;
         }
-        else{
+        if(!(flags & MID_BUTTON) && (prev_flag & MID_BUTTON)){
             middle_pressed = 0;
         }
-        if (flags & RIGHT_BUTTON) {
-           // printf("right button pressed\n");
-           right_pressed = 1;
+
+        if ((flags & RIGHT_BUTTON) && !(prev_flag & RIGHT_BUTTON) ) {
+            // printf("left button pressed\n");
+            right_pressed = 1;
         }
-        else{
+        if(!(flags & RIGHT_BUTTON) && (prev_flag & RIGHT_BUTTON)){
             right_pressed = 0;
         }
 
@@ -207,6 +211,31 @@ void mouse_interrupt_handler() {
             prev_mouse_x = mouse_x;
             prev_mouse_y = mouse_y;
         }
+
+//        if(512 >= mouse_x && 512 <= (mouse_x + 15) && 384 >= mouse_y && 384 <= (mouse_y + 7) && left_pressed){
+//            render_string(512,384,"left click is ok!",0xDC143C);
+//        }
+
+        if(prev_flag == flags){
+            return;
+        }
+
+
+        if(left_pressed){
+            render_string(512,384,"left click is ok!",0xDC143C);
+        }
+        else{
+            Rdraw(100,8,512,384,0XFFFFFF);
+        }
+
+        if(right_pressed){
+            render_string(512,484,"right click is ok!",0xDC143C);
+        }
+        else{
+            Rdraw(100,8,512,484,0XFFFFFF);
+        }
+
+        prev_flag = flags;
 
     }
 }
