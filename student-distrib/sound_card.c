@@ -44,23 +44,33 @@ int32_t audio_open() {
 
     /* programming DMA */
     // FIXME: maybe the order is wrong
-    // Disable channel 1
+    // // Disable channel 1
+    // outb(DMA_CH_1 + DMA_CH_DISABLE, DMA_REG_MASK);
+    // // write value to flip-flop port 0x0C (any value) to reset flip-flop
+    // outb(1, DMA_REG_CLEAR_FF);
+    // // send transfer mode to 0x0B (0x48 for single mode/0x58 for auto mode + channel number)
+    // outb(DMA_MODE_AUTO_PB, DMA_REG_MODE);
+    // // send page number to 0x83
+    // outb(DSP_BUF_ADDR >> 16, DMA_CH_1_PAGE_PORT);
+    // // send low bits of position
+    // outb((uint8_t) (DSP_BUF_ADDR), DMA_CH_1_ADDR_PORT);
+    // // send high bits of position
+    // outb((uint8_t) (DSP_BUF_ADDR >> 8), DMA_CH_1_ADDR_PORT);
+    // // send low bits of length of data
+    // outb((uint8_t) (DSP_BUF_LEN - 1), DMA_CH_1_CNT_PORT);
+    // // send high bits of length of data
+    // outb((uint8_t) ((DSP_BUF_LEN - 1) >> 8), DMA_CH_1_CNT_PORT);
+    // // enable channel 1
+    // outb(DMA_CH_1 + DMA_CH_ENABLE, DMA_REG_MASK);
+
     outb(DMA_CH_1 + DMA_CH_DISABLE, DMA_REG_MASK);
-    // write value to flip-flop port 0x0C (any value) to reset flip-flop
-    outb(1, DMA_REG_CLEAR_FF);
-    // send transfer mode to 0x0B (0x48 for single mode/0x58 for auto mode + channel number)
-    outb(DMA_MODE_AUTO_PB, DMA_REG_MODE);
-    // send page number to 0x83
-    outb(DSP_BUF_ADDR >> 16, DMA_CH_1_PAGE_PORT);
-    // send low bits of position
+    outb(0xFF, DMA_REG_CLEAR_FF);
     outb((uint8_t) (DSP_BUF_ADDR), DMA_CH_1_ADDR_PORT);
-    // send high bits of position
     outb((uint8_t) (DSP_BUF_ADDR >> 8), DMA_CH_1_ADDR_PORT);
-    // send low bits of length of data
+    outb(0xFF, DMA_REG_CLEAR_FF);
     outb((uint8_t) (DSP_BUF_LEN - 1), DMA_CH_1_CNT_PORT);
-    // send high bits of length of data
     outb((uint8_t) ((DSP_BUF_LEN - 1) >> 8), DMA_CH_1_CNT_PORT);
-    // enable channel 1
+    outb(DSP_BUF_ADDR >> 16, DMA_CH_1_PAGE_PORT);
     outb(DMA_CH_1 + DMA_CH_ENABLE, DMA_REG_MASK);
 
     // initialization end
@@ -99,6 +109,9 @@ int32_t audio_read() {
     // keep track of the interrupt (return if interrupted)
     temp = dsp_int_cnt;
     while (1) if (dsp_int_cnt != temp) break;
+    // while (dsp_int_cnt == temp) {
+    //     asm volatile("hlt");
+    // }
     return 0;
 }
 
@@ -111,8 +124,8 @@ int32_t audio_read() {
  * Output: the length of copy of this activity
  */
 int32_t audio_write(uint32_t *pos, const void *buf, int32_t bufsize) {
-    uint32_t cutoff, i;
-    int32_t ret, sub_bufsize = 0x2000;
+    uint32_t cutoff;
+    int32_t ret;
     if (dsp_status == DSP_OFF) {
         printf("WARNING in audio_write: cannot write with an inactive sound card.\n");
         return -1;
@@ -124,18 +137,7 @@ int32_t audio_write(uint32_t *pos, const void *buf, int32_t bufsize) {
     if (*pos + bufsize > DSP_BUF_LEN) {
         cutoff = DSP_BUF_LEN - *pos;
 
-        memcpy((uint8_t*) (DSP_BUF_ADDR + *pos), buf, bufsize);
-        
-        // for (i = 0; i < 4; i++) {
-        //     memcpy((uint8_t*) (DSP_BUF_ADDR + *pos + i * sub_bufsize), 
-        //         (uint8_t*)((uint8_t*)buf + i * sub_bufsize), sub_bufsize);
-        // }
-
-        // for (i = 0; i < (bufsize >> 4); i++) {
-        //     *(uint32_t*)(DSP_BUF_ADDR + *pos + 4*i) = *(uint32_t*)((uint8_t*)buf + 4*i);
-        // }
-
-        // copy_chunk((uint8_t*) (DSP_BUF_ADDR + *pos), (uint8_t*)buf);
+        memcpy((uint8_t*) (DSP_BUF_ADDR + *pos), buf, cutoff);
 
         *pos = 0;
         ret = audio_write(pos, (uint8_t*) buf + cutoff, bufsize - cutoff);
@@ -143,17 +145,6 @@ int32_t audio_write(uint32_t *pos, const void *buf, int32_t bufsize) {
     } else {
 
         memcpy((uint8_t*) (DSP_BUF_ADDR + *pos), buf, bufsize);
-
-        // for (i = 0; i < 4; i++) {
-        //     memcpy((uint8_t*) (DSP_BUF_ADDR + *pos + i * sub_bufsize), 
-        //         (uint8_t*)((uint8_t*)buf + i * sub_bufsize), sub_bufsize);
-        // }
-
-        // for (i = 0; i < (bufsize >> 4); i++) {
-        //     *(uint32_t*)(DSP_BUF_ADDR + *pos + 4*i) = *(uint32_t*)((uint8_t*)buf + 4*i);
-        // }
-
-        // copy_chunk((uint8_t*) (DSP_BUF_ADDR + *pos), (uint8_t*)buf);
 
         *pos = *pos + bufsize;
     }
@@ -187,6 +178,13 @@ ASMLINKAGE void dsp_interrupt_handler() {
     send_eoi(DSP_IRQ_NUM);
 }
 
+/**
+ * copy_chunk
+ * Description: copy the whole chunk of audio data (not used)
+ * Input: dest - the destination memory area
+ *        src - the source memory area
+ * Output: None
+ */
 void copy_chunk(uint8_t* dest, uint8_t* src) {
     /*
      * memcpy is actually probably good enough here, and is usually

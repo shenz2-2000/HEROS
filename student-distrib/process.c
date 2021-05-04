@@ -518,7 +518,9 @@ void init_task_main() {
 //    uint32_t copy_pa;
 //    uint8_t *copy_va;
 
-    play_wav(1);
+    disable_irq(1);
+    play_wav(0);
+    enable_irq(1);
 
     sys_execute((uint8_t *) "shell", 0  , 1, NULL);
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
