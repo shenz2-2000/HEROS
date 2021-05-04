@@ -7,7 +7,7 @@
 // static volatile int rtc_interrupt_occured;
 void rtc_set_freq(int rate);
 static int virtual_ctr[] = {-1, -1, -1, -1, -1, 0, 0};
-static volatile int ticks[] = {0, 0, 0, 0, 0, 50, 500};
+static volatile int ticks[] = {0, 0, 0, 0, 0, 25, 250};
 void system_time();
 /*
  * rtc_init
