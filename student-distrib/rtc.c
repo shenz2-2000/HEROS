@@ -47,8 +47,8 @@ void rtc_interrupt_handler() {
     ticks[4] = 1;
     ticks[5] = 1;
     rtc_restart_interrupt();
-    sti();
     show_screen();
+    sti();
     //test_interrupts();
 }
 
