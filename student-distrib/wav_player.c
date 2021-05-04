@@ -34,19 +34,16 @@ int32_t wave_file_parse(int32_t wav_fd, wave_file_struct *wav_file) {
         printf("ERROR in wave_file_parse: NULL input.\n");
         return -1;
     }
+    // read the file header
     sys_read(wav_fd, wav_file, sizeof(*wav_file));
     // check the validity of the file
-    if (wav_file->chunkID != 0x46464952 ||
-        wav_file->format != 0x45564157 ||
-        wav_file->subchunk1ID != 0x20746d66 ||
-        wav_file->subchunk2ID != 0x61746164 ||
-        wav_file->audioFormat != 1 ||
-        wav_file->numChannels < 1) {
+    if (wav_file->audioFormat != 1) {
         printf("ERROR in wave_file_parse(): the wav file is not valid. fd: %d\n", wav_fd);
         return -1;
     }
-
-    // Check if the sound card support the wav
+    if (wav_file->numChannels < 1) {
+        printf("ERROR in wave_file_parse(): cannot support channel number < 1\n");
+    }
     if (wav_file->numChannels > 2) {
         printf("ERROR in wave_file_parse: cannot support channel number > 2\n");
         return -1;
