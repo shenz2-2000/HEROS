@@ -176,7 +176,7 @@ void update_priority(int terminal_id) {
     if (terminal_id==2) {
         if (terminal_window[1].priority>terminal_window[0].priority) terminal_window[1].priority = 2,terminal_window[0].priority = 1;
     }
-    terminal_window[terminal_id] = 3;
+    terminal_window[terminal_id].priority = 3;
 }
 /* Name:text_to_graphics
  * Description: This function is used for transforming the input terminal memory information into graphical information
@@ -185,6 +185,8 @@ void update_priority(int terminal_id) {
  *        pos_y       -- y coordinate of the terminal's upper left corner
  * Side Effect: Drawing terminal information onto the screen
  */
+
+
 
 
 void draw_terminal(char* video_cache,int terminal_id) {
@@ -205,8 +207,9 @@ void draw_terminal(char* video_cache,int terminal_id) {
         for (j = 0; j < MODEX_TER_COLS; ++j)
             if (*(video_cache+((MODEX_TER_COLS * i + j) << 1)) != ' ')
                 cur_line[j] = *(video_cache+((MODEX_TER_COLS * i + j) << 1));
-        render_string(pos_x+4, pos_y+24+8*i, cur_line, 0xFFFFFF);
+        render_string(terminal_window[terminal_id].pos_x+4, terminal_window[terminal_id].pos_y+24+8*i, cur_line, 0xFFFFFF);
     }
+    need_update=1;
 }
 //
 void render_font(int x_start, int y_start, char ch, uint32_t color) {
@@ -287,14 +290,19 @@ void render_mouse(int x, int y) {
 
 
 // copy B8000 (physical) - B8FFF (physical) to dest
-void copy_vedio_mem(void* dest){
+void copy_vedio_mem(uint8_t * dest){
     int eflag;
+    int i;
     uint8_t* src = (uint8_t*) 0xB8000;
     PDE prev_pd_0 = page_directory[0];
 
     cli_and_save(eflag);
-    PDE_4K_set(page_directory,(uint32_t) page_table0,0,1,1);
-    memcpy(dest,src,COPY_NUM);
+    PDE_4K_set(page_directory,(uint32_t )page_table0,1,1,1);
+
+    for(i = 0; i < COPY_NUM; i++){
+        dest[i] = src[i];
+    }
+
     page_directory[0] = prev_pd_0;
     restore_flags(eflag);
 }

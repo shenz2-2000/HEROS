@@ -278,7 +278,7 @@ void entry(unsigned long magic, unsigned long addr) {
     printf("Enabling Interrupts\n");
     sti();
 
-//    sys_execute((uint8_t *) "init_task", 0, 0, init_task_main);
+    sys_execute((uint8_t *) "init_task", 0, 0, init_task_main);
 //    printf("Error: return from the init_task, which should not happen");
 
 

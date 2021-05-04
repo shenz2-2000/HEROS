@@ -332,6 +332,7 @@ int PDE_4K_set(PDE *pde, uint32_t pt_addr, uint32_t US, uint32_t RW, uint32_t P)
         return -1;
     }
 
+    pde->val = 0;
     pde->P = P;
     pde->US = US;
     pde->RW = RW;
@@ -345,3 +346,26 @@ int PDE_4K_set(PDE *pde, uint32_t pt_addr, uint32_t US, uint32_t RW, uint32_t P)
 
 
 
+int PDE_4M_set(PDE* pde, uint32_t page_addr, uint32_t US, uint32_t RW, uint32_t P) {
+    if (pde == NULL || page_addr == NULL) {
+        printf("ERROR in PDE_4M_set: NULL input");
+        return -1;
+    }
+    // align check
+    if (page_addr & PAGE_4MB_ALIGN_CHECK) {
+        return -1;
+    }
+    if ((!check_flag(US)) || (!check_flag(RW)) || (!check_flag(P))) {
+        return -1;
+    }
+
+    pde->val = 0;
+    pde->G = 1;
+    pde->P = P;
+    pde->US = US;
+    pde->RW = RW;
+    pde->PS = 1;
+    pde->Base_address = page_addr >> 22;
+
+    return 0;
+}

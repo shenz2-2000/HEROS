@@ -27,6 +27,7 @@
 
 // alignment check
 #define PAGE_4KB_ALIGN_CHECK    0x0FFF
+#define PAGE_4MB_ALIGN_CHECK    0x003FFFFF
 
 // tool functions
 extern void flush_tlb();
@@ -45,5 +46,7 @@ int check_flag(uint32_t flag);
 int PTE_set(PTE* pte, uint32_t page_addr, uint32_t US, uint32_t RW, uint32_t P);
 
 int PDE_4K_set(PDE *pde, uint32_t pt_addr, uint32_t US, uint32_t RW, uint32_t P);
+
+int PDE_4M_set(PDE* pde, uint32_t page_addr, uint32_t US, uint32_t RW, uint32_t P);
 
 #endif //FAKE_PAGE_LIB_H

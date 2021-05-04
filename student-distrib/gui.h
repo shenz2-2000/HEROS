@@ -29,7 +29,7 @@ void render_mouse(int x, int y);
 
 void erase_mouse();
 
-void copy_vedio_mem(void* dest);
+void copy_vedio_mem(uint8_t * dest);
 
 uint32_t mouse_click_check(int32_t x, int32_t y);
 
@@ -40,5 +40,7 @@ void restore_background(int x,int y);
 void restore_status_bar();
 
 int32_t check_in_background();
+
+void draw_terminal(char* video_cache,int terminal_id);
 
 #endif

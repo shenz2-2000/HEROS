@@ -5,6 +5,8 @@
 #include "sys_call.h"
 #include "scheduler.h"
 #include "mouse_driver.h"
+#include "gui.h"
+
 
 pcb_t* pcb_ptrs[N_PCB_LIMIT];
 int32_t n_present_pcb;
@@ -12,6 +14,8 @@ pcb_t *cur_task = NULL;
 pcb_t *foreground_task[MAX_TERMINAL];
 extern terminal_struct_t null_terminal;
 terminal_struct_t *running_term = &null_terminal;
+terminal_struct_t *showing_term = &null_terminal;
+
 /**
  * get_running_terminal
  * Description: return the terminal of the task that is running
@@ -62,6 +66,7 @@ void set_showing_task(pcb_t* target_task) {
     terminal_struct_t* old_term = get_showing_task()==NULL?&null_terminal:get_showing_task()->terminal;
     terminal_struct_t* new_term = target_task==NULL?&null_terminal:target_task->terminal;
     switch_terminal(old_term,new_term);
+    showing_term = new_term;    // sync the terminal_showing
     cur_task = target_task;
     process_user_vidmap(get_cur_process());
     restore_flags(flags);
@@ -469,16 +474,33 @@ void init_task_main() {
 
     int32_t i;
     uint32_t flags;
-    cli_and_save(flags);
+    uint32_t copy_pa;
+    uint8_t *copy_va;
+
+
 
     sys_execute((uint8_t *) "shell", 0  , 1, NULL);
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
+    cli_and_save(flags);
 //    initialize_mouse();
 //    enable_irq(12);
-    mouse_init();
-    enable_irq(12);
+
+     copy_pa = (uint32_t)0xFA000000;
+     PDE_4M_set(page_directory+(copy_pa>>22),(uint32_t)copy_pa,0,1,1);
+     copy_va = (uint8_t*)0xFA000000;
+     copy_vedio_mem((uint8_t *)copy_va);
+
+//    uint8_t* src = (uint8_t*) 0xB8000;
+//    PDE prev_pd_0 = page_directory[0];
+
+
+    if(showing_term->id != -1){
+        draw_terminal(0xB8000,showing_term->id);
+    }
+
     restore_flags(flags);
+
     while(1) {
         for (i = 0; i<MAX_TERMINAL;++i) if (foreground_task[i]==NULL) {
                 sys_execute((uint8_t *) "shell", 0, 1, NULL);
