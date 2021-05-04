@@ -6,6 +6,7 @@
 
 #define VGA_DIMX 1024
 #define VGA_DIMY 768
+#define BACKGROUND 0x3E9092
 
 volatile int need_update;
 typedef struct ARGB {

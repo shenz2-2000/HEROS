@@ -254,6 +254,11 @@ void entry(unsigned long magic, unsigned long addr) {
     render_window(100, 300, 600, 100, "Welcome", 1);
     render_window(100, 400, 600, 100, "Welcome", 1);
     render_window(100, 500, 600, 100, "Welcome", 1);
+
+    render_mouse(100,600);
+
+    render_string(100,700,"FUCK THIS",0xDC143C);
+    render_string(100,250,"what happened here???",0xDC143C);
 //    render_string(150,150,'cccccccccccc',0xDC1437);
 //    render_font(150,150,'c',0xDC1437);
 //    render_font(160,150,'c',0xDC1437);

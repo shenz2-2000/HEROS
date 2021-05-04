@@ -173,3 +173,65 @@ void render_window(int x, int y, int width, int height, char* title, uint8_t is_
         render_string(x+16, y+8, title, 0xC7C7C7);
     }
 }
+
+void render_mouse(int x, int y) {
+    static char shape[16][16] = {
+            "**************..",
+            "*111111111111*..",
+            "*11111111111*....",
+            "*1111111111*.....",
+            "*111111111*......",
+            "*11111111*.......",
+            "*1111111*.......",
+            "*111111*......",
+            "*11111**OO*.....",
+            "*111*..*OO*....",
+            "*11*....*OO*...",
+            "*1*......*OO*..",
+            "**........*OO*.",
+            "*..........*OO*",
+            "............*O0*",
+            ".............***"
+    };
+    int idx_x, idx_y;
+    for(idx_y = 0; idx_y < 16; idx_y++)
+        for(idx_x = 0; idx_x < 16; idx_x++) {
+            if(shape[idx_y][idx_x] == '*')
+                Pdraw(x+idx_x, y+idx_y, 0);
+            else if(shape[idx_y][idx_x] == '0')
+                Pdraw(x+idx_x, y+idx_y, 0xFFFFFF);
+            else if(shape[idx_y][idx_x] == '1')
+                Pdraw(x+idx_x,y+idx_y,0xDC143C);
+        }
+}
+
+void erase_mouse(int x, int y) {
+    static char shape[16][16] = {
+            "**************..",
+            "*111111111111*..",
+            "*11111111111*....",
+            "*1111111111*.....",
+            "*111111111*......",
+            "*11111111*.......",
+            "*1111111*.......",
+            "*111111*......",
+            "*11111**OO*.....",
+            "*111*..*OO*....",
+            "*11*....*OO*...",
+            "*1*......*OO*..",
+            "**........*OO*.",
+            "*..........*OO*",
+            "............*O0*",
+            ".............***"
+    };
+    int idx_x, idx_y;
+    for(idx_y = 0; idx_y < 16; idx_y++)
+        for(idx_x = 0; idx_x < 16; idx_x++) {
+            if(shape[idx_y][idx_x] == '*')
+                Pdraw(x+idx_x, y+idx_y, 0x3E9092);
+            else if(shape[idx_y][idx_x] == '0')
+                Pdraw(x+idx_x, y+idx_y, 0x3E9092);
+            else if(shape[idx_y][idx_x] == '1')
+                Pdraw(x+idx_x,y+idx_y,0x3E9092);
+        }
+}

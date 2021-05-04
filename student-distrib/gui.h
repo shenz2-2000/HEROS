@@ -11,4 +11,8 @@ void render_font(int x_start, int y_start, char ch, uint32_t color);
 
 void render_string(int x_start, int y_start, char* string, uint32_t color);
 
+void render_mouse(int x, int y);
+
+void erase_mouse(int x, int y);
+
 #endif
