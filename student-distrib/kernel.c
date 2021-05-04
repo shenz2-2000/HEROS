@@ -266,7 +266,6 @@ void entry(unsigned long magic, unsigned long addr) {
 
     /* Init Signal */
     signal_init();
-
     // Enable irq for mouse
     /* Enable interrupts */
 
@@ -274,7 +273,7 @@ void entry(unsigned long magic, unsigned long addr) {
     // sys_execute((uint8_t *) "shell");
 
     /* play the boot music */
-    play_song(0);
+    //play_song(0);
 
     ////sys_execute((uint8_t *) "init_task", 0, 0, init_task_main);
     ////printf("Error: return from the init_task, which should not happen");
@@ -286,8 +285,9 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
      * without showing you any output */
-    /*printf("Enabling Interrupts\n");
-    sti();*/
+    printf("Enabling Interrupts\n");
+    sti();
+    while (1);
 
 #ifdef RUN_TESTS
     /* Run tests */
