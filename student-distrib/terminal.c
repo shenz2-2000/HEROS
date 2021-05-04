@@ -459,7 +459,7 @@ void set_video_memory(terminal_struct_t *terminal){
     } else {
         if (terminal == terminal_showing) {
             // make the memory map show
-            PDE_4K_set(u_vm_pde, (uint32_t) (&video_page_table0), 1, 1, 1);    // user level
+            PDE_4K_set(u_vm_pde, (uint32_t) (video_page_table0), 1, 1, 1);    // user level
         } else {
             // map the video mem to backup buffers
             PDE_4K_set(u_vm_pde, (uint32_t) (u_bb_pt_list[terminal->id]), 1, 1, 1);
@@ -568,7 +568,7 @@ int terminal_vidmap(terminal_struct_t *terminal) {
     }
 
     if (terminal == &null_terminal || (terminal != &null_terminal && terminal == terminal_showing)) {
-        ret = PDE_4K_set(&(page_directory[0]), (uint32_t) &(page_table0), 0, 1, 1);
+        ret = PDE_4K_set(&(page_directory[0]), (uint32_t) (page_table0), 0, 1, 1);
         if (ret == -1) return -1;
     } else {
         ret = PDE_4K_set(&(page_directory[0]), (uint32_t) (k_bb_pt_list[terminal->id]), 0, 1, 1);
