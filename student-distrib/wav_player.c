@@ -8,6 +8,10 @@
  * https://jingyan.baidu.com/article/c74d6000dcadee0f6a595dd2.html
  */
 
+/*
+ * [-] 1. Support pause and resume
+ */
+
 #include "sound_card.h"
 #include "wav_player.h"
 #include "lib.h"
@@ -95,76 +99,57 @@ int32_t play_wav(int32_t file_num) {
     dsp_fd = sys_open((uint8_t*) "audio");
     if (dsp_fd == -1) return -1;
 
-    /* preloading some data into the buffer */
-    memset(sound_card_buf, 0, DMA_CHUNK_SIZE_BYTES);
-    length = sys_read(wav_fd, sound_card_buf, DMA_CHUNK_SIZE_BYTES);
-    if (length <= 0) {
-        printf("ERROR in play_wav: read wav data (0) failure\n");
-        return -1;
-    }
-    ret = sys_write(dsp_fd, sound_card_buf, length);
-    if (ret != length) {
-        printf("ERROR in play_wav: write wav data (0) to sound card buffer failure\n");
-        return -1;
-    }
-
-    memset(sound_card_buf, 0, DMA_CHUNK_SIZE_BYTES);
-    length = sys_read(wav_fd, sound_card_buf, DMA_CHUNK_SIZE_BYTES);
-    if (length < 0) {
-        printf("ERROR in play_wav: read wav data (1) failure\n");
-        return -1;
-    } else if (length > 0) {
-        ret = sys_write(dsp_fd, sound_card_buf, length);
-        if (ret != length) {
-            printf("ERROR in play_wav: write wav data (1) to sound card buffer failure\n");
-            return -1;
-        }
-    }
-
-    // init and start the sound card
-    if (sound_card_init(dsp_fd, &wav_file) != 0) {
-        printf("ERROR in play_wav: init sound card failure\n");
-        return -1;
-    }
-
-    i = 1;
+    // Start play the music
+    i = 0;
     while (1) {
-        i++;
-
-        // wait until one block finished
-        if (sys_read(dsp_fd, &temp, 0) == -1) return -1;
-        // exit after the end of the current block (stop for a while)
-        if (sys_ioctl(dsp_fd, DSP_EXIT_8B_AUTO_BLOCK_CMD) == -1)  return -1;
-
-        // write the next chunk of data
+        // write a chunk of data
         // memset(sound_card_buf, 0, DMA_CHUNK_SIZE_BYTES);
         length = sys_read(wav_fd, sound_card_buf, DMA_CHUNK_SIZE_BYTES);
         if (length < 0) {
-            printf("ERROR in play_wav: read wav data (%d) failure\n", i);
+            printf("ERROR in play_wav: read wav data (1) failure\n");
             return -1;
-        }
-        if (length == 0) {
+        } else if (length > 0) {
+            ret = sys_write(dsp_fd, sound_card_buf, length);
+            if (ret != length) {
+                printf("ERROR in play_wav: write wav data (1) to sound card buffer failure\n");
+                return -1;
+            }
+        } else if (length == 0 && (i == 0 || i > 1)) {
             break;  // reach the end
         }
-        // Continue
-        ret = sys_write(dsp_fd, sound_card_buf, length);
-        if (ret != length) {
-            printf("ERROR in play_wav: write wav data (%d) to sound card buffer failure\n", i);
-            return -1;
-        }
-        // send command to sound card to continue
-        if (sys_ioctl(dsp_fd, DSP_RESUME_PLAY_8B_CMD) == -1) {
-            printf("ERROR in play_wav: resume failure (%d)\n", i);
-            return -1;
-        }
-        // handle early stop
-        if (length < DMA_CHUNK_SIZE_BYTES) {
+
+        if (i > 0) {    // it's necessary to preload some data before play (mem loading is slow)
+
+            if (i == 1) {
+                // init and start the sound card
+                if (sound_card_init(dsp_fd, &wav_file) != 0) {
+                    printf("ERROR in play_wav: init sound card failure\n");
+                    return -1;
+                }
+            } else if (i > 1) {
+                // send command to sound card to continue
+                if (sys_ioctl(dsp_fd, DSP_RESUME_PLAY_8B_CMD) == -1) {
+                    printf("ERROR in play_wav: resume failure (%d)\n", i);
+                    return -1;
+                }
+            }
+
+            // wait until one block finished
             if (sys_read(dsp_fd, &temp, 1) == -1) return -1;
-            if (sys_ioctl(dsp_fd, DSP_EXIT_8B_AUTO_BLOCK_CMD) == -1) return -1;
-            break;
+            // exit after the end of the current block (stop for a while)
+            if (sys_ioctl(dsp_fd, DSP_EXIT_8B_AUTO_BLOCK_CMD) == -1)  return -1;
+
+            // handle early stop
+            if (length < DMA_CHUNK_SIZE_BYTES) {
+                break;
+            }
+
         }
-        
+
+        i++;
     }
+
+
     // FIXME: the above "return -1" will miss this operation
     sys_close(wav_fd);
     sys_close(dsp_fd);
@@ -172,3 +157,9 @@ int32_t play_wav(int32_t file_num) {
     return 0;
 }
 
+// TODO:
+static int32_t wav_player_fail(int32_t wav_fd, int32_t dsp_fd) {
+    sys_close(wav_fd);
+    sys_close(dsp_fd);
+    return -1;
+}
