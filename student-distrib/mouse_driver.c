@@ -118,7 +118,7 @@ void mouse_init() {
     set_blue_cursor(mouse_x, mouse_y);
 
     // set sample rate to slow down mouse
-    set_sample_rate(10);
+//    set_sample_rate(10);
 
     left_pressed = 0;
     right_pressed = 0;
@@ -151,28 +151,33 @@ void mouse_interrupt_handler() {
             //printf("mouse overflow!\n");
             return;
         }
-        if ((flags & LEFT_BUTTON) && !(prev_flag & LEFT_BUTTON) ) {
+        if ((flags & LEFT_BUTTON) ) {
            // printf("left button pressed\n");
            left_pressed = 1;
+           render_string(512,384,"left click is ok!",0xDC143C);
         }
-        if(!(flags & LEFT_BUTTON) && (prev_flag & LEFT_BUTTON)){
+        else if(!(flags & LEFT_BUTTON) ){
             left_pressed = 0;
+            Rdraw(100,8,512,384,0XFFFFFF);
         }
 
-        if ((flags & MID_BUTTON) && !(prev_flag & MID_BUTTON) ) {
+        if ((flags & MID_BUTTON)) {
             // printf("left button pressed\n");
             middle_pressed = 1;
+
         }
         if(!(flags & MID_BUTTON) && (prev_flag & MID_BUTTON)){
             middle_pressed = 0;
         }
 
-        if ((flags & RIGHT_BUTTON) && !(prev_flag & RIGHT_BUTTON) ) {
+        if ((flags & RIGHT_BUTTON) ) {
             // printf("left button pressed\n");
             right_pressed = 1;
+            render_string(512,484,"right click is ok!",0xDC143C);
         }
-        if(!(flags & RIGHT_BUTTON) && (prev_flag & RIGHT_BUTTON)){
+        else if(!(flags & RIGHT_BUTTON)){
             right_pressed = 0;
+            Rdraw(100,8,512,484,0XFFFFFF);
         }
 
         // value manipulation
@@ -216,24 +221,21 @@ void mouse_interrupt_handler() {
 //            render_string(512,384,"left click is ok!",0xDC143C);
 //        }
 
-        if(prev_flag == flags){
-            return;
-        }
 
 
-        if(left_pressed){
-            render_string(512,384,"left click is ok!",0xDC143C);
-        }
-        else{
-            Rdraw(100,8,512,384,0XFFFFFF);
-        }
-
-        if(right_pressed){
-            render_string(512,484,"right click is ok!",0xDC143C);
-        }
-        else{
-            Rdraw(100,8,512,484,0XFFFFFF);
-        }
+//        if(left_pressed){
+//            render_string(512,384,"left click is ok!",0xDC143C);
+//        }
+//        else{
+//            Rdraw(100,8,512,384,0XFFFFFF);
+//        }
+//
+//        if(right_pressed){
+//            render_string(512,484,"right click is ok!",0xDC143C);
+//        }
+//        else{
+//            Rdraw(100,8,512,484,0XFFFFFF);
+//        }
 
         prev_flag = flags;
 
