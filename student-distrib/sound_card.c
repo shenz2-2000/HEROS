@@ -1,7 +1,7 @@
 // reference: http://homepages.cae.wisc.edu/~brodskye/sb16doc/sb16doc.html
 
 /*
- * TODO:
+ * DEMANDS
  * 1. [x] initialize the mem area of DSP page (in paging.c) (also support user space visit!)
  * 2. [x] analyze the wav file
  * 3. [x] modify the file image
