@@ -85,6 +85,7 @@ int32_t audio_close() {
         printf("WARNING in audio_close: cannot close an inactive sound card.\n");
         return -1;
     }
+    audio_ioctl(DSP_STOP_PLAY_8B_CMD);
     dsp_status = DSP_OFF;
     return 0;
 }
