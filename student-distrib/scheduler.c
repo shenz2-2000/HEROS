@@ -189,6 +189,7 @@ int32_t delete_task_from_list(pcb_t* task){
  * Side effect: switch stack and modify task list
  */
 void reschedule(){
+
     update_cursor(get_showing_terminal()->screen_x,get_showing_terminal()->screen_y);
     // next_task to run
     pcb_t* next_task = task_list_head.next->cur_task;
@@ -262,7 +263,7 @@ ASMLINKAGE void pit_interrupt_handler(hw_context hw) {
     }
     // check overflow
     if( ( cur_task->k_esp < ( (uint32_t)cur_task + MEM_FENCE + sizeof(pcb_t) ) ) || ( cur_task->k_esp > TASK_KSTK_SIZE_IN_B + (uint32_t)cur_task)){
-        printf("Kernel stack overflow is happening!!\n");
+//        printf("Kernel stack overflow is happening!!\n");
         return;
     }
 

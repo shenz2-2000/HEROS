@@ -4,6 +4,7 @@
 #include "lib.h"
 #include "sys_call.h"
 #include "scheduler.h"
+#include "mouse_driver.h"
 
 pcb_t* pcb_ptrs[N_PCB_LIMIT];
 int32_t n_present_pcb;
@@ -70,7 +71,7 @@ void set_showing_task(pcb_t* target_task) {
  * change_focus_terminal
  * Description: switch terminal
  * Input: terminal_num -- the terminal id want to change to
- * Output: focus_task
+ * Output: showing_task
  */
 void change_focus_terminal(int32_t terminal_num) {
     set_showing_task(foreground_task[terminal_num]);
@@ -294,6 +295,8 @@ int32_t system_halt(int32_t status) {
 
     pcb_t * cur_task = get_cur_process();
 
+    if(cur_task == NULL) return -1;
+
     // remove cur_task from task list
     delete_task_from_list(cur_task);
 
@@ -446,6 +449,16 @@ pcb_t* delete_process(pcb_t* pcb) {
 int32_t get_n_present_pcb() {
     return n_present_pcb;
 }
+
+
+void mouse_process(){
+    mouse_init();
+    enable_irq(12);
+}
+
+
+
+
 /**
  * init_task_main
  * Description: Open three terminal and keep them
@@ -458,9 +471,13 @@ void init_task_main() {
     uint32_t flags;
     cli_and_save(flags);
 
+    sys_execute((uint8_t *) "shell", 0  , 1, NULL);
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
-    sys_execute((uint8_t *) "shell", 0, 1, NULL);
+//    initialize_mouse();
+//    enable_irq(12);
+//    mouse_init();
+//    enable_irq(12);
     restore_flags(flags);
     while(1) {
         for (i = 0; i<MAX_TERMINAL;++i) if (foreground_task[i]==NULL) {

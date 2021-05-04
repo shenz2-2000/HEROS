@@ -465,9 +465,21 @@ interrupt_entry_8:
     pushl $8  # push irq number as argument
     call send_eoi
     addl $4, %esp
-    call check_signal
+    #call check_signal
     RESTORE_HW_CONTEXT
     iret  # return from interrupt 
+
+.globl interrupt_entry_12
+interrupt_entry_12:
+    pushl $0
+    pushl $12
+    SET_HW_CONTEXT
+    call mouse_interrupt_handler
+    pushl $12  # push irq number as argument
+    call send_eoi
+    addl $4, %esp
+    RESTORE_HW_CONTEXT
+    iret  # return from interrupt
 
 # System call handler is in the same format as exception handler
 # naive system call handler

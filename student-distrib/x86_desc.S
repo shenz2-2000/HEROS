@@ -136,14 +136,6 @@ page_table0:
       .endr
 page_table0_bottom:
 
-// .globl page_table1
-
-// page_table1:
-//       .rept PAGE_TABLE_SIZE
-//       .long 0
-//       .endr
-// page_table1_bottom:
-
 // // .align ALIGN_4K
 .globl video_page_table0
 video_page_table0:

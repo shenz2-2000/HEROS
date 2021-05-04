@@ -17,6 +17,7 @@
 #include "svga/vga.h"
 #include "GUI/modex.h"
 #include "GUI/maze.h"
+#include "mouse_driver.h"
 
 #define RUN_TESTS
 
@@ -234,6 +235,10 @@ void entry(unsigned long magic, unsigned long addr) {
      * PIC, any other initialization stuff... */
     enable_irq(1);   // Keyboard is IRQ1
 
+    /* Init Mouse */
+//    mouse_init();
+//    enable_irq(12);
+
     /*Init RTC*/
     rtc_init();
     enable_irq(8); // RTC is IRQ8
@@ -261,6 +266,7 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Init Signal */
     signal_init();
 
+    // Enable irq for mouse
     /* Enable interrupts */
 
     /* execute shell */
@@ -269,15 +275,9 @@ void entry(unsigned long magic, unsigned long addr) {
     /* play the boot music */
     play_song(0);
 
-    set_mode_X(fill_horiz_buffer,fill_vert_buffer);
+    sys_execute((uint8_t *) "init_task", 0, 0, init_task_main);
+        printf("Error: return from the init_task, which should not happen");
 
-    uint32_t flags;
-    cli_and_save(flags);
-    {
-//        sys_execute((uint8_t *) "init_task", 0, 0, init_task_main);
-//        printf("Error: return from the init_task, which should not happen");
-    }
-    restore_flags(flags);
 
     // for test use
     // sys_execute((uint8_t *) "bibi");
@@ -290,18 +290,7 @@ void entry(unsigned long magic, unsigned long addr) {
 
 #ifdef RUN_TESTS
     /* Run tests */
-    vga_init();
-    int x, y;
-    for (x = 492; x < 533; x++) {
-        for (y = 360; y <= 374; y++) {
-            vga_pdraw(x, y, 0x0000FF);
-        }
-        for (y = 374; y <= 388; y++) {;
-            vga_pdraw(x, y, 0xFF0000);
-        }
-    }
-    while(1) {}
-    // launch_tests();
+    launch_tests();
 #endif
     /* Execute the first program ("shell") ... */
 
