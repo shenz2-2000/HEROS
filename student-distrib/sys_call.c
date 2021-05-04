@@ -61,7 +61,7 @@ int32_t sys_open(const uint8_t *f_name) {
         }
     }
 
-    cur_pcb->file_arr.n_opend_files++;
+    if (fd != -1) cur_pcb->file_arr.n_opend_files++;
 
     return fd;
 }

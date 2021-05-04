@@ -22,6 +22,8 @@ typedef struct wave_file_struct {
     /* The "data" sub-chunk */
     uint32_t subchunk2ID;   // Contains the letters "data" (0x64617461 big-endian form).
     uint32_t subchunk2Size; // NumSamples * NumChannels * BitsPerSample/8
+
+    /* Data */
 } wave_file_struct;
 
 int32_t wave_file_parse(int32_t wav_fd, wave_file_struct *wav_file);

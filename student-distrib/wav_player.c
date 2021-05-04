@@ -20,6 +20,15 @@
 const char *wav_file_list[] = {"macOS_startup.wav"};
 uint8_t sound_card_buf[DMA_CHUNK_SIZE_BYTES];
 
+static int32_t wav_player_fail(int32_t wav_fd, int32_t dsp_fd);
+
+/**
+ * wave_file_parse
+ * Description: parse the wave file
+ * Input: wav_fd - the fd for wav file
+ *        wav_file - the allocated wave file struct
+ * Output: 0 if success, -1 if not
+ */
 int32_t wave_file_parse(int32_t wav_fd, wave_file_struct *wav_file) {
     if (wav_file == NULL) {
         printf("ERROR in wave_file_parse: NULL input.\n");
@@ -54,7 +63,14 @@ int32_t wave_file_parse(int32_t wav_fd, wave_file_struct *wav_file) {
     return 0;
 }
 
-// http://homepages.cae.wisc.edu/~brodskye/sb16doc/sb16doc.html
+// reference: http://homepages.cae.wisc.edu/~brodskye/sb16doc/sb16doc.html
+/**
+ * sound_card_init
+ * Description: init and start the sound card
+ * Input: dsp_fd - the fd for the cound card device
+ *        wav_fd - the fd for wav file
+ * Output: 0 if success, -1 if not
+ */
 int32_t sound_card_init(int32_t dsp_fd, wave_file_struct *wav_file) {
     uint32_t sampleRate = wav_file->sampleRate,
              numChannels = wav_file->numChannels;
@@ -81,6 +97,12 @@ int32_t sound_card_init(int32_t dsp_fd, wave_file_struct *wav_file) {
     return 0;
 }
 
+/**
+ * play_wav
+ * Description: play the wav file
+ * Input: file_num - the file descriptor number for each wav file
+ * Output: 0 if success, -1 if not
+ */
 int32_t play_wav(int32_t file_num) {
     // open the wav file
     int32_t dsp_fd, wav_fd;
@@ -92,6 +114,7 @@ int32_t play_wav(int32_t file_num) {
 
     if (wave_file_parse(wav_fd, &wav_file) != 0) {
         printf("ERROR in play_wav: parse wav file fail\n");
+        sys_close(wav_fd);
         return -1;
     }
 
@@ -107,12 +130,12 @@ int32_t play_wav(int32_t file_num) {
         length = sys_read(wav_fd, sound_card_buf, DMA_CHUNK_SIZE_BYTES);
         if (length < 0) {
             printf("ERROR in play_wav: read wav data (1) failure\n");
-            return -1;
+            return wav_player_fail(wav_fd, dsp_fd);
         } else if (length > 0) {
             ret = sys_write(dsp_fd, sound_card_buf, length);
             if (ret != length) {
                 printf("ERROR in play_wav: write wav data (1) to sound card buffer failure\n");
-                return -1;
+                return wav_player_fail(wav_fd, dsp_fd);
             }
         } else if (length == 0 && (i == 0 || i > 1)) {
             break;  // reach the end
@@ -124,20 +147,20 @@ int32_t play_wav(int32_t file_num) {
                 // init and start the sound card
                 if (sound_card_init(dsp_fd, &wav_file) != 0) {
                     printf("ERROR in play_wav: init sound card failure\n");
-                    return -1;
+                    return wav_player_fail(wav_fd, dsp_fd);
                 }
             } else if (i > 1) {
                 // send command to sound card to continue
                 if (sys_ioctl(dsp_fd, DSP_RESUME_PLAY_8B_CMD) == -1) {
                     printf("ERROR in play_wav: resume failure (%d)\n", i);
-                    return -1;
+                    return wav_player_fail(wav_fd, dsp_fd);
                 }
             }
 
             // wait until one block finished
-            if (sys_read(dsp_fd, &temp, 1) == -1) return -1;
+            if (sys_read(dsp_fd, &temp, 1) == -1) return wav_player_fail(wav_fd, dsp_fd);
             // exit after the end of the current block (stop for a while)
-            if (sys_ioctl(dsp_fd, DSP_EXIT_8B_AUTO_BLOCK_CMD) == -1)  return -1;
+            if (sys_ioctl(dsp_fd, DSP_EXIT_8B_AUTO_BLOCK_CMD) == -1)  return wav_player_fail(wav_fd, dsp_fd);
 
             // handle early stop
             if (length < DMA_CHUNK_SIZE_BYTES) {
@@ -149,15 +172,19 @@ int32_t play_wav(int32_t file_num) {
         i++;
     }
 
-
-    // FIXME: the above "return -1" will miss this operation
     sys_close(wav_fd);
     sys_close(dsp_fd);
 
     return 0;
 }
 
-// TODO:
+/**
+ * wav_player_fail
+ * Description: close the file and return
+ * Input: dsp_fd - the fd for the cound card device
+ *        wav_fd - the fd for wav file
+ * Output: -1
+ */
 static int32_t wav_player_fail(int32_t wav_fd, int32_t dsp_fd) {
     sys_close(wav_fd);
     sys_close(dsp_fd);
