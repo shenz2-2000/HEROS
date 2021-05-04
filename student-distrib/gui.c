@@ -136,40 +136,37 @@ void init_gui() {
     init_vga();
 
     Rdraw(VGA_DIMX, VGA_DIMY, 0, 0, 0x3E9092);
-   // render_window(100, 100, 600, 400, "Welcome to NY", 1);
+    // render_window(100, 100, 600, 400, "Welcome to ECE391", 1);
 }
 //
-
-void render_font(int x_start, int y_start, char ch, uint32_t color) {
-    char* font = (char*)font8x8_basic[(uint8_t)(ch)];
-    int x,y;
-    int set;
-    for (y=0; y < 8; y++) {
-        for (x=0; x < 8; x++) {
-            set = font[y] & 1 << x;
-            if(set) {
-                Pdraw(x_start + x, y_start + y, color);
-            }
-        }
-    }
-}
+//void render_font(int x_start, int y_start, char ch, uint32_t color) {
+//    char* font = (char*)font8x8_basic[(uint8_t)(ch)];
+//    int x,y;
+//    int set;
+//    for (y=0; y < 8; y++) {
+//        for (x=0; x < 8; x++) {
+//            set = font[y] & 1 << x;
+//            if(set) {
+//                Pdraw(x_start + x, y_start + y, color);
+//            }
+//        }
+//    }
+//}
 //
-
-void render_string(int x_start, int y_start, char* string, uint32_t color) {
-    int i;
-    for(i = 0; i < strlen(string); i++) {
-        render_font(x_start + i*8, y_start, string[i], color);
-    }
-}
+//void render_string(int x_start, int y_start, char* string, uint32_t color) {
+//    int i;
+//    for(i = 0; i < strlen(string); i++) {
+//        render_font(x_start + i*8, y_start, string[i], color);
+//    }
+//}
 //
-
-void render_window(int x, int y, int width, int height, char* title, uint8_t is_focus) {
-    Rdraw(width, height, x, y,0xCDCECF);
-    if(is_focus) {
-        Rdraw(width - 4, 20,x + 2, y + 2,  0x000E8C);
-        render_string(x+16, y+8, title, 0xFFFFFF);
-    } else {
-        Rdraw(width - 4, 20, x + 2, y + 2, 0x929292);
-        render_string(x+16, y+8, title, 0xC7C7C7);
-    }
-}
+//void render_window(int x, int y, int width, int height, char* title, uint8_t is_focus) {
+//    Rdraw(width, height, x, y,0xCDCECF);
+//    if(is_focus) {
+//        Rdraw(width - 4, 20,x + 2, y + 2,  0x000E8C);
+//        render_string(x+16, y+8, title, 0xFFFFFF);
+//    } else {
+//        Rdraw(width - 4, 20, x + 2, y + 2, 0x929292);
+//        render_string(x+16, y+8, title, 0xC7C7C7);
+//    }
+//}
