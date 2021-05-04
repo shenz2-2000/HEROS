@@ -2,9 +2,9 @@
 
 /*
  * TODO:
- * 1. [-] initialize the mem area of DSP page (in paging.c) (also support user space visit!)
+ * 1. [x] initialize the mem area of DSP page (in paging.c) (also support user space visit!)
  * 2. [x] analyze the wav file
- * 3. [-] modify the file image
+ * 3. [x] modify the file image
  */
 
 #include "sound_card.h"
@@ -44,33 +44,24 @@ int32_t audio_open() {
 
     /* programming DMA */
     // FIXME: maybe the order is wrong
-    // // Disable channel 1
-    // outb(DMA_CH_1 + DMA_CH_DISABLE, DMA_REG_MASK);
-    // // write value to flip-flop port 0x0C (any value) to reset flip-flop
-    // outb(1, DMA_REG_CLEAR_FF);
-    // // send transfer mode to 0x0B (0x48 for single mode/0x58 for auto mode + channel number)
-    // outb(DMA_MODE_AUTO_PB, DMA_REG_MODE);
-    // // send page number to 0x83
-    // outb(DSP_BUF_ADDR >> 16, DMA_CH_1_PAGE_PORT);
-    // // send low bits of position
-    // outb((uint8_t) (DSP_BUF_ADDR), DMA_CH_1_ADDR_PORT);
-    // // send high bits of position
-    // outb((uint8_t) (DSP_BUF_ADDR >> 8), DMA_CH_1_ADDR_PORT);
-    // // send low bits of length of data
-    // outb((uint8_t) (DSP_BUF_LEN - 1), DMA_CH_1_CNT_PORT);
-    // // send high bits of length of data
-    // outb((uint8_t) ((DSP_BUF_LEN - 1) >> 8), DMA_CH_1_CNT_PORT);
-    // // enable channel 1
-    // outb(DMA_CH_1 + DMA_CH_ENABLE, DMA_REG_MASK);
-
+    // Disable channel 1
     outb(DMA_CH_1 + DMA_CH_DISABLE, DMA_REG_MASK);
+    // write value to flip-flop port 0x0C (any value) to reset flip-flop
     outb(0xFF, DMA_REG_CLEAR_FF);
+    // send low bits of length of data
     outb((uint8_t) (DSP_BUF_ADDR), DMA_CH_1_ADDR_PORT);
+    // send high bits of length of data
     outb((uint8_t) (DSP_BUF_ADDR >> 8), DMA_CH_1_ADDR_PORT);
+    // this is not necessary
     outb(0xFF, DMA_REG_CLEAR_FF);
+    // send low bits of length of data (MUST BE LEN-1)
     outb((uint8_t) (DSP_BUF_LEN - 1), DMA_CH_1_CNT_PORT);
+    // send high bits of length of data
     outb((uint8_t) ((DSP_BUF_LEN - 1) >> 8), DMA_CH_1_CNT_PORT);
+    // send page number to 0x83 
+    // (**NOTE** this command must be sent in the end, or boot loop may occur)
     outb(DSP_BUF_ADDR >> 16, DMA_CH_1_PAGE_PORT);
+    // enable channel 1
     outb(DMA_CH_1 + DMA_CH_ENABLE, DMA_REG_MASK);
 
     // initialization end
