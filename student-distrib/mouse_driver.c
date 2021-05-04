@@ -21,6 +21,11 @@ static int16_t mouse_y = 0;
 static int16_t prev_mouse_x = 0;
 static int16_t prev_mouse_y = 0;
 
+// several global indicators
+uint32_t left_pressed;
+uint32_t right_pressed;
+uint32_t middle_pressed;
+
 
 // set sample rate
 void set_sample_rate(uint8_t sample_rate){
@@ -112,6 +117,10 @@ void mouse_init() {
 
     // set sample rate to slow down mouse
     set_sample_rate(20);
+
+    left_pressed = 0;
+    right_pressed = 0;
+    middle_pressed = 0;
 }
 
 void mouse_interrupt_handler() {
@@ -133,21 +142,33 @@ void mouse_interrupt_handler() {
         int32_t y_movement;
 
         if (!(flags & VERIFY_ONE)) {
-            printf("mouse  not aligned!\n");
+            //printf("mouse  not aligned!\n");
             return;
         }
         if ((flags & X_OVERFLOW) || (flags & Y_OVERFLOW)) {
-            printf("mouse overflow!\n");
+            //printf("mouse overflow!\n");
             return;
         }
         if (flags & LEFT_BUTTON) {
            // printf("left button pressed\n");
+           left_pressed = 1;
+        }
+        else{
+            left_pressed = 0;
         }
         if (flags & MID_BUTTON) {
            // printf("middle button pressed\n");
+           middle_pressed = 1;
+        }
+        else{
+            middle_pressed = 0;
         }
         if (flags & RIGHT_BUTTON) {
            // printf("right button pressed\n");
+           right_pressed = 1;
+        }
+        else{
+            right_pressed = 0;
         }
 
         // value manipulation
