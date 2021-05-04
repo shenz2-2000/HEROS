@@ -1,5 +1,9 @@
-// reference: http://homepages.cae.wisc.edu/~brodskye/sb16doc/sb16doc.html
-
+/*
+ * Reference
+ * http://homepages.cae.wisc.edu/~brodskye/sb16doc/sb16doc.html
+ * https://wiki.osdev.org/Sound_Blaster_16
+ * https://oemdrivers.com/sound-sb16
+ */
 /*
  * DEMANDS
  * 1. [x] initialize the mem area of DSP page (in paging.c) (also support user space visit!)
@@ -100,9 +104,6 @@ int32_t audio_read() {
     // keep track of the interrupt (return if interrupted)
     temp = dsp_int_cnt;
     while (1) if (dsp_int_cnt != temp) break;
-    // while (dsp_int_cnt == temp) {
-    //     asm volatile("hlt");
-    // }
     return 0;
 }
 
