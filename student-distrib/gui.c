@@ -135,7 +135,7 @@ void init_gui() {
     int i = 0;
     init_vga();
 
-    Rdraw(VGA_DIMX, VGA_DIMY, 0, 0, 0x3E9092);
+
     Rdraw(VGA_DIMX, 36, 0, VGA_DIMY-36, 0xAFEEEE);
 
     setup_status_bar();

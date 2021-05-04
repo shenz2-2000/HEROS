@@ -30,6 +30,11 @@ void show_screen() {
 
 void init_vga() {
     init_vbe(VGA_DIMX, VGA_DIMY, 32);
+    // Rdraw(VGA_DIMX, VGA_DIMY, 0, 0, 0xD9A179);
+    int i, j;
+    for(i = 0; i < VGA_DIMX; i++)
+        for(j = 0; j < VGA_DIMY; j++)
+            Pdraw(i, j, 0xD9A179+i+j*2);
 }
 
 void Rdraw(int w, int h, int x, int y, uint32_t clr) {
