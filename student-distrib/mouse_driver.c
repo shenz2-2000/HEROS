@@ -4,6 +4,8 @@
 
 #include "lib.h"
 #include "mouse_driver.h"
+#include "gui.h"
+#include "vga.h"
 
 
 
@@ -16,6 +18,8 @@ void port_write(uint8_t byte, uint8_t port);
 void command_mouse(uint8_t command);
 static int16_t mouse_x = 0;
 static int16_t mouse_y = 0;
+static int16_t prev_mouse_x = 0;
+static int16_t prev_mouse_y = 0;
 
 
 // set sample rate
@@ -152,14 +156,14 @@ void mouse_interrupt_handler() {
         y_movement = d - ((flags << 3) & 0x100);
 
         // slow down a little
-        y_movement = y_movement / 4;
-        x_movement = x_movement / 2;
+        y_movement = y_movement  ;
+        x_movement = x_movement  ;
 
         // update x y
         if (mouse_x + x_movement < 0) {
             mouse_x = 0;
-        } else if (mouse_x + x_movement > 80 - 1) {
-            mouse_x = 80 - 1;
+        } else if (mouse_x + x_movement > VGA_DIMX-1) {
+            mouse_x = VGA_DIMX - 1;
         } else {
             mouse_x += x_movement;
         }
@@ -167,13 +171,22 @@ void mouse_interrupt_handler() {
 
         if (mouse_y - y_movement < 0) {
             mouse_y = 0;
-        } else if (mouse_y - y_movement > 25 - 1) {
-            mouse_y = 25 - 1;
+        } else if (mouse_y - y_movement > VGA_DIMY -1 ) {
+            mouse_y = VGA_DIMY - 1;
         } else {
             mouse_y -= y_movement;
         }
 
-        set_blue_cursor(mouse_x, mouse_y);
+        if(mouse_x == prev_mouse_x && mouse_y == prev_mouse_y){
+            return;
+        }
+        else{
+            erase_mouse(prev_mouse_x,prev_mouse_y);
+            render_mouse(mouse_x,mouse_y);
+            prev_mouse_x = mouse_x;
+            prev_mouse_y = mouse_y;
+        }
+
     }
 }
 

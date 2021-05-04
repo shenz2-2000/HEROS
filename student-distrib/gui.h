@@ -13,4 +13,8 @@ void render_string(int x_start, int y_start, char* string, uint32_t color);
 
 extern int month,day,sec,mins,hour;
 void setup_status_bar();
+void render_mouse(int x, int y);
+
+void erase_mouse(int x, int y);
+
 #endif

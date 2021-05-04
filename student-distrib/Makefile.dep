@@ -1,0 +1,47 @@
+boot.o: boot.S multiboot.h x86_desc.h types.h
+signal_assmbly.o: signal_assmbly.S signal_sys_call.h
+x86_desc.o: x86_desc.S x86_desc.h types.h
+cmos.o: cmos.c cmos.h rtc.h types.h process.h file_sys.h multiboot.h \
+  x86_desc.h signal_sys_call.h idt.h link.h terminal.h vga.h lib.h vbe.h
+file_sys.o: file_sys.c file_sys.h types.h multiboot.h lib.h terminal.h \
+  rtc.h process.h x86_desc.h signal_sys_call.h idt.h link.h vga.h vbe.h \
+  sys_call.h
+gensound.o: gensound.c gensound.h lib.h types.h sys_call.h rtc.h \
+  process.h file_sys.h multiboot.h x86_desc.h signal_sys_call.h idt.h \
+  link.h terminal.h vga.h vbe.h
+gui.o: gui.c gui.h vga.h lib.h types.h vbe.h
+i8259.o: i8259.c i8259.h types.h lib.h
+idt.o: idt.c multiboot.h types.h x86_desc.h lib.h file_sys.h link.h \
+  process.h signal_sys_call.h idt.h terminal.h sys_call.h page_lib.h
+kernel.o: kernel.c multiboot.h types.h x86_desc.h lib.h i8259.h debug.h \
+  tests.h rtc.h process.h file_sys.h signal_sys_call.h idt.h link.h \
+  terminal.h vga.h vbe.h sys_call.h gensound.h mouse_driver.h gui.h
+lib.o: lib.c lib.h types.h terminal.h process.h file_sys.h multiboot.h \
+  x86_desc.h signal_sys_call.h idt.h link.h
+mouse_driver.o: mouse_driver.c lib.h types.h mouse_driver.h gui.h vga.h \
+  vbe.h
+page_lib.o: page_lib.c page_lib.h x86_desc.h types.h file_sys.h \
+  multiboot.h terminal.h lib.h process.h signal_sys_call.h idt.h link.h
+paging.o: paging.c x86_desc.h types.h vbe.h lib.h
+process.o: process.c process.h file_sys.h types.h multiboot.h x86_desc.h \
+  signal_sys_call.h idt.h link.h terminal.h page_lib.h lib.h sys_call.h \
+  scheduler.h i8259.h mouse_driver.h
+rtc.o: rtc.c rtc.h types.h process.h file_sys.h multiboot.h x86_desc.h \
+  signal_sys_call.h idt.h link.h terminal.h vga.h lib.h vbe.h cmos.h
+scheduler.o: scheduler.c scheduler.h types.h process.h file_sys.h \
+  multiboot.h x86_desc.h signal_sys_call.h idt.h link.h terminal.h \
+  i8259.h lib.h page_lib.h
+signal_sys_call.o: signal_sys_call.c signal_sys_call.h idt.h types.h \
+  link.h x86_desc.h process.h file_sys.h multiboot.h terminal.h \
+  sys_call.h lib.h
+sys_call.o: sys_call.c file_sys.h types.h multiboot.h process.h \
+  x86_desc.h signal_sys_call.h idt.h link.h terminal.h lib.h page_lib.h \
+  tests.h scheduler.h i8259.h
+terminal.o: terminal.c multiboot.h types.h x86_desc.h lib.h i8259.h \
+  debug.h tests.h rtc.h process.h file_sys.h signal_sys_call.h idt.h \
+  link.h terminal.h vga.h vbe.h scheduler.h page_lib.h
+tests.o: tests.c tests.h x86_desc.h types.h lib.h terminal.h rtc.h \
+  process.h file_sys.h multiboot.h signal_sys_call.h idt.h link.h vga.h \
+  vbe.h sys_call.h gensound.h scheduler.h i8259.h
+vbe.o: vbe.c vbe.h lib.h types.h
+vga.o: vga.c vga.h lib.h types.h vbe.h
