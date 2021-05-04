@@ -135,12 +135,12 @@ char font8x8_basic[128][8] = {
 };
 
 void init_gui() {
-    int i = 0;
     init_vga();
 
 
     Rdraw(VGA_DIMX, 36, 0, VGA_DIMY-36, 0xAFEEEE);
-
+//    render_window(0,0,400,400,"FUCK YOU", 0);
+//    render_window(200,200,400,400,"FUCK YOU", 1);
     setup_status_bar();
 
 //    for(i = 0; i < 50; i++){
@@ -165,6 +165,30 @@ void setup_status_bar(){
     render_string(5, VGA_DIMY-30 , "Welcome to Group14-OS", 0x0000);
     render_string(VGA_DIMX-400, VGA_DIMY-30 , status_bar, 0x0000);
     need_update = 1;
+}
+/* Name:text_to_graphics
+ * Description: This function is used for transforming the input terminal memory information into graphical information
+ * Input: video_cache -- address of input terminal cache
+ *        pos_x       -- x coordinate of the terminal's upper left corner
+ *        pos_y       -- y coordinate of the terminal's upper left corner
+ * Side Effect: Drawing terminal information onto the screen
+ */
+
+
+void draw_terminal(char* video_cache, int32_t pos_x, int32_t pos_y,int terminal_id) {
+    // The input state is a boolean with 16*320
+    int i, j, k, l;
+    uint8_t cur_char;
+    char title[11] = "TERMINAL 0";
+    title[9] = terminal_id + 48;
+    render_window(pos_x, pos_y, 648, 224, title, 1);
+    for (i = 0; i < MODEX_TER_ROWS; ++i) {
+        char cur_line[80] = "                                                                                ";
+        for (j = 0; j < MODEX_TER_COLS; ++j)
+            if (*(video_cache+((MODEX_TER_COLS * i + j) << 1)) != ' ')
+                cur_line[j] = *(video_cache+((MODEX_TER_COLS * i + j) << 1));
+        render_string(pos_x+4, pos_y+24+8*i, cur_line, 0xFFFFFF);
+    }
 }
 //
 void render_font(int x_start, int y_start, char ch, uint32_t color) {
