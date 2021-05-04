@@ -69,7 +69,7 @@
 // the address of sound data
 // TODO: to be determined!!!
 #define DSP_BUF_ADDR            0xA000000    // pos at 160 MB
-#define DSP_BUF_LEN             0x20000     // number of bytes. 128 kB = 0x100000-0x120000
+#define DSP_BUF_LEN             0x10000     // number of bytes. 128 kB = 0x100000-0x120000
 
 /* DSP status */
 #define DSP_ON  1

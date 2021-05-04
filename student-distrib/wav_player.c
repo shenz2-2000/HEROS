@@ -13,7 +13,7 @@
 #include "lib.h"
 #include "sys_call.h"
 
-const char *wav_file_list[] = {"macOS_startup.wav", "halloffame.wav"};
+const char *wav_file_list[] = {"macOS_startup.wav"};
 uint8_t sound_card_buf[DMA_CHUNK_SIZE_BYTES];
 
 int32_t wave_file_parse(int32_t wav_fd, wave_file_struct *wav_file) {
@@ -137,33 +137,35 @@ int32_t play_wav(int32_t file_num) {
         if (sys_ioctl(dsp_fd, DSP_EXIT_8B_AUTO_BLOCK_CMD) == -1)  return -1;
 
         // write the next chunk of data
-        memset(sound_card_buf, 0, DMA_CHUNK_SIZE_BYTES);
+        // memset(sound_card_buf, 0, DMA_CHUNK_SIZE_BYTES);
         length = sys_read(wav_fd, sound_card_buf, DMA_CHUNK_SIZE_BYTES);
         if (length < 0) {
             printf("ERROR in play_wav: read wav data (%d) failure\n", i);
             return -1;
-        } else if (length == 0) {
-            break;  // reach the end
-        } else {
-            // Continue
-            ret = sys_write(dsp_fd, sound_card_buf, length);
-            if (ret != length) {
-                printf("ERROR in play_wav: write wav data (%d) to sound card buffer failure\n", i);
-                return -1;
-            }
-            // send command to sound card to continue
-            if (sys_ioctl(dsp_fd, DSP_RESUME_PLAY_8B_CMD) == -1) {
-                printf("ERROR in play_wav: resume failure (%d)\n", i);
-                return -1;
-            }
-            // handle early stop
-            if (length < DMA_CHUNK_SIZE_BYTES) {
-                if (sys_read(dsp_fd, &temp, 1) == -1) return -1;
-                if (sys_ioctl(dsp_fd, DSP_EXIT_8B_AUTO_BLOCK_CMD) == -1) return -1;
-                break;
-            }
         }
+        if (length == 0) {
+            break;  // reach the end
+        }
+        // Continue
+        ret = sys_write(dsp_fd, sound_card_buf, length);
+        if (ret != length) {
+            printf("ERROR in play_wav: write wav data (%d) to sound card buffer failure\n", i);
+            return -1;
+        }
+        // send command to sound card to continue
+        if (sys_ioctl(dsp_fd, DSP_RESUME_PLAY_8B_CMD) == -1) {
+            printf("ERROR in play_wav: resume failure (%d)\n", i);
+            return -1;
+        }
+        // handle early stop
+        if (length < DMA_CHUNK_SIZE_BYTES) {
+            if (sys_read(dsp_fd, &temp, 1) == -1) return -1;
+            if (sys_ioctl(dsp_fd, DSP_EXIT_8B_AUTO_BLOCK_CMD) == -1) return -1;
+            break;
+        }
+        
     }
+    // FIXME: the above "return -1" will miss this operation
     sys_close(wav_fd);
     sys_close(dsp_fd);
 
