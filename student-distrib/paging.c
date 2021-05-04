@@ -94,21 +94,7 @@ void fill_page(){
     // --------------------------Fill the video Page Table (for kernel)--------------------
     for(i = 0; i < PAGE_TABLE_SIZE; i++){
         // points to the start of vedio memory
-        if(i == VIDEO_MEMORY_INDEX){
-            page_table0[i].P = 1;
-            page_table0[i].RW = 1;
-            page_table0[i].US = 0;
-            page_table0[i].PWT = 0;
-            page_table0[i].PCD = 0;
-            page_table0[i].A = 0;
-            page_table0[i].D = 0;
-            page_table0[i].PAT = 0;
-            page_table0[i].G = 0;
-            page_table0[i].AVAIAL = 0;
-            page_table0[i].Base_address = VIDEO_MEMORY_INDEX;
-            continue;
-        }
-//        if(i >= 0xA0 && i <= 0xBF){
+//        if(i == VIDEO_MEMORY_INDEX){
 //            page_table0[i].P = 1;
 //            page_table0[i].RW = 1;
 //            page_table0[i].US = 0;
@@ -117,11 +103,25 @@ void fill_page(){
 //            page_table0[i].A = 0;
 //            page_table0[i].D = 0;
 //            page_table0[i].PAT = 0;
-//            page_table0[i].G = 1;
+//            page_table0[i].G = 0;
 //            page_table0[i].AVAIAL = 0;
-//            page_table0[i].Base_address = i;
+//            page_table0[i].Base_address = VIDEO_MEMORY_INDEX;
 //            continue;
 //        }
+        if(i >= 0xA0 && i <= 0xBF){
+            page_table0[i].P = 1;
+            page_table0[i].RW = 1;
+            page_table0[i].US = 0;
+            page_table0[i].PWT = 0;
+            page_table0[i].PCD = 0;
+            page_table0[i].A = 0;
+            page_table0[i].D = 0;
+            page_table0[i].PAT = 0;
+            page_table0[i].G = 1;
+            page_table0[i].AVAIAL = 0;
+            page_table0[i].Base_address = i;
+            continue;
+        }
 
         // else, just filled with 0
         else{

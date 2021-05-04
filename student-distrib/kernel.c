@@ -247,7 +247,43 @@ void entry(unsigned long magic, unsigned long addr) {
     init_page_register();
 
     init_gui();
+    render_window(100, 100, 600, 100, "Welcome", 1);
 
+    render_window(100, 200, 600, 100, "Welcome", 1);
+
+    render_window(100, 300, 600, 100, "Welcome", 1);
+    render_window(100, 400, 600, 100, "Welcome", 1);
+    render_window(100, 500, 600, 100, "Welcome", 1);
+//    render_string(150,150,'cccccccccccc',0xDC1437);
+//    render_font(150,150,'c',0xDC1437);
+//    render_font(160,150,'c',0xDC1437);
+//    render_font(170,150,'c',0xDC1437);
+//    render_font(180,150,'c',0xDC1437);
+//    render_font(190,150,'c',0xDC1437);
+//    render_font(200,150,'c',0xDC1437);
+//    render_font(210,150,'c',0xDC1437);
+//    render_font(220,150,'c',0xDC1437);
+//    render_font(230,150,'c',0xDC1437);
+//    render_font(240,150,'c',0xDC1437);
+//    render_font(250,150,'c',0xDC1437);
+//    render_font(260,150,'c',0xDC1437);
+//    render_font(270,150,'c',0xDC1437);
+//    render_font(280,150,'c',0xDC1437);
+//    render_font(290,150,'c',0xDC1437);
+//    render_font(300,150,'c',0xDC1437);
+
+//    render_window(100, 100, 160, 200, "trash", 1);
+    //render_font(50,50,'a',0xDC143C);
+//     render_string(100,50,'trash',0xFFFFFF);
+//    render_window(60,60,160,160,'kkkkk',1);
+//    Rdraw(160, 160, 60, 60,0xCDCECF);
+////    if(is_focus) {
+//    Rdraw(160 - 4, 160,60 + 2, 60 + 2,  0x000E8C);
+//    render_string(60+16, 60+8, 'kkkkkkkkkk', 0xFFFFFF);
+//    } else {
+//        Rdraw(width - 4, 20, x + 2, y + 2, 0x929292);
+//        render_string(x+16, y+8, title, 0xC7C7C7);
+//    }
 
     /* Init Mouse */
     mouse_init();
