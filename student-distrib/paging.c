@@ -93,7 +93,7 @@ void fill_page(){
 
     // --------------------------Fill the video Page Table (for kernel)--------------------
     for(i = 0; i < PAGE_TABLE_SIZE; i++){
-         //points to the start of vedio memory
+        // points to the start of vedio memory
         if(i == VIDEO_MEMORY_INDEX){
             page_table0[i].P = 1;
             page_table0[i].RW = 1;

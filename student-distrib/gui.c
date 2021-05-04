@@ -135,11 +135,31 @@ void init_gui() {
     int i = 0;
     init_vga();
 
-    Rdraw(VGA_DIMX, VGA_DIMY, 0, 0, 0x3E9092);
-   // render_window(100, 100, 600, 400, "Welcome to NY", 1);
+
+    Rdraw(VGA_DIMX, 36, 0, VGA_DIMY-36, 0xAFEEEE);
+
+    setup_status_bar();
+
+}
+
+void setup_status_bar(){
+    Rdraw(VGA_DIMX, 36, 0, VGA_DIMY-36, 0xAFEEEE);
+    char status_bar[26] = "UTC+0:2021-00-00 00:00:00";
+    status_bar[11] = month/10+48;
+    status_bar[12] = month%10+48;
+    status_bar[14] = day/10+48;
+    status_bar[15] = day%10+48;
+    status_bar[17] = hour/10+48;
+    status_bar[18] = hour%10+48;
+    status_bar[20] = mins/10+48;
+    status_bar[21] = mins%10+48;
+    status_bar[23] = sec/10+48;
+    status_bar[24] = sec%10+48;
+    render_string(5, VGA_DIMY-30 , "Welcome to Group14-OS", 0x0000);
+    render_string(VGA_DIMX-400, VGA_DIMY-30 , status_bar, 0x0000);
+    need_update = 1;
 }
 //
-
 void render_font(int x_start, int y_start, char ch, uint32_t color) {
     char* font = (char*)font8x8_basic[(uint8_t)(ch)];
     int x,y;
@@ -153,7 +173,6 @@ void render_font(int x_start, int y_start, char ch, uint32_t color) {
         }
     }
 }
-//
 
 void render_string(int x_start, int y_start, char* string, uint32_t color) {
     int i;
@@ -161,7 +180,6 @@ void render_string(int x_start, int y_start, char* string, uint32_t color) {
         render_font(x_start + i*8, y_start, string[i], color);
     }
 }
-//
 
 void render_window(int x, int y, int width, int height, char* title, uint8_t is_focus) {
     Rdraw(width, height, x, y,0xCDCECF);
