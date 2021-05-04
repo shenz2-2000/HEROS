@@ -203,7 +203,7 @@ void draw_terminal(char* video_cache,int terminal_id) {
     update_priority(terminal_id);
 
     for (i = 0; i < MODEX_TER_ROWS; ++i) {
-        char cur_line[80] = "                                                                                ";
+        char cur_line[81] = "                                                                                ";
         for (j = 0; j < MODEX_TER_COLS; ++j)
             if (*(video_cache+((MODEX_TER_COLS * i + j) << 1)) != ' ')
                 cur_line[j] = *(video_cache+((MODEX_TER_COLS * i + j) << 1));
