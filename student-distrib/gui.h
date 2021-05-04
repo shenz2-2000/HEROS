@@ -7,6 +7,11 @@
 #define MODEX_TER_COLS 80  // Same as the original one
 #define MODEX_TER_ROWS 25
 
+typedef struct window_t {
+    int32_t pos_x, pos_y, width, height;
+    int id;
+    int priority;
+} window_t;
 
 void init_gui();
 

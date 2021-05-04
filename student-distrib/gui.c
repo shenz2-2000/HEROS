@@ -2,7 +2,7 @@
 #include "x86_desc.h"
 #include "page_lib.h"
 #include "mouse_driver.h"
-
+window_t terminal_window[3];
 char font8x8_basic[128][8] = {
         { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
         { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
@@ -166,6 +166,18 @@ void setup_status_bar(){
     render_string(VGA_DIMX-400, VGA_DIMY-30 , status_bar, 0x0000);
     need_update = 1;
 }
+void update_priority(int terminal_id) {
+    if (terminal_id==0) {
+        if (terminal_window[1].priority>terminal_window[2].priority) terminal_window[1].priority = 2,terminal_window[2].priority = 1;
+    }
+    if (terminal_id==1) {
+        if (terminal_window[0].priority>terminal_window[2].priority) terminal_window[0].priority = 2,terminal_window[2].priority = 1;
+    }
+    if (terminal_id==2) {
+        if (terminal_window[1].priority>terminal_window[0].priority) terminal_window[1].priority = 2,terminal_window[0].priority = 1;
+    }
+    terminal_window[terminal_id] = 3;
+}
 /* Name:text_to_graphics
  * Description: This function is used for transforming the input terminal memory information into graphical information
  * Input: video_cache -- address of input terminal cache
@@ -175,13 +187,19 @@ void setup_status_bar(){
  */
 
 
-void draw_terminal(char* video_cache, int32_t pos_x, int32_t pos_y,int terminal_id) {
+void draw_terminal(char* video_cache,int terminal_id) {
     // The input state is a boolean with 16*320
     int i, j;
 
     char title[11] = "TERMINAL 0";
     title[9] = terminal_id + 48;
-    render_window(pos_x, pos_y, 648, 224, title, 1);
+    render_window(100+20*terminal_id, 100+20*terminal_id, 648, 224, title, 1);
+    terminal_window[terminal_id].id = terminal_id;
+    terminal_window[terminal_id].height = 224;
+    terminal_window[terminal_id].width = 648;
+    terminal_window[terminal_id].pos_x=terminal_window[terminal_id].pos_y=100+20*terminal_id;
+    update_priority(terminal_id);
+
     for (i = 0; i < MODEX_TER_ROWS; ++i) {
         char cur_line[80] = "                                                                                ";
         for (j = 0; j < MODEX_TER_COLS; ++j)
@@ -244,11 +262,11 @@ void erase_mouse(int x, int y) {
             "...1*********1..",
             "....111111111...",
     };
-
+    // Trying to check where prev_location in, and redraw that location
     int idx_x, idx_y;
     for(idx_y = 0; idx_y < 16; idx_y++)
         for(idx_x = 0; idx_x < 16; idx_x++) {
-            if(shape1[idx_y][idx_x] == '*')
+            if(shape1[idx_y][idx_x] == '*'||shape1[idx_y][idx_x] == '1')
                 Pdraw(x+idx_x, y+idx_y, 0);
             else if(shape1[idx_y][idx_x] == '0')
                 Pdraw(x+idx_x, y+idx_y, 0xFFFFFF);
