@@ -27,10 +27,18 @@ void setup_status_bar();
 
 void render_mouse(int x, int y);
 
-void erase_mouse(int x, int y);
+void erase_mouse();
 
 void copy_vedio_mem(void* dest);
 
 uint32_t mouse_click_check(int32_t x, int32_t y);
+
+int32_t check_in_status_bar();
+
+void restore_background(int x,int y);
+
+void restore_status_bar();
+
+int32_t check_in_background();
 
 #endif

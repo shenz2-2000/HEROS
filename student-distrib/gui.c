@@ -243,36 +243,15 @@ void render_window(int x, int y, int width, int height, char* title, uint8_t is_
 
 
 // TODO:
-void erase_mouse(int x, int y) {
-    static char shape1[16][16] = {
-            ".....111........",
-            ".....1*1........",
-            ".....1*1........",
-            ".....1*111......",
-            ".....1*1*111....",
-            ".....1*1*1*111..",
-            ".....1*1*1*1*1..",
-            ".....1*1*1*1*1..",
-            ".111.1*1*1*1*111",
-            "1***11*1*1*1***1",
-            "1***11*1*******1",
-            "1****1*********1",
-            ".1*************1",
-            "..1***********1.",
-            "...1*********1..",
-            "....111111111...",
-    };
-    // Trying to check where prev_location in, and redraw that location
-    int idx_x, idx_y;
-    for(idx_y = 0; idx_y < 16; idx_y++)
-        for(idx_x = 0; idx_x < 16; idx_x++) {
-            if(shape1[idx_y][idx_x] == '*'||shape1[idx_y][idx_x] == '1')
-                Pdraw(x+idx_x, y+idx_y, 0);
-            else if(shape1[idx_y][idx_x] == '0')
-                Pdraw(x+idx_x, y+idx_y, 0xFFFFFF);
-            else if(shape1[idx_y][idx_x] == '1')
-                Pdraw(x+idx_x,y+idx_y,0x3E9092);
-        }
+void erase_mouse() {
+    if(check_in_status_bar()){
+        restore_status_bar();
+    }
+
+    if(check_in_background()){
+        restore_background(prev_mouse_x,prev_mouse_y);
+    }
+
 }
 
 void render_mouse(int x, int y) {
@@ -334,3 +313,36 @@ uint32_t mouse_click_check(int32_t x, int32_t y){
 
 }
 
+// ----------------------------Restore Information--------------------------
+void restore_status_bar(){
+    setup_status_bar();
+}
+
+void restore_background(int x,int y){
+    int i,j;
+    for(i = 0; i <= 15; i++){
+        for(j = 0; j <= 15; j++){
+            if(j+y >= VGA_DIMY - 36) continue;
+            Pdraw(i+x, j+y, 0xD9A179+(i+x)+(y+j)*2);
+        }
+    }
+}
+
+// 1: in status bar
+// 0: not
+int32_t check_in_status_bar(){
+    if((prev_mouse_y + 15) >= (VGA_DIMY-36) && (prev_mouse_y <= (VGA_DIMY - 1))){
+        return 1;
+    }
+    return 0;
+}
+
+//TODO: need modification
+// 1: in status bar
+// 0: not
+int32_t check_in_background(){
+    if(  prev_mouse_y < (VGA_DIMY - 36)  ){
+        return 1;
+    }
+    return 0;
+}

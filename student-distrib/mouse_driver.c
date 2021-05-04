@@ -154,11 +154,11 @@ void mouse_interrupt_handler() {
         if ((flags & LEFT_BUTTON) ) {
            // printf("left button pressed\n");
            left_pressed = 1;
-           render_string(512,384,"left click is ok!",0xDC143C);
+           //render_string(512,384,"left click is ok!",0xDC143C);
         }
         else if(!(flags & LEFT_BUTTON) ){
             left_pressed = 0;
-            Rdraw(100,8,512,384,0XFFFFFF);
+            //Rdraw(100,8,512,384,0XFFFFFF);
         }
 
         if ((flags & MID_BUTTON)) {
@@ -173,11 +173,11 @@ void mouse_interrupt_handler() {
         if ((flags & RIGHT_BUTTON) ) {
             // printf("left button pressed\n");
             right_pressed = 1;
-            render_string(512,484,"right click is ok!",0xDC143C);
+            //render_string(512,484,"right click is ok!",0xDC143C);
         }
         else if(!(flags & RIGHT_BUTTON)){
             right_pressed = 0;
-            Rdraw(100,8,512,484,0XFFFFFF);
+            //Rdraw(100,8,512,484,0XFFFFFF);
         }
 
         // value manipulation
@@ -211,7 +211,7 @@ void mouse_interrupt_handler() {
             return;
         }
         else{
-            erase_mouse(prev_mouse_x,prev_mouse_y);
+            erase_mouse();
             render_mouse(mouse_x,mouse_y);
             prev_mouse_x = mouse_x;
             prev_mouse_y = mouse_y;
