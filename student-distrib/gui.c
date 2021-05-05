@@ -772,7 +772,7 @@ void draw_terminal(char* video_cache,int terminal_id, int focus) {
     for (i = 0; i < MODEX_TER_ROWS; ++i) {
         char cur_line[81] = "                                                                                ";
         for (j = 0; j < MODEX_TER_COLS; ++j)
-            if (*(video_cache+((MODEX_TER_COLS * i + j) << 1)) != ' ')
+            if (*(video_cache+((MODEX_TER_COLS * i + j) << 1)) != '\0')
                 cur_line[j] = *(video_cache+((MODEX_TER_COLS * i + j) << 1));
         render_string(terminal_window[terminal_id].pos_x+4, terminal_window[terminal_id].pos_y+24+16*i, cur_line, 0xFFFFFF);
     }

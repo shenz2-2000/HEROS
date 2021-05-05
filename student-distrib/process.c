@@ -478,22 +478,22 @@ void update_screen() {
     }
     if(showing_term->id != -1){
         // set the real page table to visit, or in the backup table there is no buffer (page fault)
-        PDE_4K_set(&(page_directory[0]), (uint32_t) (page_table0), 0, 1, 1);
+        PDE_4K_set(&(page_directory[0]), (uint32_t) (page_table0), 1, 1, 1);
         flush_tlb();
         if (!init) {
             update_priority(0); update_priority(1); update_priority(2);
-            draw_terminal((char*)(0xC0000 + 0 * 0x1000),0,0);
-            draw_terminal((char*)(0xC0000 + 1 * 0x1000),1,0);
-            draw_terminal((char*)(0xC0000 + 2 * 0x1000),2,1);
+            draw_terminal((char*)(VM_BUF_SVGA_ADDR + 0 * SIZE_4K_IN_BYTES),0,0);
+            draw_terminal((char*)(VM_BUF_SVGA_ADDR + 1 * SIZE_4K_IN_BYTES),1,0);
+            draw_terminal((char*)(VM_BUF_SVGA_ADDR + 2 * SIZE_4K_IN_BYTES),2,1);
             init = 1;
         } else {
             for (i=0;i<=2;++i)
                 for (j=0;j<3;++j)
                     if (terminal_window[j].priority==i)
-                        draw_terminal((char*)(0xC0000 + j * 0x1000),j,0);
+                        draw_terminal((char*)(VM_BUF_SVGA_ADDR + j * SIZE_4K_IN_BYTES),j,0);
             for (j=0;j<3;++j)
                 if (terminal_window[j].priority==3)
-                    draw_terminal((char*)(0xC0000 + j * 0x1000),j,1);
+                    draw_terminal((char*)(VM_BUF_SVGA_ADDR + j * SIZE_4K_IN_BYTES),j,1);
         }
 
 

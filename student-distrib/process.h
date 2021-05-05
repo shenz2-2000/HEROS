@@ -12,6 +12,13 @@
 #define TASK_KSTK_PCB_ADDR_MASK 0xFFFFE000
 #define US_STARTING  (0x8400000 - 1)
 
+// vidmap for SVGA
+#define VM_BUF_SVGA_ADDR    0xE0000 // the start of 3 buf
+#define VM_BUF_SVGA_PD_INDEX    0x00   // addr >> 22
+#define VM_BUF_SVGA_PT_INDEX    0xE0
+
+#define SIZE_4K_IN_BYTES    0x1000
+
 // the definition of linked list's node
 typedef struct task_node{
     struct task_node* prev;

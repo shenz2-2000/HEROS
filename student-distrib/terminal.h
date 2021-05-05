@@ -24,11 +24,6 @@
 #define VM_INDEX      0xB8000
 #define VM_PTE        0xB8
 
-// vidmap for SVGA
-#define VM_BUF_SVGA_ADDR    0xE0000 // the start of 3 buf
-#define VM_BUF_SVGA_PD_INDEX    0x00   // addr >> 22
-#define VM_BUF_SVGA_PT_INDEX    0xC0
-
 #define U_VM_PDE 33
 
 #define BITS_4K        4096     // 0x1000
