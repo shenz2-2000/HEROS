@@ -683,12 +683,15 @@ void setup_status_bar(){
 void update_priority(int terminal_id) {
     if (terminal_id==0) {
         if (terminal_window[1].priority>terminal_window[2].priority) terminal_window[1].priority = 2,terminal_window[2].priority = 1;
+        else terminal_window[1].priority = 1,terminal_window[2].priority = 2;
     }
     if (terminal_id==1) {
         if (terminal_window[0].priority>terminal_window[2].priority) terminal_window[0].priority = 2,terminal_window[2].priority = 1;
+        else terminal_window[0].priority = 1,terminal_window[2].priority = 2;
     }
     if (terminal_id==2) {
         if (terminal_window[1].priority>terminal_window[0].priority) terminal_window[1].priority = 2,terminal_window[0].priority = 1;
+        else terminal_window[1].priority = 1,terminal_window[0].priority = 2;
     }
     terminal_window[terminal_id].priority = 3;
 }
@@ -870,6 +873,15 @@ int32_t check_in_background(){
         return 1;
     }
     return 0;
+}
+int check_mouse_in_which_terminal(int32_t x, int32_t y) {
+    // will return the terminal with the highest priority
+    int i, pri;
+    for (pri=3;pri>=0;--pri) for (i=0;i<3;++i) if (terminal_window[i].priority==pri)  {
+        if (x>=terminal_window[i].pos_x && x<=terminal_window[i].pos_x+terminal_window[i].width
+        && y>=terminal_window[i].pos_y && y<=terminal_window[i].pos_y+terminal_window[i].height)
+            return i;
+    }
 }
 
 int32_t check_in_window(){

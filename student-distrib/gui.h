@@ -44,6 +44,7 @@ int32_t check_in_background();
 void draw_terminal(char* video_cache,int terminal_id, int focus);
 
 void update_priority(int terminal_id);
+int check_mouse_in_which_terminal(int32_t x, int32_t y);
 
 int32_t check_in_window();
 #endif

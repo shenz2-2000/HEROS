@@ -6,7 +6,7 @@
 #include "mouse_driver.h"
 #include "gui.h"
 #include "vga.h"
-
+#include "process.h"
 
 
 
@@ -128,7 +128,7 @@ void mouse_init() {
 }
 
 void mouse_interrupt_handler() {
-
+    int ret;
     // avoid collide with keyboard
     if (0 == (inb(MOUSE_CHECK_PORT) & 0x1)) {
         return;
@@ -156,6 +156,9 @@ void mouse_interrupt_handler() {
         if ((flags & LEFT_BUTTON) ) {
            // printf("left button pressed\n");
            left_pressed = 1;
+           ret = check_mouse_in_which_terminal(mouse_x,mouse_y);
+           change_focus_terminal(ret);
+           update_priority(ret);
            //render_string(512,384,"left click is ok!",0xDC143C);
         }
         else if(!(flags & LEFT_BUTTON) ){
