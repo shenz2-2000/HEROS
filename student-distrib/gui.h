@@ -53,4 +53,7 @@ int32_t check_in_window(int,int);
 void render_music_icon(int x, int y);
 
 void render_terminal_button();
+
+void render_randomness();
+
 #endif

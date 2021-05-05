@@ -49,7 +49,6 @@ void system_time(){
 }
 
 // The following part is for random
-#define LARGE_NUM 0x7FFFFFFF
 int random_seed = 2;
 int random_source = 100000;
 
@@ -57,5 +56,8 @@ int generate_random_number(){
     random_source = year*365*24*3600 + month*30*24*3600 + day*24*3600 + hour*3600 + mins*60 + sec;
     random_seed = (random_seed * random_source) % LARGE_NUM;
     if(random_seed == 0) random_seed = 50000;
-    return (-random_seed)%1000;
+
+    if(random_seed <= 0) return (-random_seed)%1000;
+
+    return (random_seed)%1000;
 }

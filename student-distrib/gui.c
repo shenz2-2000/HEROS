@@ -2,6 +2,7 @@
 #include "x86_desc.h"
 #include "page_lib.h"
 #include "mouse_driver.h"
+#include "cmos.h"
 window_t terminal_window[3];
 char font8x8_basic[128][8] = {
         { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
@@ -684,6 +685,7 @@ void setup_status_bar(){
     render_sentence(VGA_DIMX-250, VGA_DIMY-24 , status_bar, 0x0000);
     render_music_icon(VGA_DIMX - 43, VGA_DIMY-27);
     render_terminal_button();
+    render_randomness();
     need_update = 1;
 }
 
@@ -962,3 +964,10 @@ int32_t check_in_window(int x, int y){
 //    int id;
 //    int priority;
 //} window_t;
+void render_randomness(){
+    int cur_num;
+    int8_t * str_head;
+    cur_num = generate_random_number();
+    itoa(cur_num,str_head,10);
+    render_sentence(645,VGA_DIMY-24,str_head,0x0000);
+}
