@@ -79,7 +79,7 @@ void patch_mouse(int x, int y) {
     ry = min(VGA_DIMY, y + 16);
     for(idx_y = y; idx_y < ry; idx_y++) {
         for (idx_x = x; idx_x < rx; idx_x++) {
-            cpbuf(&vbe_mem[idx_x+idx_y*VGA_DIMX], &fbuf[idx_x][idx_y], 1);
+            cpbuf(&vbe_mem[idx_x+idx_y*VGA_DIMX], &fbuf[idx_y][idx_x], 1);
         }
     }
 }

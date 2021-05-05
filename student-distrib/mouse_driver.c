@@ -20,8 +20,8 @@ int16_t mouse_x = 0;
 int16_t mouse_y = 0;
 int16_t prev_mouse_x = 0;
 int16_t prev_mouse_y = 0;
-int16_t prev_draw_x = 0;
-int16_t prev_draw_y = 0;
+int prev_draw_x = 0;
+int prev_draw_y = 0;
 
 // several global indicators
 uint32_t left_pressed = 0;
