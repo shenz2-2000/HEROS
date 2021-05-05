@@ -748,40 +748,40 @@ void invalid_sys_call_test(){
 
 /* Extra Point tests */
 
-int play_sound_test() {
-    TEST_HEADER;
+//int play_sound_test() {
+//    TEST_HEADER;
+//
+//    long ret;
+//
+//    // gensound(1047, 3000);
+//
+//    // sys_play_sound(1047);
+//    asm volatile ("INT $0x80"
+//    : "=a" (ret)
+//    : "a" (0x0B), "b" (1047)
+//    : "memory", "cc");
+//
+//    printf("begin the sound:\n");
+//
+//    sleep(5000);
+//
+//    printf("stop the sound\n");
+//
+//    asm volatile ("INT $0x80"
+//    : "=a" (ret)
+//    : "a" (0x0C)
+//    : "memory", "cc");
+//
+//    return PASS;
+//}
 
-    long ret;
-
-    // gensound(1047, 3000);
-
-    // sys_play_sound(1047);
-    asm volatile ("INT $0x80"
-    : "=a" (ret)
-    : "a" (0x0B), "b" (1047)
-    : "memory", "cc");
-
-    printf("begin the sound:\n");
-
-    sleep(5000);
-
-    printf("stop the sound\n");
-
-    asm volatile ("INT $0x80"
-    : "=a" (ret)
-    : "a" (0x0C)
-    : "memory", "cc");
-
-    return PASS;
-}
-
-int play_music_test() {
-    TEST_HEADER;
-
-    play_song(0);
-
-    return PASS;
-}
+//int play_music_test() {
+//    TEST_HEADER;
+//
+//    play_song(0);
+//
+//    return PASS;
+//}
 
 /* launch_tests
  *

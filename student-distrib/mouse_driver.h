@@ -24,6 +24,8 @@
 #define MOUSE_IRQ_NUM 12
 extern void mouse_init();
 extern void mouse_interrupt_handler();
+extern int need_redraw_background;
+extern int need_change_focus;
 //--------------------------
 //#define MOUSE_PORT_60 0x60
 //#define PORT_64 0x64
@@ -48,5 +50,21 @@ extern void mouse_interrupt_handler();
 //#define WHITE 0xFFFFFFFF
 extern void set_mouse_cursor(int x, int y);
 extern void mouse_init();
+extern void erase_mouse();
+extern void render_mouse(int,int);
+int check_mouse_in_button(int mouse_x,int mouse_y);
+
+extern int16_t mouse_x;
+extern int16_t mouse_y;
+extern int16_t prev_mouse_x;
+extern int16_t prev_mouse_y;
+extern int prev_draw_x;
+extern int prev_draw_y;
+
+
+// several global indicators
+extern uint32_t left_pressed;
+extern uint32_t right_pressed;
+extern uint32_t middle_pressed;
 
 #endif //MP3_GROUP_14_MOUSE_DRIVER_H

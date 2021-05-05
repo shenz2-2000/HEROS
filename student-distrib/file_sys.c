@@ -4,6 +4,7 @@
 #include "rtc.h"
 #include "process.h"
 #include "sys_call.h"
+#include "sound_card.h"
 
 /* global var */
 // block discription
@@ -16,10 +17,41 @@ static data_block_t *dblocks_arr;   // data block
 // static file_struct_t file_arr[N_FILE_LIMIT];  // the file struct array
 
 // op table
-static file_operations_t file_op;       // the op table for regular file
-static file_operations_t terminal_op;   // the op table for terminal
-static file_operations_t rtc_op;        // the op table for rtc file
-static file_operations_t dir_op;        // thr op table for directory
+static file_operations_t file_op = {    // the op table for regular file
+    .open = file_open,
+    .close = file_close,
+    .read = file_read,
+    .write = file_write,
+    .ioctl = NULL
+};
+static file_operations_t terminal_op = {    // the op table for terminal
+    .open =  terminal_open,
+    .read =  terminal_read,
+    .write =  terminal_write,
+    .close =  terminal_close,
+    .ioctl = NULL
+};
+static file_operations_t rtc_op = { // the op table for rtc file
+    .open =  file_rtc_open,
+    .read =  file_rtc_read,
+    .write =  file_rtc_write,
+    .close =  file_rtc_close,
+    .ioctl = NULL
+};
+static file_operations_t dir_op = { // thr op table for directory
+    .open =  dir_open,
+    .read =  dir_read,
+    .write =  dir_write,
+    .close =  dir_close,
+    .ioctl = NULL
+};
+static file_operations_t audio_op = {   // thr op table for sound card
+    .open = file_audio_open,
+    .read = file_audio_read,
+    .write = file_audio_write,
+    .close = file_audio_close,
+    .ioctl = file_audio_ioctl
+};
 
 /**
  * file_sys_init
@@ -39,27 +71,6 @@ int32_t file_sys_init(module_t *f_sys_mod) {
     bblock_ptr = (boot_block_t*)(f_sys_mod->mod_start);
     inodes_arr = ((inode_block_t*)(f_sys_mod->mod_start)) + 1;
     dblocks_arr = ((data_block_t*)(f_sys_mod->mod_start)) + bblock_ptr->n_inodes + 1;
-
-    // init the file operations
-    file_op.open = file_open;
-    file_op.close = file_close;
-    file_op.read = file_read;
-    file_op.write = file_write;
-
-    terminal_op.open =  terminal_open;
-    terminal_op.read =  terminal_read;
-    terminal_op.write =  terminal_write;
-    terminal_op.close =  terminal_close;
-
-    dir_op.open =  dir_open;
-    dir_op.read =  dir_read;
-    dir_op.write =  dir_write;
-    dir_op.close =  dir_close;
-
-    rtc_op.open =  file_rtc_open;
-    rtc_op.read =  file_rtc_read;
-    rtc_op.write =  file_rtc_write;
-    rtc_op.close =  file_rtc_close;
 
     // init the file_arr
     cur_pcb = get_cur_process();
@@ -509,7 +520,7 @@ int32_t file_rtc_open(const uint8_t *f_name) {
     cur_pcb->file_arr.files[fd].f_op = &rtc_op;
     cur_pcb->file_arr.files[fd].inode_idx = 0;
     cur_pcb->file_arr.files[fd].f_pos = 0;  // the global cursor is at the beginning
-    // no need to fill flags
+    cur_pcb->file_arr.files[fd].flags = OCCUPIED;
 
     return fd;
 }
@@ -553,3 +564,85 @@ int32_t file_rtc_write(int32_t fd, const void *buf, int32_t bufsize) {
     return rtc_write(fd, buf, bufsize);
 }
 
+/**
+ * file_audio_open
+ * Description: call rtc_write
+ * Input: fd - the file descriptor
+          buf - the buffer
+          bufsize - the number of bytes of a buffer
+ * Output: 0 if success
+ */
+int32_t file_audio_open(const uint8_t *f_name) {
+    int32_t fd;
+    pcb_t *cur_pcb;
+    
+    if (audio_open() != 0) {
+        printf("ERROR in file_audio_open: sound car open fail\n");
+        return -1;
+    }
+
+    // get the current pcb
+    cur_pcb = get_cur_process();
+    if (cur_pcb == NULL) {
+        printf("ERROR in file_audio_open(): cur_pcb NULL pointer\n");
+        return -1;
+    }
+
+    // obtain an available fd number
+    fd = allocate_fd(cur_pcb);
+    
+    // populate the block
+    cur_pcb->file_arr.files[fd].f_op = &audio_op;
+    cur_pcb->file_arr.files[fd].inode_idx = 0;
+    cur_pcb->file_arr.files[fd].f_pos = 0;  // the cursor of the sound card buffer is begging
+    cur_pcb->file_arr.files[fd].flags = OCCUPIED;
+
+    return fd;
+}
+
+/**
+ * file_audio_close
+ * Description: close the sound card driver
+ * Input: fd - the file descriptor
+ * Output: 0 if success -1 if unccessful
+ * Side effect: release the place in file struct array
+ */
+int32_t file_audio_close(int32_t fd) {
+    return audio_close();
+}
+
+/**
+ * file_audio_read
+ * Description: call audio_read
+ * Input: fd - the file descriptor
+          buf - the buffer
+          bufsize - the number of bytes of a buffer
+ * Output: 0 if success
+ */
+int32_t file_audio_read(int32_t fd, void *buf, int32_t bufsize) {
+    return audio_read();
+}
+
+/**
+ * file_audio_write
+ * Description: call audio_write
+ * Input: fd - the file descriptor
+          buf - the buffer
+          bufsize - the number of bytes of a buffer
+ * Output: 0 if success
+ */
+int32_t file_audio_write(int32_t fd, const void *buf, int32_t bufsize) {
+    pcb_t* cur_pcb = get_cur_process();
+    return audio_write(&(cur_pcb->file_arr.files[fd].f_pos), buf, bufsize);
+}
+
+/**
+ * file_audio_ioctl
+ * Description: call audio_ioctl
+ * Input: fd - the file descriptor
+          cmd - the command sent to the device
+ * Output: 0 if success
+ */
+int32_t file_audio_ioctl(int32_t fd, int32_t cmd) {
+    return audio_ioctl((uint8_t) cmd);
+}

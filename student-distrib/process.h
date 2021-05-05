@@ -1,16 +1,23 @@
 #ifndef _PROCESS_H
 #define _PROCESS_H
-
+#include "gui.h"
 #include "file_sys.h"
 #include "x86_desc.h"
 #include "signal_sys_call.h"
 #include "terminal.h"
-#define N_PCB_LIMIT 7
+#define N_PCB_LIMIT 10
 
 #define TASK_KSTK_SIZE_IN_B 8192
 #define TASK_KSTK_BOTTOM 0x800000    
 #define TASK_KSTK_PCB_ADDR_MASK 0xFFFFE000
 #define US_STARTING  (0x8400000 - 1)
+
+// vidmap for SVGA
+#define VM_BUF_SVGA_ADDR    0xE0000 // the start of 3 buf
+#define VM_BUF_SVGA_PD_INDEX    0x00   // addr >> 22
+#define VM_BUF_SVGA_PT_INDEX    0xE0
+
+#define SIZE_4K_IN_BYTES    0x1000
 
 // the definition of linked list's node
 typedef struct task_node{
@@ -60,4 +67,7 @@ terminal_struct_t* get_running_terminal();
 void set_running_terminal(terminal_struct_t* cur);
 void init_task_main();
 void process_user_vidmap(pcb_t *process);
+void update_screen();
+extern window_t terminal_window[3];;
+extern int need_play;
 #endif

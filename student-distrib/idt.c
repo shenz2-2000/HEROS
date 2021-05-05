@@ -14,6 +14,7 @@
 
 #define IDT_ENTRY_PIT      0x20
 #define IDT_ENTRY_KEYBOARD 0x21
+#define IDT_ENTRY_SB16     0x25
 #define IDT_ENTRY_RTC 0x28
 #define IDT_ENTRY_MOUSE 0x2C
 #define IDT_SYSTEM_CALL 0x80
@@ -99,6 +100,10 @@ void init_IDT(){
     SET_IDT_ENTRY(idt[IDT_ENTRY_KEYBOARD], interrupt_entry_1);
     idt[IDT_ENTRY_KEYBOARD].present = 1;
 
+    // Set sound card interrupt handler (defined in boot.S)
+    SET_IDT_ENTRY(idt[IDT_ENTRY_SB16], interrupt_entry_5);
+    idt[IDT_ENTRY_SB16].present = 1;
+
     // Set RTC handler (defined in boot.S)
     SET_IDT_ENTRY(idt[IDT_ENTRY_RTC], interrupt_entry_8);
     idt[IDT_ENTRY_RTC].present = 1;
@@ -154,14 +159,6 @@ ASMLINKAGE int32_t close_sys_call(int32_t fd){
  *         nbytes: number of bytes we want to write
  * Return Value: ret: whether the write is successful
  */
-
-
-// extern int sys_execute(uint8_t *command);
-
-ASMLINKAGE int dummy_sys_call(){
-    return invalid_sys_call();
-}
-
 ASMLINKAGE int32_t write_sys_call(int32_t fd, const void* buf, int32_t nbytes){
     uint32_t flags;
     int32_t ret;
@@ -171,6 +168,15 @@ ASMLINKAGE int32_t write_sys_call(int32_t fd, const void* buf, int32_t nbytes){
     return ret;
 }
 
+ASMLINKAGE int32_t ioctl_sys_call(int32_t fd, int32_t cmd) {
+    return sys_ioctl(fd, cmd);
+}
+
+// extern int sys_execute(uint8_t *command);
+
+ASMLINKAGE int dummy_sys_call(){
+    return invalid_sys_call();
+}
 
 ASMLINKAGE int32_t halt_sys_call(int8_t status){
 

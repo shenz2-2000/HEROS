@@ -25,6 +25,8 @@ extern int32_t ece391_sigreturn (void);
 extern int32_t ece391_play_sound(uint32_t nFrequence);
 extern int32_t ece391_nosound();
 
+extern int32_t ece391_ioctl(int32_t fd, int32_t cmd);
+
 enum signums {
 	DIV_ZERO = 0,
 	SEGFAULT,

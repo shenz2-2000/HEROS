@@ -5,6 +5,7 @@
 #include "tests.h"
 #include "signal_sys_call.h"
 #include "scheduler.h"
+#include "sound_card.h"
 
 #define FILE_CLOSED_TEST 1
 
@@ -19,14 +20,13 @@ int32_t sys_open(const uint8_t *f_name) {
     dentry_t dentry;
     int32_t fd = -1;
     pcb_t *cur_pcb;
-//    int i;
-//    i = 1/0;
 
-    // For error test, we can return back to shell!
-//    int i = 1;
-//    i = i / 0;
     cur_pcb = get_cur_process();
 
+    if (cur_pcb == NULL) {
+        printf("ERROR [SYS FILE] in sys_open: the current process is NULL");
+        return -1;
+    }
     if (cur_pcb->file_arr.n_opend_files >= N_FILE_LIMIT) {
         printf("ERROR [SYS FILE] in sys_open: cannot OPEN file [%s] because the max number of files is reached\n", f_name);
         return -1;
@@ -35,31 +35,33 @@ int32_t sys_open(const uint8_t *f_name) {
     if (f_name == NULL) {
         printf("ERROR [SYS FILE] in sys_open: f_name NULL pointer\n");
         return -1;
+    } else if (strncmp((int8_t*) "audio", (int8_t*) f_name, (uint32_t) 6) == 0) {
+        fd = file_audio_open(f_name);
+    } else {
+        // obtain the dentry to know the file type
+        if (read_dentry_by_name(f_name, &dentry) == -1) {
+            printf("WARNING [SYS FILE] in sys_open: cannot OPEN file with name: [%s]\n", f_name);
+            return -1;
+        }
+
+        // invoke the different open op according to file type
+        switch (dentry.f_type) {
+            case 0: {   // RTC file
+                fd = file_rtc_open(f_name);
+                break;
+            }
+            case 1: {   // directory file
+                fd = dir_open(f_name);
+                break;
+            }
+            case 2: {   // regulary file
+                fd = file_open(f_name);
+                break;
+            }
+        }
     }
 
-    // obtain the dentry to know the file type
-    if (read_dentry_by_name(f_name, &dentry) == -1) {
-        printf("WARNING [SYS FILE] in sys_open: cannot OPEN file with name: [%s]\n", f_name);
-        return -1;
-    }
-
-    // invoke the different open op according to file type
-    switch (dentry.f_type) {
-        case 0: {   // RTC file
-            fd = file_rtc_open(f_name);
-            break;
-        }
-        case 1: {   // directory file
-            fd = dir_open(f_name);
-            break;
-        }
-        case 2: {   // regulary file
-            fd = file_open(f_name);
-            break;
-        }
-    }
-
-    cur_pcb->file_arr.n_opend_files++;
+    if (fd != -1) cur_pcb->file_arr.n_opend_files++;
 
     return fd;
 }
@@ -85,6 +87,14 @@ int32_t sys_close(int32_t fd) {
     // get the current process
     cur_pcb = get_cur_process();
 
+    if (cur_pcb == NULL) {
+        printf("ERROR [SYS FILE] in sys_close: the current process is NULL");
+        return -1;
+    }
+    if (cur_pcb->file_arr.files[fd].f_op == NULL) {
+        printf("ERROR [SYS FILE] in sys_close: the file has no file operation. fd: %d\n", fd);
+        return -1;
+    }
     if (cur_pcb->file_arr.files[fd].flags == AVAILABLE) {
         printf("WARNING [FILE]: cannot CLOSE a file that is not opened. fd: %d\n", fd);
         return -1;
@@ -119,12 +129,20 @@ int32_t sys_read(int32_t fd, void *buf, int32_t bufsize) {
         printf("ERROR [SYS FILE] in sys_read: read buffer NULL pointer\n");
         return -1;
     }
-    if (bufsize <= 0) {
-        printf("ERROR [SYS FILE] in sys_read: read buffer size should be positive\n");
+    if (bufsize < 0) {
+        printf("ERROR [SYS FILE] in sys_read: read buffer size should not be negative\n");
+        return -1;
+    }
+    if (cur_pcb == NULL) {
+        printf("ERROR [SYS FILE] in sys_read: the current process is NULL");
         return -1;
     }
     if (cur_pcb->file_arr.files[fd].flags == AVAILABLE) {
         printf("WARNING [SYS FILE] in sys_read: cannot READ a file that is not opened. fd: %d\n", fd);
+        return -1;
+    }
+    if (cur_pcb->file_arr.files[fd].f_op == NULL) {
+        printf("ERROR [SYS FILE] in sys_read: the file has no file operation. fd: %d\n", fd);
         return -1;
     }
     // stdout is write-only
@@ -139,20 +157,6 @@ int32_t sys_read(int32_t fd, void *buf, int32_t bufsize) {
     // printf("In file_test: Now the file type is %d\n", dentry.f_type);
 
     return cur_pcb->file_arr.files[fd].f_op->read(fd, buf, bufsize);
-}
-
-/**
- * invalid_sys_call
- * Description: for invalid system call number
- * Input: None
- * Output: None
- * Side effect: None
- */
-
-int
-invalid_sys_call(){
-     printf("The system call is invalid!!!! Please check the call number!!! \n");
-     return -1;
 }
 
 /**
@@ -179,6 +183,14 @@ int32_t sys_write(int32_t fd, const void *buf, int32_t bufsize) {
         printf("ERROR [SYS FILE] in sys_write: write buffer size should be non-negative\n");
         return -1;
     }
+    if (cur_pcb == NULL) {
+        printf("ERROR [SYS FILE] in sys_write: the current process is NULL");
+        return -1;
+    }
+    if (cur_pcb->file_arr.files[fd].f_op == NULL) {
+        printf("ERROR [SYS FILE] in sys_write: the file has no file operation. fd: %d\n", fd);
+        return -1;
+    }
     if (cur_pcb->file_arr.files[fd].flags == AVAILABLE) {
         printf("WARNING [SYS FILE] in sys_write: the file is not opened. fd: %d\n", fd);
         return -1;
@@ -191,7 +203,51 @@ int32_t sys_write(int32_t fd, const void *buf, int32_t bufsize) {
     return cur_pcb->file_arr.files[fd].f_op->write(fd, buf, bufsize);
 }
 
+/**
+ * sys_ioctl
+ * Description: system call: system io control for the device
+ * Input: fd - the file descriptor
+          cmd - the command sent to the device
+ * Output: -1: fail
+ * Side effect: a command is sent to the device
+ */
+int32_t sys_ioctl(int32_t fd, int32_t cmd) {
+    pcb_t *cur_pcb = get_cur_process();
 
+    if (fd < 0 || fd > N_FILE_LIMIT) {
+        printf("ERROR [SYS FILE] in sys_ioctl: invalid fd\n");
+        return -1;
+    }
+    if (cur_pcb == NULL) {
+        printf("ERROR [SYS FILE] in sys_ioctl: the current process is NULL");
+        return -1;
+    }
+    if (cur_pcb->file_arr.files[fd].flags == AVAILABLE) {
+        printf("WARNING [SYS FILE] in sys_ioctl: the file is not opened. fd: %d\n", fd);
+        return -1;
+    }
+    if (cur_pcb->file_arr.files[fd].f_op == NULL) {
+        printf("ERROR [SYS FILE] in sys_ioctl: the file has no file operation. fd: %d\n", fd);
+        return -1;
+    }
+    if (cur_pcb->file_arr.files[fd].f_op->ioctl == NULL) {
+        printf("ERROR [SYS FILE] in sys_ioctl: the file has no ioctl operation. fd: %d\n", fd);
+        return -1;
+    }
+    return cur_pcb->file_arr.files[fd].f_op->ioctl(fd, cmd);
+}
+
+/**
+ * invalid_sys_call
+ * Description: for invalid system call number
+ * Input: None
+ * Output: None
+ * Side effect: None
+ */
+int invalid_sys_call(){
+     printf("The system call is invalid!!!! Please check the call number!!! \n");
+     return -1;
+}
 
 /**
  * sys_vidmap
@@ -225,7 +281,8 @@ int sys_vidmap(uint8_t** screen_start){
     }
 
     // setup the video memory in PD
-    set_video_memory(cur_pcb->terminal);
+//    set_video_memory(cur_pcb->terminal);
+    set_video_memory_SVGA(cur_pcb->terminal);   // for SVGA
 
     *screen_start = (uint8_t*)(USER_VA_END + VM_INDEX);
 

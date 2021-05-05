@@ -15,4 +15,6 @@
 #define SYS_PLAY_SOUND 11
 #define SYS_NOSOUND 12
 
+#define SYS_IOCTL 13
+
 #endif /* ECE391SYSNUM_H */

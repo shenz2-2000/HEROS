@@ -15,7 +15,8 @@
 #include "signal_sys_call.h"
 #include "gensound.h"
 #include "mouse_driver.h"
-
+#include "gui.h"
+#include "wav_player.h"
 #define RUN_TESTS
 
 /* Function Declaration */
@@ -225,21 +226,13 @@ void entry(unsigned long magic, unsigned long addr) {
     }
 
 
+
     /* Init the PIC */
     i8259_init();
 
     /* Initialize devices, memory, filesystem, enable device interrupts on the
      * PIC, any other initialization stuff... */
     enable_irq(1);   // Keyboard is IRQ1
-
-    /* Init Mouse */
-//    mouse_init();
-//    enable_irq(12);
-
-    /*Init RTC*/
-    rtc_init();
-    enable_irq(8); // RTC is IRQ8
-    rtc_restart_interrupt();
 
     /*Init IDT*/
     init_IDT();
@@ -254,6 +247,18 @@ void entry(unsigned long magic, unsigned long addr) {
     fill_page();
     init_page_register();
 
+    init_gui();
+
+
+    /* Init Mouse */
+     mouse_init();
+     enable_irq(12);
+
+    /*Init RTC*/
+    rtc_init();
+    enable_irq(8); // RTC is IRQ8
+    rtc_restart_interrupt();
+
     /* Init vidmap */
     vidmap_init();
 
@@ -262,7 +267,6 @@ void entry(unsigned long magic, unsigned long addr) {
 
     /* Init Signal */
     signal_init();
-
     // Enable irq for mouse
     /* Enable interrupts */
 
@@ -270,10 +274,13 @@ void entry(unsigned long magic, unsigned long addr) {
     // sys_execute((uint8_t *) "shell");
 
     /* play the boot music */
-    play_song(0);
+    //play_song(0);
+
+    printf("Enabling Interrupts\n");
+    sti();
 
     sys_execute((uint8_t *) "init_task", 0, 0, init_task_main);
-        printf("Error: return from the init_task, which should not happen");
+//    printf("Error: return from the init_task, which should not happen");
 
 
     // for test use
@@ -282,8 +289,7 @@ void entry(unsigned long magic, unsigned long addr) {
     /* Do not enable the following until after you have set up your
      * IDT correctly otherwise QEMU will triple fault and simple close
      * without showing you any output */
-    /*printf("Enabling Interrupts\n");
-    sti();*/
+
 
 #ifdef RUN_TESTS
     /* Run tests */

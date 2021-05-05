@@ -4,6 +4,7 @@
 #include "lib.h"
 #include "terminal.h"
 #include "process.h"
+#include "mouse_driver.h"
 #define VIDEO       0xB8000
 #define NUM_COLS    80
 #define NUM_ROWS    25
@@ -14,8 +15,9 @@
 
 int screen_x;
 int screen_y;
-int prev_mouse_x = 0;
-int prev_mouse_y = 0;
+int new_content = 0;
+//int prev_mouse_x = 0;
+//int prev_mouse_y = 0;
 static char* video_mem = (char *)VIDEO;
 uint8_t mouse_in_use = 0;
 
@@ -88,10 +90,12 @@ void restore_blue_screen(){
  * Function: Clears video memory */
 void clear(void) {
     int32_t i;
+
     for (i = 0; i < NUM_ROWS * NUM_COLS; i++) {
         *(uint8_t *)(video_mem + (i << 1)) = 0;
         *(uint8_t *)(video_mem + (i << 1) + 1) = ATTRIB;
     }
+    new_content = 1;
 }
 
 /* void delete_last(void);
@@ -99,6 +103,7 @@ void clear(void) {
  * Return Value: none
  * Function: delete the last character */
 void delete_last(void) {
+
     if (screen_x==0&&screen_y>0) {
         screen_y--;
         screen_x = NUM_COLS;
@@ -109,6 +114,7 @@ void delete_last(void) {
 
     // update the cursor position
     update_cursor(get_showing_terminal()->screen_x,get_showing_terminal()->screen_y);
+    new_content=1;
 }
 
 /* void reset_screen(void);
@@ -308,6 +314,7 @@ void putc(uint8_t c) {
        }
 
     }
+    new_content = 1;
 }
 
 /* int8_t* itoa(uint32_t value, int8_t* buf, int32_t radix);
@@ -691,6 +698,20 @@ int32_t close(int32_t fd) {
     asm volatile ("INT $0x80"
     : "=a" (ret)
     : "a" (0x06), "b" (fd)
+    : "memory", "cc");
+    return ret;
+}
+
+/* int32_t ioctl(int32_t fd)
+ * Inputs: fd : the target file
+ *         cmd : the command to send
+ * Return Value: ret: whether the close is successful
+ */
+int32_t ioctl(int32_t fd, int32_t cmd) {
+    long ret;
+    asm volatile ("INT $0x80"
+    : "=a" (ret)
+    : "a" (0x0D), "b" (fd), "c" (cmd)
     : "memory", "cc");
     return ret;
 }

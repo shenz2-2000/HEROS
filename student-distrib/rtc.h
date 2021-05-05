@@ -1,5 +1,6 @@
 #include "types.h"
 #include "process.h"
+#include "vga.h"
 
 #ifndef RTC_H
 #define RTC_H
@@ -20,7 +21,7 @@ int32_t rtc_read(int32_t fd, void* buf, int32_t nbytes);
 int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes);
 int32_t rtc_open(const uint8_t* filename);
 int32_t rtc_close(int32_t fd);
-
+extern int all_terminal_is_on;
 /* utils */
 int32_t sleep(uint32_t time_in_ms);
 

@@ -31,6 +31,7 @@ typedef struct file_operations {
     int32_t (*close) (int32_t fd);
     int32_t (*read) (int32_t fd, void *buf, int32_t bufsize);
     int32_t (*write) (int32_t fd, const void *buf, int32_t bufsize);
+    int32_t (*ioctl) (int32_t fd, int32_t cmd);
 } file_operations_t;
 
 // entries in the file array
@@ -102,5 +103,11 @@ int32_t file_rtc_open(const uint8_t *f_name);
 int32_t file_rtc_close(int32_t fd);
 int32_t file_rtc_read(int32_t fd, void *buf, int32_t bufsize);
 int32_t file_rtc_write(int32_t fd, const void *buf, int32_t bufsize);
+
+int32_t file_audio_open(const uint8_t *f_name);
+int32_t file_audio_close(int32_t fd);
+int32_t file_audio_read(int32_t fd, void *buf, int32_t bufsize);
+int32_t file_audio_write(int32_t fd, const void *buf, int32_t bufsize);
+int32_t file_audio_ioctl(int32_t fd, int32_t cmd);
 
 #endif      // FILE_SYS_H

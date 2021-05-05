@@ -5,6 +5,9 @@
 #include "sys_call.h"
 #include "scheduler.h"
 #include "mouse_driver.h"
+#include "gui.h"
+#include "wav_player.h"
+#include "mouse_driver.h"
 
 pcb_t* pcb_ptrs[N_PCB_LIMIT];
 int32_t n_present_pcb;
@@ -12,6 +15,9 @@ pcb_t *cur_task = NULL;
 pcb_t *foreground_task[MAX_TERMINAL];
 extern terminal_struct_t null_terminal;
 terminal_struct_t *running_term = &null_terminal;
+terminal_struct_t *showing_term = &null_terminal;
+int32_t all_terminal_is_on = 0 ;
+static int init = 0;
 /**
  * get_running_terminal
  * Description: return the terminal of the task that is running
@@ -46,7 +52,7 @@ void process_user_vidmap(pcb_t *process) {
         printf("ERROR in process_user_vidmap(): NULL input");
         return;
     }
-    set_video_memory(process->terminal);
+    set_video_memory_SVGA(process->terminal);
 }
 
 /**
@@ -59,9 +65,11 @@ void set_showing_task(pcb_t* target_task) {
     if (target_task!=NULL && target_task->terminal==NULL) return;
     uint32_t flags;
     cli_and_save(flags);
-    terminal_struct_t* old_term = get_showing_task()==NULL?&null_terminal:get_showing_task()->terminal;
+    //terminal_struct_t* old_term = get_showing_task()==NULL?&null_terminal:get_showing_task()->terminal;
     terminal_struct_t* new_term = target_task==NULL?&null_terminal:target_task->terminal;
-    switch_terminal(old_term,new_term);
+    // because it's SVGA version, we don't switch terminal
+    // switch_terminal(old_term,new_term);
+    showing_term = new_term;    // sync the terminal_showing
     cur_task = target_task;
     process_user_vidmap(get_cur_process());
     restore_flags(flags);
@@ -458,7 +466,46 @@ void mouse_process(){
 
 
 
+void update_screen() {
+    uint32_t flags;
+    int i,j;
+    cli_and_save(flags);
+    if (need_redraw_background) {
 
+        for(i = 0; i < VGA_DIMX; i++)
+            for(j = 0; j < VGA_DIMY; j++)
+                Pdraw(i, j, (i-300)*(i-300)+(i-300)*(j-400)+(j-400)*(j-400)+0xEE0000);
+        setup_status_bar();
+    }
+    char s[10] = "fish";
+    if(showing_term->id != -1){
+        // set the real page table to visit, or in the backup table there is no buffer (page fault)
+        PDE_4K_set(&(page_directory[0]), (uint32_t) (page_table0), 1, 1, 1);
+        flush_tlb();
+        if (!init) {
+            update_priority(0); update_priority(1); update_priority(2);
+            draw_terminal((char*)(VM_BUF_SVGA_ADDR + 0 * SIZE_4K_IN_BYTES),0,0);
+            draw_terminal((char*)(VM_BUF_SVGA_ADDR + 1 * SIZE_4K_IN_BYTES),1,0);
+            draw_terminal((char*)(VM_BUF_SVGA_ADDR + 2 * SIZE_4K_IN_BYTES),2,1);
+            init = 1;
+        } else if (new_content || need_redraw_background || need_change_focus || strcmp(s, (int8_t*)get_cur_process()->name)==1) {
+            for (i=0;i<=2;++i)
+                for (j=0;j<3;++j)
+                    if (terminal_window[j].priority==i && terminal_window[j].active==1)
+                        draw_terminal((char*)(VM_BUF_SVGA_ADDR + j * SIZE_4K_IN_BYTES),j,0);
+            for (j=0;j<3;++j)
+                if (terminal_window[j].priority==3 && terminal_window[j].active==1)
+                    draw_terminal((char*)(VM_BUF_SVGA_ADDR + j * SIZE_4K_IN_BYTES),j,1);
+            new_content = 0;
+        }
+
+        terminal_vidmap_SVGA(running_term);
+    }
+    need_redraw_background = 0;
+    need_change_focus = 0;
+    restore_flags(flags);
+
+}
 /**
  * init_task_main
  * Description: Open three terminal and keep them
@@ -468,18 +515,19 @@ void mouse_process(){
 void init_task_main() {
 
     int32_t i;
-    uint32_t flags;
-    cli_and_save(flags);
-
+    play_wav(0);
     sys_execute((uint8_t *) "shell", 0  , 1, NULL);
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
-//    initialize_mouse();
-//    enable_irq(12);
-//    mouse_init();
-//    enable_irq(12);
-    restore_flags(flags);
+    all_terminal_is_on = 1;
+    uint32_t flags;
     while(1) {
+        if (need_play) {
+            cli_and_save(flags);
+            sys_execute((uint8_t *) "wav_player YoungForYou.wav",1,0,NULL);
+            restore_flags(flags);
+            need_play = 0;
+        }
         for (i = 0; i<MAX_TERMINAL;++i) if (foreground_task[i]==NULL) {
                 sys_execute((uint8_t *) "shell", 0, 1, NULL);
         }

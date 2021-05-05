@@ -6,8 +6,9 @@
 #include "rtc.h"
 #include "lib.h"
 #include "terminal.h"
+#include "gui.h"
 /*The following parts are concerning CMOS system time*/
-/*Reference Comes from: https://wiki.osdev.org/CMOS#Getting_Current_Date_and_Time_from_RTC\ */
+/* Reference Comes from: https://wiki.osdev.org/CMOS#Getting_Current_Date_and_Time_from_RTC\ */
 
 int32_t sec, mins, hour, day, month, year;
 #define CMOS_address 0x70
@@ -24,7 +25,8 @@ unsigned get_data_from_register(int reg) {
 }
 
 void system_time(){
-    while (waiting_for_ack());
+    int cnt = 0;
+    while (waiting_for_ack() || cnt>=10000) ++cnt;
     sec = get_data_from_register(0x00);
     mins = get_data_from_register(0x02);
     hour = get_data_from_register(0x04);
@@ -43,12 +45,19 @@ void system_time(){
     }
 
     if (!(Mode&0x02) && (hour&0x80)) hour = ((hour & 0x7F) + 12) % 24;
-    uint32_t flags;
-    cli_and_save(flags);
-    terminal_struct_t* running_terminal = get_running_terminal();
-    if (get_showing_task())
-        terminal_set_running(get_showing_task()->terminal);
-    // printf("UTC+0: 2021/%d/%d %d:%d:%d\n", month, day, hour, mins, sec);
-    terminal_set_running(running_terminal);
-    restore_flags(flags);
+    setup_status_bar();
+}
+
+// The following part is for random
+int random_seed = 2;
+int random_source = 100000;
+
+int generate_random_number(){
+    random_source = year*365*24*3600 + month*30*24*3600 + day*24*3600 + hour*3600 + mins*60 + sec;
+    random_seed = (random_seed * random_source) % LARGE_NUM;
+    if(random_seed == 0) random_seed = 50000;
+
+    if(random_seed <= 0) return (-random_seed)%1000;
+
+    return (random_seed)%1000;
 }
