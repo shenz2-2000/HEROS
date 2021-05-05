@@ -486,7 +486,7 @@ void update_screen() {
             draw_terminal((char*)(VM_BUF_SVGA_ADDR + 1 * SIZE_4K_IN_BYTES),1,0);
             draw_terminal((char*)(VM_BUF_SVGA_ADDR + 2 * SIZE_4K_IN_BYTES),2,1);
             init = 1;
-        } else {
+        } else if (new_content) {
             for (i=0;i<=2;++i)
                 for (j=0;j<3;++j)
                     if (terminal_window[j].priority==i)
@@ -494,6 +494,7 @@ void update_screen() {
             for (j=0;j<3;++j)
                 if (terminal_window[j].priority==3)
                     draw_terminal((char*)(VM_BUF_SVGA_ADDR + j * SIZE_4K_IN_BYTES),j,1);
+            new_content = 0;
         }
 
 
