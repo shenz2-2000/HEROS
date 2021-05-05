@@ -118,7 +118,7 @@ void handle_input(uint8_t input) {
             // Handle the enter pressed and reading is turned on
             if ((get_showing_task()->terminal->user_ask)!=0 && input == 0x1C) {    // If enter is pressed
                 get_showing_task()->terminal->buf[get_showing_task()->terminal->buf_cnt] = '\n';
-                putc(get_showing_task()->terminal->buf[get_showing_task()->terminal->buf_cnt]);
+//                putc(get_showing_task()->terminal->buf[get_showing_task()->terminal->buf_cnt]);
                 get_showing_task()->terminal->buf_cnt++;
                 return;
             }

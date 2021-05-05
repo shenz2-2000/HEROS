@@ -520,8 +520,14 @@ void init_task_main() {
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
     all_terminal_is_on = 1;
-
+    uint32_t flags;
     while(1) {
+        if (need_play) {
+            cli_and_save(flags);
+            sys_execute((uint8_t *) "wav_player YoungForYou.wav",1,0,NULL);
+            restore_flags(flags);
+            need_play = 0;
+        }
         for (i = 0; i<MAX_TERMINAL;++i) if (foreground_task[i]==NULL) {
                 sys_execute((uint8_t *) "shell", 0, 1, NULL);
         }

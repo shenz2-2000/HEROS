@@ -22,7 +22,7 @@ int16_t prev_mouse_x = 0;
 int16_t prev_mouse_y = 0;
 int prev_draw_x = 0;
 int prev_draw_y = 0;
-
+int need_play = 0;
 // several global indicators
 uint32_t left_pressed = 0;
 uint32_t right_pressed = 0;
@@ -166,8 +166,8 @@ void mouse_interrupt_handler() {
                    update_priority(dragged_terminal);
                    dragged_mouse_x = mouse_x; dragged_mouse_y = mouse_y;
                }
-
            }
+           if (mouse_x>=VGA_DIMX-43 && mouse_y>=VGA_DIMY-27) need_play = 1;
 
            //render_string(512,384,"left click is ok!",0xDC143C);
         }

@@ -5,7 +5,7 @@
 #include "x86_desc.h"
 #include "signal_sys_call.h"
 #include "terminal.h"
-#define N_PCB_LIMIT 7
+#define N_PCB_LIMIT 10
 
 #define TASK_KSTK_SIZE_IN_B 8192
 #define TASK_KSTK_BOTTOM 0x800000    
@@ -69,4 +69,5 @@ void init_task_main();
 void process_user_vidmap(pcb_t *process);
 void update_screen();
 extern window_t terminal_window[3];;
+extern int need_play;
 #endif
