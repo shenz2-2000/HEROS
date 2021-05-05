@@ -474,7 +474,7 @@ void update_screen() {
 
         for(i = 0; i < VGA_DIMX; i++)
             for(j = 0; j < VGA_DIMY; j++)
-                Pdraw(i, j, (i-300)*(i-300)+(i-300)*(j-400)+(j-400)*(j-400)+0xCC0000);
+                Pdraw(i, j, (i-300)*(i-300)+(i-300)*(j-400)+(j-400)*(j-400)+0xEE0000);
         setup_status_bar();
     }
     char s[10] = "fish";
