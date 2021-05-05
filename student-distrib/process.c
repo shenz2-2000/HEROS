@@ -476,6 +476,7 @@ void update_screen() {
                 Pdraw(i, j, 0xD9A179+i+j*2);
         setup_status_bar();
     }
+    char s[10] = "fish";
     if(showing_term->id != -1){
         // set the real page table to visit, or in the backup table there is no buffer (page fault)
         PDE_4K_set(&(page_directory[0]), (uint32_t) (page_table0), 1, 1, 1);
@@ -486,7 +487,7 @@ void update_screen() {
             draw_terminal((char*)(VM_BUF_SVGA_ADDR + 1 * SIZE_4K_IN_BYTES),1,0);
             draw_terminal((char*)(VM_BUF_SVGA_ADDR + 2 * SIZE_4K_IN_BYTES),2,1);
             init = 1;
-        } else if (new_content || need_redraw_background || need_change_focus) {
+        } else if (new_content || need_redraw_background || need_change_focus || strcmp(s, (int8_t*)get_cur_process()->name)==1) {
             for (i=0;i<=2;++i)
                 for (j=0;j<3;++j)
                     if (terminal_window[j].priority==i && terminal_window[j].active==1)

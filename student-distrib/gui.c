@@ -680,7 +680,7 @@ void setup_status_bar(){
     status_bar[18] = hour%10+48;
     status_bar[20] = mins/10+48;
     status_bar[21] = mins%10+48;
-    render_string(5, VGA_DIMY-24 , " Welcome to HEROS-OS", 0x0000);
+    render_string(5, VGA_DIMY-24 , " Welcome to HEROS", 0x0000);
     render_string(VGA_DIMX-250, VGA_DIMY-24 , status_bar, 0x0000);
     render_music_icon(VGA_DIMX - 43, VGA_DIMY-27);
     render_terminal_button();
@@ -689,18 +689,9 @@ void setup_status_bar(){
 
 
 void render_terminal_button(){
-    int i;
-    render_string(240,VGA_DIMY-24,"TERMINAL0",0x0000);
-    render_string(200+200,VGA_DIMY-24,"TERMINAL1",0x0000);
-    render_string(200+200+200 - 40,VGA_DIMY-24,"TERMINAL2",0x0000);
-    for(i=0; i < 16; i++){
-        Pdraw(240,VGA_DIMY-24+i,0x0000);
-        Pdraw(240+71,VGA_DIMY-24+i,0x0000);
-        Pdraw(400,VGA_DIMY-24+i,0x0000);
-        Pdraw(400+71,VGA_DIMY-24+i,0x0000);
-        Pdraw(600-40,VGA_DIMY-24+i,0x0000);
-        Pdraw(600-40+71,VGA_DIMY-24+i,0x0000);
-    }
+    render_string(240-32,VGA_DIMY-24,"|   TERMINAL 0  |",0x0000);
+    render_string(200+200-32,VGA_DIMY-24,"|   TERMINAL 1  |",0x0000);
+    render_string(200+200+200 - 40-32,VGA_DIMY-24,"|   TERMINAL 2  |",0x0000);
 
 }
 

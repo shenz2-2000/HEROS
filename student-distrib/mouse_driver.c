@@ -263,8 +263,3 @@ int check_mouse_in_button(int mouse_x,int mouse_y){
     return -1;
 }
 
-//void render_terminal_button(){
-//    render_string(240,VGA_DIMY-24,"TERMINAL1",0x0000);
-//    render_string(200+200,VGA_DIMY-24,"TERMINAL2",0x0000);
-//    render_string(200+200+200 - 40,VGA_DIMY-24,"TERMINAL3",0x0000);
-//}
