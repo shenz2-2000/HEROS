@@ -1,4 +1,5 @@
-// reference: https://wiki.osdev.org/VGA_Hardware#Memory_Layout_in_16-color_graphics_modes and linux v5 source code
+// reference1: https://forum.osdev.org/viewtopic.php?f=1&t=30884
+// reference2: https://wiki.osdev.org/Bochs_VBE_Extensions
 
 #include "vbe.h"
 
@@ -12,22 +13,23 @@
 #define VBE_DISPI_ENABLED               0x01
 #define VBE_DISPI_INDEX_FB_BASE_HI      0x0B
 
-void vbe_write(uint16_t index, uint16_t value)
+// BgaWriteRegister
+void BgaWriteRegister(unsigned short IndexValue, unsigned short DataValue)
 {
-    outw(index, VBE_DISPI_IOPORT_INDEX);
-    outw(value, VBE_DISPI_IOPORT_DATA);
+    outw(IndexValue, VBE_DISPI_IOPORT_INDEX);
+    outw(DataValue, VBE_DISPI_IOPORT_DATA);
 }
 
 void veb_clear() {
-    vbe_write(VBE_DISPI_INDEX_ENABLE, VBE_DISPI_DISABLED);
+    BgaWriteRegister(VBE_DISPI_INDEX_ENABLE, VBE_DISPI_DISABLED);
 }
 
-void init_vbe(uint16_t xres, uint16_t yres, uint16_t bpp)
+void init_vbe(uint16_t res_x, uint16_t res_y, uint16_t bpp)
 {
-    vbe_write(VBE_DISPI_INDEX_ENABLE, VBE_DISPI_DISABLED);
-    vbe_write(VBE_DISPI_INDEX_XRES, xres);
-    vbe_write(VBE_DISPI_INDEX_YRES, yres);
-    vbe_write(VBE_DISPI_INDEX_BPP, bpp);
-    vbe_write(VBE_DISPI_INDEX_FB_BASE_HI, REG_VBE >> 16);
-    vbe_write(VBE_DISPI_INDEX_ENABLE, VBE_DISPI_ENABLED);
+    BgaWriteRegister(VBE_DISPI_INDEX_ENABLE, VBE_DISPI_DISABLED);
+    BgaWriteRegister(VBE_DISPI_INDEX_XRES, res_x);
+    BgaWriteRegister(VBE_DISPI_INDEX_YRES, res_y);
+    BgaWriteRegister(VBE_DISPI_INDEX_BPP, bpp);
+    BgaWriteRegister(VBE_DISPI_INDEX_FB_BASE_HI, REG_VBE >> 16);
+    BgaWriteRegister(VBE_DISPI_INDEX_ENABLE, VBE_DISPI_ENABLED);
 }
