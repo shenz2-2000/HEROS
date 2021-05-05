@@ -809,14 +809,14 @@ void render_sentence(int x_start, int y_start, char* string, uint32_t color) {
     }
 }
 
-void render_window(int x, int y, int width, int height, char* title, uint8_t is_focus) {
+void render_window(int x, int y, int width, int height, char* title, int focus) {
     Rdraw(width, height, x, y,0x000000);
-    if(is_focus) {
-        Rdraw(width - 4, 20,x + 2, y + 2,  0x2F4F4F);
-        render_sentence(x+16, y+8, title, 0xFFFFFF);
+    if(focus) {
+        Rdraw(width-4,18,x + 4,y + 4,0x2F4F4F);
+        render_sentence(x+16,y+8,title,0xFFFFFF);
     } else {
-        Rdraw(width - 4, 20, x + 2, y + 2, 0xBEBEBE);
-        render_sentence(x+16, y+8, title, 0xFFFFFF);
+        Rdraw(width-4,18,x+4,y+4,0xBEBEBE);
+        render_sentence(x+16,y+8,title,0xFFFFFF);
     }
 }
 

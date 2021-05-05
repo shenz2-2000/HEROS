@@ -45,13 +45,17 @@ void system_time(){
     }
 
     if (!(Mode&0x02) && (hour&0x80)) hour = ((hour & 0x7F) + 12) % 24;
-//    uint32_t flags;
-//    cli_and_save(flags);
-//    terminal_struct_t* running_terminal = get_running_terminal();
-//    if (get_showing_task())
-//        terminal_set_running(get_showing_task()->terminal);
-//    // printf("UTC+0: 2021/%d/%d %d:%d:%d\n", month, day, hour, mins, sec);
-//    terminal_set_running(running_terminal);
     setup_status_bar();
-//    restore_flags(flags);
+}
+
+// The following part is for random
+#define LARGE_NUM 0x7FFFFFFF
+int random_seed = 2;
+int random_source = 100000;
+
+int generate_random_number(){
+    random_source = year*365*24*3600 + month*30*24*3600 + day*24*3600 + hour*3600 + mins*60 + sec;
+    random_seed = (random_seed * random_source) % LARGE_NUM;
+    if(random_seed == 0) random_seed = 50000;
+    return (-random_seed)%1000;
 }

@@ -16,7 +16,7 @@ typedef struct window_t {
 
 void init_gui();
 
-void render_window(int x, int y, int width, int height, char* title, uint8_t is_focus);
+void render_window(int x, int y, int width, int height, char* title, int focus);
 
 void render_word(int x_start, int y_start, char ch, uint32_t color);
 
