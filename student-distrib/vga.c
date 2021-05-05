@@ -58,7 +58,7 @@ void Pdraw(int x, int y, uint32_t clr) {
     fbuf[y][x].r = ((clr >> 16) & 0xFF);
     fbuf[y][x].g = ((clr >> 8) & 0xFF);
     fbuf[y][x].b = (clr & 0xFF);
-    need_update = 1;
+    // need_update = 1;
 }
 
 void Pcopy(int x, int y, uint32_t clr) {
@@ -68,4 +68,18 @@ void Pcopy(int x, int y, uint32_t clr) {
     Mbuf[0][0].g = ((clr >> 8) & 0xFF);
     Mbuf[0][0].b = (clr & 0xFF);
     cpbuf(&vbe_mem[x+y*VGA_DIMX], Mbuf, 1);
+}
+
+void patch_mouse(int x, int y) {
+    if( x < 0 || y < 0 || x >= VGA_DIMX || y >= VGA_DIMY)
+        return;
+    int idx_x, idx_y;
+    int ry, rx;
+    rx = min(VGA_DIMX, x + 16);
+    ry = min(VGA_DIMY, y + 16);
+    for(idx_y = y; idx_y < ry; idx_y++) {
+        for (idx_x = x; idx_x < rx; idx_x++) {
+            cpbuf(&vbe_mem[idx_x+idx_y*VGA_DIMX], &fbuf[idx_x][idx_y], 1);
+        }
+    }
 }

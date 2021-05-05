@@ -54,6 +54,8 @@ void render_music_icon(int x, int y);
 
 void render_terminal_button();
 
+int check_play(int x,int y) ;
+
 int render_randomness();
 
 int check_click_random_button();

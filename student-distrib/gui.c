@@ -651,6 +651,9 @@ unsigned char font_8x16[256][16] = {
 
 static int init_terminal[3];
 int status_bar_need_refresh = 0;
+
+static ARGB Mpatch[16][16] __attribute__((aligned(32)));
+
 int need_redraw_background = 0;
 int prev_random_num = 0;
 void init_gui() {
@@ -702,7 +705,7 @@ void render_terminal_button(){
     render_sentence(240,VGA_DIMY-24,"TERMINAL 0",0x0000);
     render_sentence(200+200,VGA_DIMY-24,"TERMINAL 1",0x0000);
     render_sentence(200+200+200 - 40 ,VGA_DIMY-24,"TERMINAL 2",0x0000);
-
+    // need_update = 1;
 }
 
 
@@ -739,6 +742,7 @@ void render_music_icon(int x, int y){
                 Pdraw(x+idx_x, y+idx_y, 0xAFEEEE);
             }
     }
+    // need_update = 1;
 }
 
 
@@ -872,7 +876,7 @@ void render_mouse(int x, int y) {
             else if(shape1[idx_y][idx_x] == '1')
                 Pcopy(x+idx_x,y+idx_y,0x000000);
         }
-    need_update = 1;
+//    need_update = 1;
 }
 
 
@@ -966,6 +970,9 @@ int32_t check_in_window(int x, int y){
     return 0;
 }
 
+int check_play(int x,int y) {
+    return (x>=VGA_DIMX - 43 && y>= VGA_DIMY-27);
+}
 //typedef struct window_t {
 //    int32_t pos_x, pos_y, width, height;
 //    int id;
