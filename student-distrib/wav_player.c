@@ -16,9 +16,11 @@
 #include "wav_player.h"
 #include "lib.h"
 #include "sys_call.h"
+#include "process.h"
 
-const char *wav_file_list[] = {"macOS_startup.wav"};
+const char *wav_file_list[] = {"macOS_startup.wav", "YoungForYou.wav"};
 uint8_t sound_card_buf[DMA_CHUNK_SIZE_BYTES];
+static int32_t is_process = 0;
 
 static int32_t wav_player_fail(int32_t wav_fd, int32_t dsp_fd);
 
@@ -100,11 +102,12 @@ int32_t sound_card_init(int32_t dsp_fd, wave_file_struct *wav_file) {
  * Input: file_num - the file descriptor number for each wav file
  * Output: 0 if success, -1 if not
  */
-int32_t play_wav(int32_t file_num) {
+int32_t play_wav(int32_t file_num, int32_t is_task) {
     // open the wav file
     int32_t dsp_fd, wav_fd;
     int32_t length, i, ret, temp;
     wave_file_struct wav_file;
+    is_process = is_task;
 
     wav_fd = sys_open((uint8_t*) wav_file_list[file_num]);
     if (wav_fd == -1) return -1;
@@ -171,7 +174,7 @@ int32_t play_wav(int32_t file_num) {
 
     sys_close(wav_fd);
     sys_close(dsp_fd);
-
+    if (is_process) system_halt(0);
     return 0;
 }
 
@@ -185,5 +188,6 @@ int32_t play_wav(int32_t file_num) {
 static int32_t wav_player_fail(int32_t wav_fd, int32_t dsp_fd) {
     sys_close(wav_fd);
     sys_close(dsp_fd);
+    if (is_process) system_halt(256);
     return -1;
 }

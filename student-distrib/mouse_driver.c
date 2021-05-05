@@ -179,7 +179,9 @@ void mouse_interrupt_handler() {
                 need_redraw_background = 1;
             }
             dragged_terminal = -1;
-
+            if (check_play(mouse_x,mouse_y)) {
+                
+            }
             //Rdraw(100,8,512,384,0XFFFFFF);
         }
 

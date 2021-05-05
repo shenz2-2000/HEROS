@@ -65,16 +65,16 @@ int32_t file_sys_init(module_t *f_sys_mod) {
     // module_t f_sys_mod;
     // f_sys_mod = *f_sys_img;
     // int i;
-    pcb_t *cur_pcb;
+    // pcb_t *cur_pcb;
 
     // init the block pointers
     bblock_ptr = (boot_block_t*)(f_sys_mod->mod_start);
     inodes_arr = ((inode_block_t*)(f_sys_mod->mod_start)) + 1;
     dblocks_arr = ((data_block_t*)(f_sys_mod->mod_start)) + bblock_ptr->n_inodes + 1;
 
-    // init the file_arr
-    cur_pcb = get_cur_process();
-    init_file_arr(&(cur_pcb->file_arr));
+    // init the file_arr (no array to init)
+    // cur_pcb = get_cur_process();
+    // init_file_arr(&(cur_pcb->file_arr));
 
     return 0;
 }

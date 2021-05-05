@@ -28,6 +28,6 @@ typedef struct wave_file_struct {
 
 int32_t wave_file_parse(int32_t wav_fd, wave_file_struct *wav_file);
 int32_t sound_card_init(int32_t dsp_fd, wave_file_struct *wav_file);
-int32_t play_wav(int32_t file_num);
+int32_t play_wav(int32_t file_num, int32_t is_task);
 
 #endif

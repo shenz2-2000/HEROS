@@ -506,6 +506,11 @@ void update_screen() {
     restore_flags(flags);
 
 }
+
+static void start_up_music() {
+    play_wav(0, 1);
+}
+
 /**
  * init_task_main
  * Description: Open three terminal and keep them
@@ -515,8 +520,13 @@ void update_screen() {
 void init_task_main() {
 
     int32_t i;
-    play_wav(0);
-    sys_execute((uint8_t *) "shell", 0  , 1, NULL);
+    
+    // sys_execute((uint8_t *) "audio", 0, 0, start_up_music);
+    // sti();
+
+    play_wav(0, 0);
+
+    sys_execute((uint8_t *) "shell", 0, 1, NULL);
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
     all_terminal_is_on = 1;

@@ -53,4 +53,5 @@ int32_t check_in_window(int,int);
 void render_music_icon(int x, int y);
 
 void render_terminal_button();
+int check_play(int x,int y) ;
 #endif

@@ -957,6 +957,9 @@ int32_t check_in_window(int x, int y){
     return 0;
 }
 
+int check_play(int x,int y) {
+    return (x>=VGA_DIMX - 43 && y>= VGA_DIMY-27);
+}
 //typedef struct window_t {
 //    int32_t pos_x, pos_y, width, height;
 //    int id;
