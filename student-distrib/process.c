@@ -486,7 +486,7 @@ void update_screen() {
             draw_terminal((char*)(0xC0000 + 1 * 0x1000),1,0);
             draw_terminal((char*)(0xC0000 + 2 * 0x1000),2,1);
             init = 1;
-        } else {
+        } else if (new_content) {
             for (i=0;i<=2;++i)
                 for (j=0;j<3;++j)
                     if (terminal_window[j].priority==i)
@@ -494,6 +494,7 @@ void update_screen() {
             for (j=0;j<3;++j)
                 if (terminal_window[j].priority==3)
                     draw_terminal((char*)(0xC0000 + j * 0x1000),j,1);
+            new_content = 0;
         }
 
 
