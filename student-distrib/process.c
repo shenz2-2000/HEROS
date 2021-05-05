@@ -50,7 +50,7 @@ void process_user_vidmap(pcb_t *process) {
         printf("ERROR in process_user_vidmap(): NULL input");
         return;
     }
-    set_video_memory(process->terminal);
+    set_video_memory_SVGA(process->terminal);
 }
 
 /**
@@ -65,7 +65,8 @@ void set_showing_task(pcb_t* target_task) {
     cli_and_save(flags);
     terminal_struct_t* old_term = get_showing_task()==NULL?&null_terminal:get_showing_task()->terminal;
     terminal_struct_t* new_term = target_task==NULL?&null_terminal:target_task->terminal;
-    switch_terminal(old_term,new_term);
+    // because it's SVGA version, we don't switch terminal
+    // switch_terminal(old_term,new_term);
     showing_term = new_term;    // sync the terminal_showing
     cur_task = target_task;
     process_user_vidmap(get_cur_process());
@@ -496,7 +497,16 @@ void init_task_main() {
 
 
     if(showing_term->id != -1){
-        draw_terminal(0xB8000,showing_term->id);
+        // set the real page table to visit, or in the backup table there is no buffer (page fault)
+        int ret;
+        ret = PDE_4K_set(&(page_directory[0]), (uint32_t) (page_table0), 0, 1, 1);
+        flush_tlb();
+
+        draw_terminal(0xC0000 + 2 * 0x1000,2);
+        draw_terminal(0xC0000 + 0 * 0x1000, 0);
+        draw_terminal(0xC0000 + 1 * 0x1000, 1);
+
+        terminal_vidmap_SVGA(running_term);
     }
 
     restore_flags(flags);

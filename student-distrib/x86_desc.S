@@ -144,5 +144,12 @@ video_page_table0:
       .endr
 video_page_table0_bottom:
 
+// .globl SVGA_buf_table0
+// SVGA_buf_table0:
+//     .rept PAGE_TABLE_SIZE
+//     .long 0
+//     .endr
+// SVGA_buf_table0_bottom:
+
 page_table_bottom:
 

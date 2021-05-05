@@ -52,6 +52,24 @@ void fill_page(){
             page_directory[i].Base_address = 1;
             continue;
         }
+//        // for the SVGA entry
+//        else if (i == 0x3C0) {  // 0xF0000000 >> 22
+//            uint32_t temp = (uint32_t) SVGA_buf_table0;
+//            page_directory[i].P = 1;
+//            page_directory[i].RW = 1;
+//            page_directory[i].US = 0;
+//            page_directory[i].PWT = 0;
+//            page_directory[i].PCD = 0;
+//            page_directory[i].A = 0;
+//            page_directory[i].D = 0;
+//            page_directory[i].PS = 0;
+//            page_directory[i].G = 0;
+//            page_directory[i].AVAIAL = 0;
+//            page_directory[i].PAT = (temp >> 12) & 0x1;
+//            page_directory[i].reserved = (temp >> 13) & 0x1FF;
+//            page_directory[i].Base_address = temp >> 22;
+//            continue;
+//        }
         // else, just filled with 0
         else{
             page_directory[i].P = 0;
@@ -140,7 +158,7 @@ void fill_page(){
         }
     }
 
-    // --------------------------Fill the video Page Table--------------------
+     // --------------------------Fill the video Page Table--------------------
 //    for(i = 0; i < PAGE_TABLE_SIZE; i++){
 //        // points to the start of vedio memory
 //        if(i == VIDEO_MEMORY_INDEX){
@@ -171,6 +189,41 @@ void fill_page(){
 //            video_page_table0[i].G = 0;
 //            video_page_table0[i].AVAIAL = 0;
 //            video_page_table0[i].Base_address = 0;
+//            continue;
+//        }
+//    }
+
+    // --------------------------Fill the SVGA buf Page Table--------------------
+//    for(i = 0; i < PAGE_TABLE_SIZE; i++){
+//        // points to the start of vedio memory
+//        if(i == 0 || i == 1 || i == 2){
+//            SVGA_buf_table0[i].P = 1;
+//            SVGA_buf_table0[i].RW = 1;
+//            SVGA_buf_table0[i].US = 0;
+//            SVGA_buf_table0[i].PWT = 0;
+//            SVGA_buf_table0[i].PCD = 0;
+//            SVGA_buf_table0[i].A = 0;
+//            SVGA_buf_table0[i].D = 0;
+//            SVGA_buf_table0[i].PAT = 0;
+//            SVGA_buf_table0[i].G = 0;
+//            SVGA_buf_table0[i].AVAIAL = 0;
+//            SVGA_buf_table0[i].Base_address = 0xC0 + i;
+//            continue;
+//        }
+//
+//            // else, just filled with 0
+//        else{
+//            SVGA_buf_table0[i].P = 0;
+//            SVGA_buf_table0[i].RW = 0;
+//            SVGA_buf_table0[i].US = 0;
+//            SVGA_buf_table0[i].PWT = 0;
+//            SVGA_buf_table0[i].PCD = 0;
+//            SVGA_buf_table0[i].A = 0;
+//            SVGA_buf_table0[i].D = 0;
+//            SVGA_buf_table0[i].PAT = 0;
+//            SVGA_buf_table0[i].G = 0;
+//            SVGA_buf_table0[i].AVAIAL = 0;
+//            SVGA_buf_table0[i].Base_address = 0;
 //            continue;
 //        }
 //    }

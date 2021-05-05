@@ -390,7 +390,7 @@ void terminal_set_running(terminal_struct_t *terminal) {
     }
     cur -> screen_x = screen_x;
     cur -> screen_y = screen_y;
-    terminal_vidmap(terminal);
+    terminal_vidmap_SVGA(terminal);
     screen_x = terminal->screen_x;
     screen_y = terminal->screen_y;
     set_running_terminal(terminal);
@@ -422,12 +422,12 @@ void vidmap_init() {
         }
 
         // map the 0xB8000 of user and kernel backup buffers to backup area
-        // which is 0xB9000, BA000, BB000
-        PTE_set(&(k_bb_pt_list[i][VM_PTE]), VM_INDEX + (i+1) * BITS_4K, 0, 1, 1);
-        PTE_set(&(u_bb_pt_list[i][VM_PTE]), VM_INDEX + (i+1) * BITS_4K, 1, 1, 1);
+        // which is 0xF0000000 + i * 0x1000
+        PTE_set(&(k_bb_pt_list[i][VM_PTE]), VM_BUF_SVGA_ADDR + i * BITS_4K, 0, 1, 1);
+        PTE_set(&(u_bb_pt_list[i][VM_PTE]), VM_BUF_SVGA_ADDR + i * BITS_4K, 1, 1, 1);
 
         // map to the kernel page itself
-        page_table0[VM_PTE + i + 1] = k_bb_pt_list[i][VM_PTE];
+         page_table0[VM_BUF_SVGA_PT_INDEX + i] = k_bb_pt_list[i][VM_PTE];
 
         // turn on all the terminals
         terminal_status[i] = TERMINAL_ON; // the terminals are definitely on
@@ -464,6 +464,34 @@ void set_video_memory(terminal_struct_t *terminal){
             // map the video mem to backup buffers
             PDE_4K_set(u_vm_pde, (uint32_t) (u_bb_pt_list[terminal->id]), 1, 1, 1);
         }
+    }
+
+    flush_tlb();
+}
+
+/* set_video_memory_SVGA
+ * Description: setup page directory for user manipulation for SVGA mode (everything to buffer)
+ * Inputs: terminal - the desired terminal
+ * Return Value: None
+ * Side effect: None
+ * */
+void set_video_memory_SVGA(terminal_struct_t *terminal){
+
+    // sanity check
+    if (terminal == NULL) {
+        printf("ERROR in set_video_memory(): NULL terminal input\n");
+        return;
+    }
+
+    // the page directory entry we need to setup
+    PDE *u_vm_pde = &(page_directory[U_VM_PDE]);
+
+    if (terminal == &null_terminal) {
+        // turn off the user vidmap
+        u_vm_pde->val = 0;
+    } else {
+        // no matter what, always map the video mem to backup buffers
+        PDE_4K_set(u_vm_pde, (uint32_t) (u_bb_pt_list[terminal->id]), 1, 1, 1);
     }
 
     flush_tlb();
@@ -579,3 +607,42 @@ int terminal_vidmap(terminal_struct_t *terminal) {
     return 0;
 }
 
+/* terminal_vidmap_SVGA
+ * Description: map the target terminal to the corresponding memory area (video mem or backup buffer) (for SVGA)
+ * Inputs: terminal - the target terminal
+ * Return Value: 0 for success
+ * Side effect: None
+ * */
+/* NOTE: this function is only invoked when set running terminal (reschedule) and switch terminal*/
+int terminal_vidmap_SVGA(terminal_struct_t *terminal) {
+    int ret;
+
+    // sanity check
+    if (terminal == NULL) {
+        printf("ERROR in terminal_vidmap(): NULL terminal input\n");
+        return -1;
+    }
+
+    // sanity check
+    if (terminal != &null_terminal) {
+        if (terminal->id < 0 || terminal->id >= MAX_TERMINAL) {
+            printf("ERROR in terminal_vidmap(): bad input of terminal\n");
+            return -1;
+        }
+        if (terminal_status[terminal->id] == TERMINAL_OFF) {
+            printf("ERROR in terminal_vidmap(): terminal not turned on\n");
+            return -1;
+        }
+    }
+
+    if (terminal == &null_terminal) {
+        ret = PDE_4K_set(&(page_directory[0]), (uint32_t) (k_bb_pt_list[0]), 0, 1, 1);
+        if (ret == -1) return -1;
+    } else {
+        ret = PDE_4K_set(&(page_directory[0]), (uint32_t) (k_bb_pt_list[terminal->id]), 0, 1, 1);
+        if (ret == -1) return -1;
+    }
+    terminal_running = terminal;
+    flush_tlb();
+    return 0;
+}

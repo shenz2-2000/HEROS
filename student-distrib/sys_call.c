@@ -225,7 +225,8 @@ int sys_vidmap(uint8_t** screen_start){
     }
 
     // setup the video memory in PD
-    set_video_memory(cur_pcb->terminal);
+//    set_video_memory(cur_pcb->terminal);
+    set_video_memory_SVGA(cur_pcb->terminal);   // for SVGA
 
     *screen_start = (uint8_t*)(USER_VA_END + VM_INDEX);
 
