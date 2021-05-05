@@ -24,6 +24,7 @@
 #define MOUSE_IRQ_NUM 12
 extern void mouse_init();
 extern void mouse_interrupt_handler();
+extern int need_redraw_background;
 //--------------------------
 //#define MOUSE_PORT_60 0x60
 //#define PORT_64 0x64

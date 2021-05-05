@@ -648,6 +648,8 @@ unsigned char font_8x16[256][16] = {
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 };
 
+static int init_terminal[3];
+int need_redraw_background = 0;
 void init_gui() {
     init_vga();
 
@@ -665,7 +667,7 @@ void init_gui() {
 
 void setup_status_bar(){
     Rdraw(VGA_DIMX, 36, 0, VGA_DIMY-36, 0xAFEEEE);
-    char status_bar[26] = "UTC+0:2021-00-00 00:00:00";
+    char status_bar[26] = "UTC+0:2021-00-00 00:00";
     status_bar[11] = month/10+48;
     status_bar[12] = month%10+48;
     status_bar[14] = day/10+48;
@@ -674,8 +676,6 @@ void setup_status_bar(){
     status_bar[18] = hour%10+48;
     status_bar[20] = mins/10+48;
     status_bar[21] = mins%10+48;
-    status_bar[23] = sec/10+48;
-    status_bar[24] = sec%10+48;
     render_string(5, VGA_DIMY-30 , "Welcome to Group14-OS", 0x0000);
     render_string(VGA_DIMX-400, VGA_DIMY-30 , status_bar, 0x0000);
     need_update = 1;
@@ -712,11 +712,15 @@ void draw_terminal(char* video_cache,int terminal_id, int focus) {
 
     char title[11] = "TERMINAL 0";
     title[9] = terminal_id + 48;
-    render_window(100+20*terminal_id, 100+20*terminal_id, 648, 448, title, focus);
-    terminal_window[terminal_id].id = terminal_id;
-    terminal_window[terminal_id].height = 448;
-    terminal_window[terminal_id].width = 648;
-    terminal_window[terminal_id].pos_x=terminal_window[terminal_id].pos_y=100+20*terminal_id;
+    if (!init_terminal[terminal_id]) {
+        terminal_window[terminal_id].id = terminal_id;
+        terminal_window[terminal_id].height = 448;
+        terminal_window[terminal_id].width = 648;
+        terminal_window[terminal_id].pos_x=terminal_window[terminal_id].pos_y=100+20*terminal_id;
+        init_terminal[terminal_id]=1;
+    }
+    render_window(terminal_window[terminal_id].pos_x, terminal_window[terminal_id].pos_y, 648, 448, title, focus);
+
 
     for (i = 0; i < MODEX_TER_ROWS; ++i) {
         char cur_line[81] = "                                                                                ";
@@ -882,6 +886,7 @@ int check_mouse_in_which_terminal(int32_t x, int32_t y) {
         && y>=terminal_window[i].pos_y && y<=terminal_window[i].pos_y+terminal_window[i].height)
             return i;
     }
+    return -1;
 }
 
 int32_t check_in_window(){

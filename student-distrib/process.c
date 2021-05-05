@@ -469,6 +469,13 @@ void update_screen() {
     uint32_t flags;
     int i,j;
     cli_and_save(flags);
+    if (need_redraw_background) {
+        need_redraw_background = 0;
+        for(i = 0; i < VGA_DIMX; i++)
+            for(j = 0; j < VGA_DIMY; j++)
+                Pdraw(i, j, 0xD9A179+i+j*2);
+        setup_status_bar();
+    }
     if(showing_term->id != -1){
         // set the real page table to visit, or in the backup table there is no buffer (page fault)
         PDE_4K_set(&(page_directory[0]), (uint32_t) (page_table0), 0, 1, 1);
@@ -489,9 +496,6 @@ void update_screen() {
                     draw_terminal(0xC0000 + j * 0x1000,j,1);
         }
 
-//        draw_terminal(0xC0000 + 1 * 0x1000,1);
-//        draw_terminal(0xC0000 + 0 * 0x1000, 0);
-//        draw_terminal(0xC0000 + 2 * 0x1000, 2);
 
         terminal_vidmap_SVGA(running_term);
     }
