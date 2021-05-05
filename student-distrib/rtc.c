@@ -64,9 +64,10 @@ void rtc_interrupt_handler() {
 
         // erase_mouse();
 
-//        prev_draw_x = mouse_x;
-//        prev_draw_y = mouse_y;
         show_screen();
+        prev_draw_x = mouse_x;
+        prev_draw_y = mouse_y;
+        patch_mouse(prev_draw_x, prev_draw_y);
         render_mouse(mouse_x,mouse_y);
         ticks[5] = 20;
     }
