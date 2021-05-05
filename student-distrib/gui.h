@@ -41,6 +41,7 @@ void restore_status_bar();
 
 int32_t check_in_background();
 
-void draw_terminal(char* video_cache,int terminal_id);
+void draw_terminal(char* video_cache,int terminal_id, int focus);
 
+void update_priority(int terminal_id);
 #endif

@@ -1,6 +1,6 @@
 #ifndef _PROCESS_H
 #define _PROCESS_H
-
+#include "gui.h"
 #include "file_sys.h"
 #include "x86_desc.h"
 #include "signal_sys_call.h"
@@ -61,4 +61,5 @@ void set_running_terminal(terminal_struct_t* cur);
 void init_task_main();
 void process_user_vidmap(pcb_t *process);
 void update_screen();
+extern window_t terminal_window[3];;
 #endif

@@ -16,6 +16,7 @@ extern terminal_struct_t null_terminal;
 terminal_struct_t *running_term = &null_terminal;
 terminal_struct_t *showing_term = &null_terminal;
 int32_t all_terminal_is_on = 0 ;
+static int init = 0;
 /**
  * get_running_terminal
  * Description: return the terminal of the task that is running
@@ -466,17 +467,31 @@ void mouse_process(){
 
 void update_screen() {
     uint32_t flags;
-//    while(1) {
+    int i,j;
     cli_and_save(flags);
     if(showing_term->id != -1){
         // set the real page table to visit, or in the backup table there is no buffer (page fault)
-        int ret;
-
-        ret = PDE_4K_set(&(page_directory[0]), (uint32_t) (page_table0), 0, 1, 1);
+        PDE_4K_set(&(page_directory[0]), (uint32_t) (page_table0), 0, 1, 1);
         flush_tlb();
-        draw_terminal(0xC0000 + 1 * 0x1000,1);
-        draw_terminal(0xC0000 + 0 * 0x1000, 0);
-        draw_terminal(0xC0000 + 2 * 0x1000, 2);
+        if (!init) {
+            update_priority(0); update_priority(1); update_priority(2);
+            draw_terminal(0xC0000 + 0 * 0x1000,0,0);
+            draw_terminal(0xC0000 + 1 * 0x1000,1,0);
+            draw_terminal(0xC0000 + 2 * 0x1000,2,1);
+            init = 1;
+        } else {
+            for (i=0;i<=2;++i)
+                for (j=0;j<3;++j)
+                    if (terminal_window[j].priority==i)
+                        draw_terminal(0xC0000 + j * 0x1000,j,0);
+            for (j=0;j<3;++j)
+                if (terminal_window[j].priority==3)
+                    draw_terminal(0xC0000 + j * 0x1000,j,1);
+        }
+
+//        draw_terminal(0xC0000 + 1 * 0x1000,1);
+//        draw_terminal(0xC0000 + 0 * 0x1000, 0);
+//        draw_terminal(0xC0000 + 2 * 0x1000, 2);
 
         terminal_vidmap_SVGA(running_term);
     }
@@ -501,7 +516,6 @@ void init_task_main() {
     sys_execute((uint8_t *) "shell", 0  , 1, NULL);
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
-  //  sys_execute((uint8_t *) "update_screen", 0, 0, update_screen);
     all_terminal_is_on = 1;
 
     while(1) {
