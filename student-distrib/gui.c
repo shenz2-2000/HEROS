@@ -652,7 +652,7 @@ unsigned char font_8x16[256][16] = {
 static int init_terminal[3];
 int status_bar_need_refresh = 0;
 
-static ARGB Mpatch[16][16] __attribute__((aligned(32)));
+// static ARGB Mpatch[16][16] __attribute__((aligned(32)));
 
 int need_redraw_background = 0;
 int prev_random_num = 0;
