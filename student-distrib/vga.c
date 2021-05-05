@@ -26,7 +26,7 @@ void clear_screen() {
 void show_screen() {
     if (need_update == 1) {
         // if (memcpy(vbe_mem, fbuf, VGA_DIMY * VGA_DIMX) == vbe_mem) need_update = 0;
-         cpbuf(vbe_mem, fbuf, VGA_DIMY * VGA_DIMX);
+         memcpy(vbe_mem, fbuf, VGA_DIMY * VGA_DIMX * 4);
          need_update = 0;
     }
 
