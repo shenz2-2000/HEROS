@@ -234,8 +234,8 @@ void entry(unsigned long magic, unsigned long addr) {
     enable_irq(1);   // Keyboard is IRQ1
 
     /* Init Mouse */
-    mouse_init();
-    enable_irq(12);
+//    mouse_init();
+//    enable_irq(12);
 
     /*Init RTC*/
     rtc_init();
