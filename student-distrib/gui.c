@@ -654,7 +654,7 @@ void init_gui() {
     init_vga();
 
 
-    Rdraw(VGA_DIMX, 36, 0, VGA_DIMY-36, 0xAFEEEE);
+    Rdraw(VGA_DIMX, STATUS_BAR_HEIGHT, 0, VGA_DIMY-STATUS_BAR_HEIGHT, 0xAFEEEE);
 //    render_window(0,0,400,400,"FUCK YOU", 0);
 //    render_window(200,200,400,400,"FUCK YOU", 1);
     setup_status_bar();
@@ -666,7 +666,7 @@ void init_gui() {
 }
 
 void setup_status_bar(){
-    Rdraw(VGA_DIMX, 36, 0, VGA_DIMY-36, 0xAFEEEE);
+    Rdraw(VGA_DIMX, STATUS_BAR_HEIGHT, 0, VGA_DIMY-STATUS_BAR_HEIGHT, 0xAFEEEE);
     char status_bar[26] = "UTC+0:2021-00-00 00:00";
     status_bar[11] = month/10+48;
     status_bar[12] = month%10+48;
@@ -676,10 +676,49 @@ void setup_status_bar(){
     status_bar[18] = hour%10+48;
     status_bar[20] = mins/10+48;
     status_bar[21] = mins%10+48;
-    render_string(5, VGA_DIMY-30 , "Welcome to Group14-OS", 0x0000);
-    render_string(VGA_DIMX-400, VGA_DIMY-30 , status_bar, 0x0000);
+    render_string(5, VGA_DIMY-24 , " Welcome to HEROS-OS", 0x0000);
+    render_string(VGA_DIMX-250, VGA_DIMY-24 , status_bar, 0x0000);
+    render_music_icon(VGA_DIMX - 43, VGA_DIMY-27);
     need_update = 1;
 }
+
+
+void render_music_icon(int x, int y){
+    static char music_icon[20][20] = {
+           "...11111111111111...",
+           "...11..........11...",
+           "...11111111111111...",
+           "...11111111111111...",
+           "...11..........11...",
+           "...11..........11...",
+           "...11..........11...",
+           "...11..........11...",
+           "...11..........11...",
+           "...11..........11...",
+           "...11..........11...",
+           "...11..........11...",
+           "...11..........11...",
+           "...11..........11...",
+           "...11..........11...",
+           "...11..........11...",
+           "11111.......11111...",
+           "11111.......11111...",
+           "11111.......11111...",
+           "11111.......11111...",
+    };
+
+    int idx_x, idx_y;
+    for(idx_y = 0; idx_y < 20; idx_y++)
+        for(idx_x = 0; idx_x < 20; idx_x++) {
+            if(music_icon[idx_y][idx_x] == '1')
+                Pdraw(x+idx_x, y+idx_y, 0xFF1493);
+            else{
+                Pdraw(x+idx_x, y+idx_y, 0xAFEEEE);
+            }
+    }
+}
+
+
 void update_priority(int terminal_id) {
     if (terminal_id==0) {
         if (terminal_window[1].priority>terminal_window[2].priority) terminal_window[1].priority = 2,terminal_window[2].priority = 1;
@@ -771,13 +810,9 @@ void erase_mouse() {
         restore_status_bar();
     }
 
-    if(check_in_window()){
-        return;
-    }
 
-    if(check_in_background()){
-        restore_background(prev_draw_x,prev_draw_y);
-    }
+    restore_background(prev_draw_x,prev_draw_y);
+
 
 }
 
@@ -854,7 +889,11 @@ void restore_background(int x,int y){
     int i,j;
     for(i = 0; i <= 15; i++){
         for(j = 0; j <= 15; j++){
-            if(j+y >= VGA_DIMY - 36) continue;
+
+            if(j+y >= VGA_DIMY - STATUS_BAR_HEIGHT) continue;
+
+            if(check_in_window(i+x,j+y)) continue;
+
             Pdraw(i+x, j+y, 0xD9A179+(i+x)+(y+j)*2);
         }
     }
@@ -863,7 +902,7 @@ void restore_background(int x,int y){
 // 1: in status bar
 // 0: not
 int32_t check_in_status_bar(){
-    if((prev_draw_y + 15) >= (VGA_DIMY-36) && (prev_draw_y <= (VGA_DIMY - 1))){
+    if((prev_draw_y + 15) >= (VGA_DIMY-STATUS_BAR_HEIGHT) ){
         return 1;
     }
     return 0;
@@ -873,7 +912,7 @@ int32_t check_in_status_bar(){
 // 1: in status bar
 // 0: not
 int32_t check_in_background(){
-    if(  prev_draw_y < (VGA_DIMY - 36)  ){
+    if(  prev_draw_y <= (VGA_DIMY - STATUS_BAR_HEIGHT)  ){
         return 1;
     }
     return 0;
@@ -889,10 +928,10 @@ int check_mouse_in_which_terminal(int32_t x, int32_t y) {
     return -1;
 }
 
-int32_t check_in_window(){
+int32_t check_in_window(int x, int y){
     int i;
     for(i = 0; i < 3; i++){
-        if(prev_draw_x >= terminal_window[i].pos_x && prev_draw_x <= terminal_window[i].pos_x + terminal_window[i].width &&  prev_draw_y >= terminal_window[i].pos_y && prev_draw_y <= terminal_window[i].pos_y + terminal_window[i].height  ){
+        if(x >= terminal_window[i].pos_x && x < terminal_window[i].pos_x + terminal_window[i].width &&  y >= terminal_window[i].pos_y && y < terminal_window[i].pos_y + terminal_window[i].height  ){
             return 1;
         }
     }

@@ -255,7 +255,7 @@ ASMLINKAGE void pit_interrupt_handler(hw_context hw) {
 
     // TODO: signal alarm
     if (get_showing_task()) {
-        get_showing_task()->signals.alarm_time += 1000 / INIT_PIT_FREQ; // Time increase per interrupt
+        get_showing_task()->signals.alarm_time += 2000 / INIT_PIT_FREQ; // Time increase per interrupt
         if (get_showing_task()->signals.alarm_time > ALARM_TIME) {
             signal_send(3); // ALARM
             get_showing_task()->signals.alarm_time = 0;

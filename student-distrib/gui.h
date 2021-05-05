@@ -6,6 +6,7 @@
 #define COPY_NUM 4096
 #define MODEX_TER_COLS 80  // Same as the original one
 #define MODEX_TER_ROWS 25
+#define STATUS_BAR_HEIGHT 31
 
 typedef struct window_t {
     int32_t pos_x, pos_y, width, height;
@@ -44,7 +45,10 @@ int32_t check_in_background();
 void draw_terminal(char* video_cache,int terminal_id, int focus);
 
 void update_priority(int terminal_id);
+
 int check_mouse_in_which_terminal(int32_t x, int32_t y);
 
-int32_t check_in_window();
+int32_t check_in_window(int,int);
+
+void render_music_icon(int x, int y);
 #endif
