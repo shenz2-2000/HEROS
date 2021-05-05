@@ -42,7 +42,7 @@ void init_vga() {
     int i, j;
     for(i = 0; i < VGA_DIMX; i++)
         for(j = 0; j < VGA_DIMY; j++)
-            Pdraw(i, j, 0xD9A179+i+j*2);
+            Pdraw(i, j, (i-300)*(i-300)+(i-300)*(j-400)+(j-400)*(j-400)+0xCC0000);
 }
 
 void Rdraw(int w, int h, int x, int y, uint32_t clr) {
