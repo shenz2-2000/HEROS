@@ -16,7 +16,7 @@
 #include "gensound.h"
 #include "mouse_driver.h"
 #include "gui.h"
-
+#include "wav_player.h"
 #define RUN_TESTS
 
 /* Function Declaration */
@@ -226,6 +226,7 @@ void entry(unsigned long magic, unsigned long addr) {
     }
 
 
+
     /* Init the PIC */
     i8259_init();
 
@@ -250,8 +251,8 @@ void entry(unsigned long magic, unsigned long addr) {
 
 
     /* Init Mouse */
-    // mouse_init();
-    // enable_irq(12);
+     mouse_init();
+     enable_irq(12);
 
     /*Init RTC*/
     rtc_init();
