@@ -27,6 +27,7 @@ int16_t prev_draw_y = 0;
 uint32_t left_pressed = 0;
 uint32_t right_pressed = 0;
 uint32_t middle_pressed = 0;
+int need_change_focus = 0;
 
 static uint8_t prev_flag = 0;
 static int dragged_terminal = -1;
@@ -157,7 +158,10 @@ void mouse_interrupt_handler() {
            left_pressed = 1;
            if (dragged_terminal==-1) {
                dragged_terminal = check_mouse_in_which_terminal(mouse_x,mouse_y);
+               int ret;
+               if ((ret=check_mouse_in_button(mouse_x,mouse_y)) != -1) terminal_window[ret].active^=1,need_redraw_background=1;
                if (dragged_terminal!=-1) {
+                   need_change_focus = 1;
                    change_focus_terminal(dragged_terminal);
                    update_priority(dragged_terminal);
                    dragged_mouse_x = mouse_x; dragged_mouse_y = mouse_y;
@@ -239,4 +243,28 @@ void mouse_interrupt_handler() {
     }
 }
 
+// -1 if not in any button
+// 0 1 2 for button 0 1 2
+int check_mouse_in_button(int mouse_x,int mouse_y){
+    int upper_left_x = mouse_x;
+    int upper_left_y = mouse_y;
+    int lower_left_x = mouse_x + 15;
+    int lower_left_y = mouse_y + 7;
 
+    if( (upper_left_x >= 240 && upper_left_x <= (240+71) && upper_left_y >= (768-24) && upper_left_y <= (768-24+15)) ||  (lower_left_x >= 240 && lower_left_x <= (240+71) && lower_left_y >= (768-24) && lower_left_y <= (768-24+15)) )
+        return 0;
+
+    if( (upper_left_x >= 400 && upper_left_x <= (400+71) && upper_left_y >= (768-24) && upper_left_y <= (768-24+15)) ||  (lower_left_x >= 400 && lower_left_x <= (400+71) && lower_left_y >= (768-24) && lower_left_y <= (768-24+15)) )
+        return 1;
+
+    if( (upper_left_x >= 600-40 && upper_left_x <= (600+71-40) && upper_left_y >= (768-24) && upper_left_y <= (768-24+15)) ||  (lower_left_x >= 600 && lower_left_x <= (600+71) && lower_left_y >= (768-24) && lower_left_y <= (768-24+15)) )
+        return 2;
+
+    return -1;
+}
+
+//void render_terminal_button(){
+//    render_string(240,VGA_DIMY-24,"TERMINAL1",0x0000);
+//    render_string(200+200,VGA_DIMY-24,"TERMINAL2",0x0000);
+//    render_string(200+200+200 - 40,VGA_DIMY-24,"TERMINAL3",0x0000);
+//}

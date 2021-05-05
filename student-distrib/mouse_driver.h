@@ -25,6 +25,7 @@
 extern void mouse_init();
 extern void mouse_interrupt_handler();
 extern int need_redraw_background;
+extern int need_change_focus;
 //--------------------------
 //#define MOUSE_PORT_60 0x60
 //#define PORT_64 0x64
@@ -51,6 +52,7 @@ extern void set_mouse_cursor(int x, int y);
 extern void mouse_init();
 extern void erase_mouse();
 extern void render_mouse(int,int);
+int check_mouse_in_button(int mouse_x,int mouse_y);
 
 extern int16_t mouse_x;
 extern int16_t mouse_y;

@@ -470,7 +470,7 @@ void update_screen() {
     int i,j;
     cli_and_save(flags);
     if (need_redraw_background) {
-        need_redraw_background = 0;
+
         for(i = 0; i < VGA_DIMX; i++)
             for(j = 0; j < VGA_DIMY; j++)
                 Pdraw(i, j, 0xD9A179+i+j*2);
@@ -486,20 +486,21 @@ void update_screen() {
             draw_terminal((char*)(VM_BUF_SVGA_ADDR + 1 * SIZE_4K_IN_BYTES),1,0);
             draw_terminal((char*)(VM_BUF_SVGA_ADDR + 2 * SIZE_4K_IN_BYTES),2,1);
             init = 1;
-        } else if (new_content) {
+        } else if (new_content || need_redraw_background || need_change_focus) {
             for (i=0;i<=2;++i)
                 for (j=0;j<3;++j)
-                    if (terminal_window[j].priority==i)
+                    if (terminal_window[j].priority==i && terminal_window[j].active==1)
                         draw_terminal((char*)(VM_BUF_SVGA_ADDR + j * SIZE_4K_IN_BYTES),j,0);
             for (j=0;j<3;++j)
-                if (terminal_window[j].priority==3)
+                if (terminal_window[j].priority==3 && terminal_window[j].active==1)
                     draw_terminal((char*)(VM_BUF_SVGA_ADDR + j * SIZE_4K_IN_BYTES),j,1);
             new_content = 0;
         }
 
-
         terminal_vidmap_SVGA(running_term);
     }
+    need_redraw_background = 0;
+    need_change_focus = 0;
     restore_flags(flags);
 
 }

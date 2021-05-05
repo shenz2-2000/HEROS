@@ -657,6 +657,10 @@ void init_gui() {
     Rdraw(VGA_DIMX, STATUS_BAR_HEIGHT, 0, VGA_DIMY-STATUS_BAR_HEIGHT, 0xAFEEEE);
 //    render_window(0,0,400,400,"FUCK YOU", 0);
 //    render_window(200,200,400,400,"FUCK YOU", 1);
+    int i,j;
+    for(i = 0; i < VGA_DIMX; i++)
+        for(j = 0; j < VGA_DIMY; j++)
+            Pdraw(i, j, 0xD9A179+i+j*2);
     setup_status_bar();
 
 //    for(i = 0; i < 50; i++){
@@ -685,9 +689,19 @@ void setup_status_bar(){
 
 
 void render_terminal_button(){
-    render_string(240,VGA_DIMY-24,"TERMINAL1",0x0000);
-    render_string(200+200,VGA_DIMY-24,"TERMINAL2",0x0000);
-    render_string(200+200+200 - 40,VGA_DIMY-24,"TERMINAL3",0x0000);
+    int i;
+    render_string(240,VGA_DIMY-24,"TERMINAL0",0x0000);
+    render_string(200+200,VGA_DIMY-24,"TERMINAL1",0x0000);
+    render_string(200+200+200 - 40,VGA_DIMY-24,"TERMINAL2",0x0000);
+    for(i=0; i < 16; i++){
+        Pdraw(240,VGA_DIMY-24+i,0x0000);
+        Pdraw(240+71,VGA_DIMY-24+i,0x0000);
+        Pdraw(400,VGA_DIMY-24+i,0x0000);
+        Pdraw(400+71,VGA_DIMY-24+i,0x0000);
+        Pdraw(600-40,VGA_DIMY-24+i,0x0000);
+        Pdraw(600-40+71,VGA_DIMY-24+i,0x0000);
+    }
+
 }
 
 
@@ -763,12 +777,13 @@ void draw_terminal(char* video_cache,int terminal_id, int focus) {
         terminal_window[terminal_id].id = terminal_id;
         terminal_window[terminal_id].height = 448;
         terminal_window[terminal_id].width = 648;
+        terminal_window[terminal_id].active = 1;
         terminal_window[terminal_id].pos_x=terminal_window[terminal_id].pos_y=100+20*terminal_id;
         init_terminal[terminal_id]=1;
     }
     render_window(terminal_window[terminal_id].pos_x, terminal_window[terminal_id].pos_y, 648, 448, title, focus);
 
-
+   // if (new_content) {
     for (i = 0; i < MODEX_TER_ROWS; ++i) {
         char cur_line[81] = "                                                                                ";
         for (j = 0; j < MODEX_TER_COLS; ++j)
@@ -776,6 +791,8 @@ void draw_terminal(char* video_cache,int terminal_id, int focus) {
                 cur_line[j] = *(video_cache+((MODEX_TER_COLS * i + j) << 1));
         render_string(terminal_window[terminal_id].pos_x+4, terminal_window[terminal_id].pos_y+24+16*i, cur_line, 0xFFFFFF);
     }
+    //}
+
     need_update=1;
 }
 //
@@ -848,7 +865,10 @@ void render_mouse(int x, int y) {
     int idx_x, idx_y;
     for(idx_y = 0; idx_y < 16; idx_y++)
         for(idx_x = 0; idx_x < 16; idx_x++) {
-            if(shape1[idx_y][idx_x] == '*')
+
+            if (check_in_window(x+idx_x,y+idx_y)) return;
+
+            if(shape1[idx_y][idx_x] == '*' )
                 Pdraw(x+idx_x, y+idx_y, 0xFFFFFF);
             else if(shape1[idx_y][idx_x] == '1')
                 Pdraw(x+idx_x,y+idx_y,0x000000);
@@ -928,7 +948,7 @@ int32_t check_in_background(){
 int check_mouse_in_which_terminal(int32_t x, int32_t y) {
     // will return the terminal with the highest priority
     int i, pri;
-    for (pri=3;pri>=0;--pri) for (i=0;i<3;++i) if (terminal_window[i].priority==pri)  {
+    for (pri=3;pri>=0;--pri) for (i=0;i<3;++i) if (terminal_window[i].priority==pri && terminal_window[i].active)  {
         if (x>=terminal_window[i].pos_x && x<=terminal_window[i].pos_x+terminal_window[i].width
         && y>=terminal_window[i].pos_y && y<=terminal_window[i].pos_y+terminal_window[i].height)
             return i;
@@ -938,7 +958,7 @@ int check_mouse_in_which_terminal(int32_t x, int32_t y) {
 
 int32_t check_in_window(int x, int y){
     int i;
-    for(i = 0; i < 3; i++){
+    for(i = 0; i < 3; i++) if (terminal_window[i].active){
         if(x >= terminal_window[i].pos_x && x < terminal_window[i].pos_x + terminal_window[i].width &&  y >= terminal_window[i].pos_y && y < terminal_window[i].pos_y + terminal_window[i].height  ){
             return 1;
         }

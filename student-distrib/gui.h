@@ -11,7 +11,7 @@
 typedef struct window_t {
     int32_t pos_x, pos_y, width, height;
     int id;
-    int priority;
+    int priority,active;
 } window_t;
 
 void init_gui();
