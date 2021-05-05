@@ -250,8 +250,8 @@ void entry(unsigned long magic, unsigned long addr) {
 
 
     /* Init Mouse */
-    mouse_init();
-    enable_irq(12);
+    // mouse_init();
+    // enable_irq(12);
 
     /*Init RTC*/
     rtc_init();

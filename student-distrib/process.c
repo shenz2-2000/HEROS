@@ -515,10 +515,8 @@ void update_screen() {
 void init_task_main() {
 
     int32_t i;
-//    uint32_t flags;
-//    uint32_t copy_pa;
-//    uint8_t *copy_va;
-
+    mouse_init();
+    enable_irq(12);
     disable_irq(1);
     play_wav(0);
     enable_irq(1);
