@@ -464,7 +464,26 @@ void mouse_process(){
 
 
 
+void update_screen() {
+    uint32_t flags;
+    while(1) {
+        cli_and_save(flags);
+        if(showing_term->id != -1){
+            // set the real page table to visit, or in the backup table there is no buffer (page fault)
+            int ret;
+            ret = PDE_4K_set(&(page_directory[0]), (uint32_t) (page_table0), 0, 1, 1);
+            flush_tlb();
 
+            draw_terminal(0xC0000 + 2 * 0x1000,2);
+            draw_terminal(0xC0000 + 0 * 0x1000, 0);
+            draw_terminal(0xC0000 + 1 * 0x1000, 1);
+
+            terminal_vidmap_SVGA(running_term);
+        }
+
+        restore_flags(flags);
+    }
+}
 /**
  * init_task_main
  * Description: Open three terminal and keep them
@@ -483,33 +502,8 @@ void init_task_main() {
     sys_execute((uint8_t *) "shell", 0  , 1, NULL);
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
     sys_execute((uint8_t *) "shell", 0, 1, NULL);
-    cli_and_save(flags);
-//    initialize_mouse();
-//    enable_irq(12);
+    sys_execute((uint8_t *) "update_screen", 0, 0, update_screen);
 
-     copy_pa = (uint32_t)0xFA000000;
-     PDE_4M_set(page_directory+(copy_pa>>22),(uint32_t)copy_pa,0,1,1);
-     copy_va = (uint8_t*)0xFA000000;
-     copy_vedio_mem((uint8_t *)copy_va);
-
-//    uint8_t* src = (uint8_t*) 0xB8000;
-//    PDE prev_pd_0 = page_directory[0];
-
-
-    if(showing_term->id != -1){
-        // set the real page table to visit, or in the backup table there is no buffer (page fault)
-        int ret;
-        ret = PDE_4K_set(&(page_directory[0]), (uint32_t) (page_table0), 0, 1, 1);
-        flush_tlb();
-
-        draw_terminal(0xC0000 + 2 * 0x1000,2);
-        draw_terminal(0xC0000 + 0 * 0x1000, 0);
-        draw_terminal(0xC0000 + 1 * 0x1000, 1);
-
-        terminal_vidmap_SVGA(running_term);
-    }
-
-    restore_flags(flags);
 
     while(1) {
         for (i = 0; i<MAX_TERMINAL;++i) if (foreground_task[i]==NULL) {
