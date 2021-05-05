@@ -7,7 +7,7 @@
 // static volatile int rtc_interrupt_occured;
 void rtc_set_freq(int rate);
 static int virtual_ctr[] = {-1, -1, -1, -1, -1, 0, 0};
-static volatile int ticks[] = {0, 0, 0, 0, 0, 20, 200};
+static volatile int ticks[] = {0, 0, 0, 0, 0, 50, 500};
 void system_time();
 /*
  * rtc_init
@@ -58,6 +58,8 @@ void rtc_interrupt_handler() {
     }
     //send_eoi(8);
     if (ticks[5] <= 0) {
+        if (all_terminal_is_on)
+            update_screen();
         show_screen();
         ticks[5] = 50;
     }

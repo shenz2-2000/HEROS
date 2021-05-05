@@ -60,4 +60,5 @@ terminal_struct_t* get_running_terminal();
 void set_running_terminal(terminal_struct_t* cur);
 void init_task_main();
 void process_user_vidmap(pcb_t *process);
+void update_screen();
 #endif
