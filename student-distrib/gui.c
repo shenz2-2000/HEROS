@@ -764,8 +764,12 @@ void erase_mouse() {
         restore_status_bar();
     }
 
+    if(check_in_window()){
+        return;
+    }
+
     if(check_in_background()){
-        restore_background(prev_mouse_x,prev_mouse_y);
+        restore_background(prev_draw_x,prev_draw_y);
     }
 
 }
@@ -852,7 +856,7 @@ void restore_background(int x,int y){
 // 1: in status bar
 // 0: not
 int32_t check_in_status_bar(){
-    if((prev_mouse_y + 15) >= (VGA_DIMY-36) && (prev_mouse_y <= (VGA_DIMY - 1))){
+    if((prev_draw_y + 15) >= (VGA_DIMY-36) && (prev_draw_y <= (VGA_DIMY - 1))){
         return 1;
     }
     return 0;
@@ -862,8 +866,24 @@ int32_t check_in_status_bar(){
 // 1: in status bar
 // 0: not
 int32_t check_in_background(){
-    if(  prev_mouse_y < (VGA_DIMY - 36)  ){
+    if(  prev_draw_y < (VGA_DIMY - 36)  ){
         return 1;
     }
     return 0;
 }
+
+int32_t check_in_window(){
+    int i;
+    for(i = 0; i < 3; i++){
+        if(prev_draw_x >= terminal_window[i].pos_x && prev_draw_x <= terminal_window[i].pos_x + terminal_window[i].width &&  prev_draw_y >= terminal_window[i].pos_y && prev_draw_y <= terminal_window[i].pos_y + terminal_window[i].height  ){
+            return 1;
+        }
+    }
+    return 0;
+}
+
+//typedef struct window_t {
+//    int32_t pos_x, pos_y, width, height;
+//    int id;
+//    int priority;
+//} window_t;

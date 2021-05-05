@@ -1,5 +1,6 @@
 
 #include "vga.h"
+#include "mouse_driver.h"
 
 ARGB* vbe_mem = (ARGB*)REG_VBE;
 static ARGB fbuf[VGA_DIMY][VGA_DIMX] __attribute__((aligned(32)));
@@ -23,9 +24,15 @@ void clear_screen() {
 
 void show_screen() {
     if (need_update == 1) {
-        cpbuf(vbe_mem, fbuf, VGA_DIMY * VGA_DIMX);
-        need_update = 0;
+        // if (memcpy(vbe_mem, fbuf, VGA_DIMY * VGA_DIMX) == vbe_mem) need_update = 0;
+         cpbuf(vbe_mem, fbuf, VGA_DIMY * VGA_DIMX);
+         need_update = 0;
     }
+
+//    erase_mouse();
+//    render_mouse(mouse_x,mouse_y);
+
+
 }
 
 void init_vga() {

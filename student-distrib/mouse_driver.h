@@ -48,11 +48,16 @@ extern void mouse_interrupt_handler();
 //#define WHITE 0xFFFFFFFF
 extern void set_mouse_cursor(int x, int y);
 extern void mouse_init();
+extern void erase_mouse();
+extern void render_mouse(int,int);
 
 extern int16_t mouse_x;
 extern int16_t mouse_y;
 extern int16_t prev_mouse_x;
 extern int16_t prev_mouse_y;
+extern int16_t prev_draw_x;
+extern int16_t prev_draw_y;
+
 
 // several global indicators
 extern uint32_t left_pressed;

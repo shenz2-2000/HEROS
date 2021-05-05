@@ -20,6 +20,8 @@ int16_t mouse_x = 0;
 int16_t mouse_y = 0;
 int16_t prev_mouse_x = 0;
 int16_t prev_mouse_y = 0;
+int16_t prev_draw_x = 0;
+int16_t prev_draw_y = 0;
 
 // several global indicators
 uint32_t left_pressed = 0;
@@ -211,8 +213,8 @@ void mouse_interrupt_handler() {
             return;
         }
         else{
-            erase_mouse();
-            render_mouse(mouse_x,mouse_y);
+//            erase_mouse();
+//            render_mouse(mouse_x,mouse_y);
             prev_mouse_x = mouse_x;
             prev_mouse_y = mouse_y;
         }
