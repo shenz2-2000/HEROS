@@ -19,11 +19,12 @@
   * WAV Decoder and Player
   * Double Channel, 8-bit Width, 44100 sample rate WAV file
 - VESA sVGA 1024 x 768 16-bit high color
+  * double buffer
 - GUI with multiple terminals
   * Status Bar
   * Terminal Dragging Using Mouse 
   * Window Hierarchical Layer Support
-  * Focus Terminal Maintaining  
+  * Focus Terminal Maintaining
 - PS/2 Mouse Driver 
 - CMOS Datetime  
 - Signal

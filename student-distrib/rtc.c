@@ -62,11 +62,12 @@ void rtc_interrupt_handler() {
         if (all_terminal_is_on)
             update_screen();
 
-        erase_mouse();
-        render_mouse(mouse_x,mouse_y);
-        prev_draw_x = mouse_x;
-        prev_draw_y = mouse_y;
+        // erase_mouse();
+
+//        prev_draw_x = mouse_x;
+//        prev_draw_y = mouse_y;
         show_screen();
+        render_mouse(mouse_x,mouse_y);
         ticks[5] = 30;
     }
     //test_interrupts();

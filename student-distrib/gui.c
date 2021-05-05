@@ -829,17 +829,17 @@ void render_window(int x, int y, int width, int height, char* title, uint8_t is_
 }
 
 
-// TODO:
-void erase_mouse() {
-    if(check_in_status_bar()){
-        restore_status_bar();
-    }
-
-
-    restore_background(prev_draw_x,prev_draw_y);
-
-
-}
+//// TODO:
+//void erase_mouse() {
+//    if(check_in_status_bar()){
+//        restore_status_bar();
+//    }
+//
+//
+//    restore_background(prev_draw_x,prev_draw_y);
+//
+//
+//}
 
 void render_mouse(int x, int y) {
     static char shape1[16][16] = {
@@ -866,13 +866,12 @@ void render_mouse(int x, int y) {
     for(idx_y = 0; idx_y < 16; idx_y++)
         for(idx_x = 0; idx_x < 16; idx_x++) {
 
-            if (check_in_window(x+idx_x,y+idx_y)) return;
-
             if(shape1[idx_y][idx_x] == '*' )
-                Pdraw(x+idx_x, y+idx_y, 0xFFFFFF);
+                Pcopy(x+idx_x, y+idx_y, 0xFFFFFF);
             else if(shape1[idx_y][idx_x] == '1')
-                Pdraw(x+idx_x,y+idx_y,0x000000);
+                Pcopy(x+idx_x,y+idx_y,0x000000);
         }
+    need_update = 1;
 }
 
 

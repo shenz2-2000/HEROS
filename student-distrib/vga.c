@@ -4,6 +4,7 @@
 
 ARGB* vbe_mem = (ARGB*)REG_VBE;
 static ARGB fbuf[VGA_DIMY][VGA_DIMX] __attribute__((aligned(32)));
+static ARGB Mbuf[1][1] __attribute__((aligned(32)));
 
 
 static void cpbuf(void* tar,void* buf, int nbytes) {
@@ -58,4 +59,13 @@ void Pdraw(int x, int y, uint32_t clr) {
     fbuf[y][x].g = ((clr >> 8) & 0xFF);
     fbuf[y][x].b = (clr & 0xFF);
     need_update = 1;
+}
+
+void Pcopy(int x, int y, uint32_t clr) {
+    if( x < 0 || y < 0 || x >= VGA_DIMX || y >= VGA_DIMY)
+        return;
+    Mbuf[0][0].r = ((clr >> 16) & 0xFF);
+    Mbuf[0][0].g = ((clr >> 8) & 0xFF);
+    Mbuf[0][0].b = (clr & 0xFF);
+    cpbuf(&vbe_mem[x+y*VGA_DIMX], Mbuf, 1);
 }
