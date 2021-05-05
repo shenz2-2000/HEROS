@@ -174,7 +174,7 @@ int32_t play_wav(int32_t file_num, int32_t is_task) {
 
     sys_close(wav_fd);
     sys_close(dsp_fd);
-    if (is_process) system_halt(0);
+    if (is_process) while (1);
     return 0;
 }
 
@@ -188,6 +188,6 @@ int32_t play_wav(int32_t file_num, int32_t is_task) {
 static int32_t wav_player_fail(int32_t wav_fd, int32_t dsp_fd) {
     sys_close(wav_fd);
     sys_close(dsp_fd);
-    if (is_process) system_halt(256);
+    if (is_process) while(1);
     return -1;
 }

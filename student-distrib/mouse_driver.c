@@ -7,7 +7,7 @@
 #include "gui.h"
 #include "vga.h"
 #include "process.h"
-
+#include "wav_player.h"
 
 
 
@@ -32,6 +32,9 @@ int need_change_focus = 0;
 static uint8_t prev_flag = 0;
 static int dragged_terminal = -1;
 static int dragged_mouse_x,dragged_mouse_y;
+
+// static void play_music();
+
 // set sample rate
 void set_sample_rate(uint8_t sample_rate){
 
@@ -180,7 +183,8 @@ void mouse_interrupt_handler() {
             }
             dragged_terminal = -1;
             if (check_play(mouse_x,mouse_y)) {
-                
+                // TODO:
+                // sys_execute((uint8_t *) "audio", 0, 0, play_music);
             }
             //Rdraw(100,8,512,384,0XFFFFFF);
         }
@@ -265,3 +269,6 @@ int check_mouse_in_button(int mouse_x,int mouse_y){
     return -1;
 }
 
+// static void play_music() {
+//     play_wav(1, 1);
+// }

@@ -507,9 +507,9 @@ void update_screen() {
 
 }
 
-static void start_up_music() {
-    play_wav(0, 1);
-}
+// static void start_up_music() {
+//     play_wav(0, 1);
+// }
 
 /**
  * init_task_main
