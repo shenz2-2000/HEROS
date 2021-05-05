@@ -18,7 +18,7 @@
 - Sound Blaster 16 (Audio Card) Driver
   * WAV Decoder and Player
   * Double Channel, 8-bit Width, 44100 sample rate WAV file
-- SVGA 1024 x 768 16-bit high color
+- VESA sVGA 1024 x 768 16-bit high color
 - GUI with multiple terminals
   * Status Bar
   * Terminal Dragging Using Mouse 
@@ -27,8 +27,8 @@
 - PS/2 Mouse Driver 
 - CMOS Datetime  
 - Signal
-- Virtualized RTC
-  * Optimize what???
+- Virtualized RTC 
+  * acceleration when scheduling
 - Randomness
 
 # Screenshot
