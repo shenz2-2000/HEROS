@@ -31,6 +31,8 @@ DO_CALL(ece391_sigreturn,SYS_SIGRETURN)
 DO_CALL(ece391_play_sound, SYS_PLAY_SOUND)
 DO_CALL(ece391_nosound, SYS_NOSOUND)
 
+DO_CALL(ece391_ioctl, SYS_IOCTL)
+
 /* Call the main() function, then halt with its return value. */
 
 .GLOBAL _start

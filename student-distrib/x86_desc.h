@@ -9,7 +9,7 @@
 #include "types.h"
 //#include "signal_sys_call.h"
 
-#define MAXIMUM_SYS_CALL_NUM 12
+#define MAXIMUM_SYS_CALL_NUM 13
 
 
 /* Segment selector values */
