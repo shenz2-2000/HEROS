@@ -64,7 +64,7 @@ void set_showing_task(pcb_t* target_task) {
     if (target_task!=NULL && target_task->terminal==NULL) return;
     uint32_t flags;
     cli_and_save(flags);
-    terminal_struct_t* old_term = get_showing_task()==NULL?&null_terminal:get_showing_task()->terminal;
+    //terminal_struct_t* old_term = get_showing_task()==NULL?&null_terminal:get_showing_task()->terminal;
     terminal_struct_t* new_term = target_task==NULL?&null_terminal:target_task->terminal;
     // because it's SVGA version, we don't switch terminal
     // switch_terminal(old_term,new_term);
@@ -482,18 +482,18 @@ void update_screen() {
         flush_tlb();
         if (!init) {
             update_priority(0); update_priority(1); update_priority(2);
-            draw_terminal(0xC0000 + 0 * 0x1000,0,0);
-            draw_terminal(0xC0000 + 1 * 0x1000,1,0);
-            draw_terminal(0xC0000 + 2 * 0x1000,2,1);
+            draw_terminal((char*)(0xC0000 + 0 * 0x1000),0,0);
+            draw_terminal((char*)(0xC0000 + 1 * 0x1000),1,0);
+            draw_terminal((char*)(0xC0000 + 2 * 0x1000),2,1);
             init = 1;
         } else {
             for (i=0;i<=2;++i)
                 for (j=0;j<3;++j)
                     if (terminal_window[j].priority==i)
-                        draw_terminal(0xC0000 + j * 0x1000,j,0);
+                        draw_terminal((char*)(0xC0000 + j * 0x1000),j,0);
             for (j=0;j<3;++j)
                 if (terminal_window[j].priority==3)
-                    draw_terminal(0xC0000 + j * 0x1000,j,1);
+                    draw_terminal((char*)(0xC0000 + j * 0x1000),j,1);
         }
 
 
@@ -511,9 +511,9 @@ void update_screen() {
 void init_task_main() {
 
     int32_t i;
-    uint32_t flags;
-    uint32_t copy_pa;
-    uint8_t *copy_va;
+//    uint32_t flags;
+//    uint32_t copy_pa;
+//    uint8_t *copy_va;
 
 
 

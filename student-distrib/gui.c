@@ -679,7 +679,15 @@ void setup_status_bar(){
     render_string(5, VGA_DIMY-24 , " Welcome to HEROS-OS", 0x0000);
     render_string(VGA_DIMX-250, VGA_DIMY-24 , status_bar, 0x0000);
     render_music_icon(VGA_DIMX - 43, VGA_DIMY-27);
+    render_terminal_button();
     need_update = 1;
+}
+
+
+void render_terminal_button(){
+    render_string(240,VGA_DIMY-24,"TERMINAL1",0x0000);
+    render_string(200+200,VGA_DIMY-24,"TERMINAL2",0x0000);
+    render_string(200+200+200 - 40,VGA_DIMY-24,"TERMINAL3",0x0000);
 }
 
 

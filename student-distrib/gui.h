@@ -51,4 +51,6 @@ int check_mouse_in_which_terminal(int32_t x, int32_t y);
 int32_t check_in_window(int,int);
 
 void render_music_icon(int x, int y);
+
+void render_terminal_button();
 #endif
