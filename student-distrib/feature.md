@@ -13,9 +13,9 @@
 -  Multiple Terminals
 # Extra
 - PIT PC Speaker
-  * Startup Sound
   * Error Alarm  
-- Sound Blaster 16 (Audio Card) Driver
+- Sound Blaster 16 (Audio Card) Driver and WAV Decoder
+  * Startup Sound
   * WAV Decoder and Player
   * Double Channel, 8-bit Width, 44100 sample rate WAV file
 - VESA sVGA 1024 x 768 16-bit high color
