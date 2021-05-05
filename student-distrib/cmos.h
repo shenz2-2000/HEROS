@@ -5,6 +5,9 @@
 #ifndef MP3_GROUP_14_CMOS_H
 #define MP3_GROUP_14_CMOS_H
 
+#define LARGE_NUM 0x7FFFFFFF
 
-void system_time();
+extern void system_time();
+extern int generate_random_number();
+
 #endif //MP3_GROUP_14_CMOS_H

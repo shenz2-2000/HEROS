@@ -8,7 +8,7 @@
 // static volatile int rtc_interrupt_occured;
 void rtc_set_freq(int rate);
 static int virtual_ctr[] = {-1, -1, -1, -1, -1, 0, 0};
-static volatile int ticks[] = {0, 0, 0, 0, 0, 30, 300};
+static volatile int ticks[] = {0, 0, 0, 0, 0, 20, 500};
 void system_time();
 /*
  * rtc_init
@@ -55,7 +55,7 @@ void rtc_interrupt_handler() {
     sti();
     if (ticks[6] <= 0) {
         system_time();
-        ticks[6] = 300;
+        ticks[6] = 500;
     }
     //send_eoi(8);
     if (ticks[5] <= 0) {
@@ -64,11 +64,12 @@ void rtc_interrupt_handler() {
 
         // erase_mouse();
 
-//        prev_draw_x = mouse_x;
-//        prev_draw_y = mouse_y;
         show_screen();
+        prev_draw_x = mouse_x;
+        prev_draw_y = mouse_y;
+        patch_mouse(prev_draw_x, prev_draw_y);
         render_mouse(mouse_x,mouse_y);
-        ticks[5] = 30;
+        ticks[5] = 20;
     }
     //test_interrupts();
 }
@@ -154,7 +155,7 @@ int32_t rtc_write(int32_t fd, const void* buf, int32_t nbytes) {
     if (rate <= RTC_MIN_RATE) return -1;
 
     pcb_t *cur_pcb = get_cur_process();
-    virtual_ctr[(int) cur_pcb->rtc_id] = 1024 >> (pow+1);
+    virtual_ctr[(int) cur_pcb->rtc_id] = 1024 >> (pow+2);
 
     return 0;
 }

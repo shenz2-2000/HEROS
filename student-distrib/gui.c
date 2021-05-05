@@ -2,6 +2,7 @@
 #include "x86_desc.h"
 #include "page_lib.h"
 #include "mouse_driver.h"
+#include "cmos.h"
 window_t terminal_window[3];
 char font8x8_basic[128][8] = {
         { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
@@ -649,7 +650,12 @@ unsigned char font_8x16[256][16] = {
 };
 
 static int init_terminal[3];
+int status_bar_need_refresh = 0;
+
+static ARGB Mpatch[16][16] __attribute__((aligned(32)));
+
 int need_redraw_background = 0;
+int prev_random_num = 0;
 void init_gui() {
     init_vga();
 
@@ -657,10 +663,6 @@ void init_gui() {
     Rdraw(VGA_DIMX, STATUS_BAR_HEIGHT, 0, VGA_DIMY-STATUS_BAR_HEIGHT, 0xAFEEEE);
 //    render_window(0,0,400,400,"FUCK YOU", 0);
 //    render_window(200,200,400,400,"FUCK YOU", 1);
-    int i,j;
-    for(i = 0; i < VGA_DIMX; i++)
-        for(j = 0; j < VGA_DIMY; j++)
-            Pdraw(i, j, 0xD9A179+i+j*2);
     setup_status_bar();
 
 //    for(i = 0; i < 50; i++){
@@ -684,6 +686,16 @@ void setup_status_bar(){
     render_sentence(VGA_DIMX-250, VGA_DIMY-24 , status_bar, 0x0000);
     render_music_icon(VGA_DIMX - 43, VGA_DIMY-27);
     render_terminal_button();
+    if(check_click_random_button()){
+        prev_random_num = render_randomness();
+    }
+    else{
+        int8_t str_head[1000];
+        itoa(prev_random_num,str_head,10);
+        render_sentence(675,VGA_DIMY-24,"Random:",0x0000);
+        render_sentence(732,VGA_DIMY-24,str_head,0x0000);
+    }
+
     need_update = 1;
 }
 
@@ -693,7 +705,7 @@ void render_terminal_button(){
     render_sentence(240,VGA_DIMY-24,"TERMINAL 0",0x0000);
     render_sentence(200+200,VGA_DIMY-24,"TERMINAL 1",0x0000);
     render_sentence(200+200+200 - 40 ,VGA_DIMY-24,"TERMINAL 2",0x0000);
-
+    // need_update = 1;
 }
 
 
@@ -730,6 +742,7 @@ void render_music_icon(int x, int y){
                 Pdraw(x+idx_x, y+idx_y, 0xAFEEEE);
             }
     }
+    // need_update = 1;
 }
 
 
@@ -809,14 +822,14 @@ void render_sentence(int x_start, int y_start, char* string, uint32_t color) {
     }
 }
 
-void render_window(int x, int y, int width, int height, char* title, uint8_t is_focus) {
+void render_window(int x, int y, int width, int height, char* title, int focus) {
     Rdraw(width, height, x, y,0x000000);
-    if(is_focus) {
-        Rdraw(width - 4, 20,x + 2, y + 2,  0x2F4F4F);
-        render_sentence(x+16, y+8, title, 0xFFFFFF);
+    if(focus) {
+        Rdraw(width-4,18,x + 4,y + 4,0x2F4F4F);
+        render_sentence(x+16,y+8,title,0xFFFFFF);
     } else {
-        Rdraw(width - 4, 20, x + 2, y + 2, 0xBEBEBE);
-        render_sentence(x+16, y+8, title, 0xFFFFFF);
+        Rdraw(width-4,18,x+4,y+4,0xBEBEBE);
+        render_sentence(x+16,y+8,title,0xFFFFFF);
     }
 }
 
@@ -863,7 +876,7 @@ void render_mouse(int x, int y) {
             else if(shape1[idx_y][idx_x] == '1')
                 Pcopy(x+idx_x,y+idx_y,0x000000);
         }
-    need_update = 1;
+//    need_update = 1;
 }
 
 
@@ -965,3 +978,44 @@ int check_play(int x,int y) {
 //    int id;
 //    int priority;
 //} window_t;
+int render_randomness(){
+    int cur_num;
+    int8_t str_head[1000];
+    cur_num = generate_random_number();
+    itoa(cur_num,str_head,10);
+    render_sentence(675,VGA_DIMY-24,"Random:",0x0000);
+    render_sentence(732,VGA_DIMY-24,str_head,0x0000);
+    return cur_num;
+}
+
+int check_click_random_button(){
+        int upper_left_x = mouse_x;
+        int upper_left_y = mouse_y;
+        int lower_left_x = mouse_x + 15;
+        int lower_left_y = mouse_y + 7;
+
+        if( ((upper_left_x >= 675 && upper_left_x <= (675+55) && upper_left_y >= (768-24) && upper_left_y <= (768-24+15)) ||  (lower_left_x >= 675 && lower_left_x <= (675+55) && lower_left_y >= (768-24) && lower_left_y <= (768-24+15))) && left_pressed )
+             return 1;
+
+        return 0;
+
+}
+
+
+//int check_mouse_in_button(int mouse_x,int mouse_y){
+//    int upper_left_x = mouse_x;
+//    int upper_left_y = mouse_y;
+//    int lower_left_x = mouse_x + 15;
+//    int lower_left_y = mouse_y + 7;
+//
+//    if( (upper_left_x >= 240 && upper_left_x <= (240+71) && upper_left_y >= (768-24) && upper_left_y <= (768-24+15)) ||  (lower_left_x >= 240 && lower_left_x <= (240+71) && lower_left_y >= (768-24) && lower_left_y <= (768-24+15)) )
+//        return 0;
+//
+//    if( (upper_left_x >= 400 && upper_left_x <= (400+71) && upper_left_y >= (768-24) && upper_left_y <= (768-24+15)) ||  (lower_left_x >= 400 && lower_left_x <= (400+71) && lower_left_y >= (768-24) && lower_left_y <= (768-24+15)) )
+//        return 1;
+//
+//    if( (upper_left_x >= 600-40 && upper_left_x <= (600+71-40) && upper_left_y >= (768-24) && upper_left_y <= (768-24+15)) ||  (lower_left_x >= 600 && lower_left_x <= (600+71) && lower_left_y >= (768-24) && lower_left_y <= (768-24+15)) )
+//        return 2;
+//
+//    return -1;
+//}

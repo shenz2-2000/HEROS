@@ -21,6 +21,8 @@ void init_vga();
 void show_screen();
 void clear_screen();
 
+void patch_mouse(int x, int y);
+
 void Pcopy(int x, int y, uint32_t clr);
 void Pdraw(int x, int y, uint32_t clr);
 void Rdraw(int w, int h, int x, int y, uint32_t clr);
