@@ -447,7 +447,7 @@ pcb_t* delete_process(pcb_t* pcb) {
 int32_t get_n_present_pcb() {
     return n_present_pcb;
 }
-/**
+/* *
  * init_task_main
  * Description: Open three terminal and keep them
  * Input: None
