@@ -868,6 +868,8 @@ void render_mouse(int x, int y) {
 
 
     int idx_x, idx_y;
+    prev_draw_x = x;
+    prev_draw_y = y;
     for(idx_y = 0; idx_y < 16; idx_y++)
         for(idx_x = 0; idx_x < 16; idx_x++) {
 

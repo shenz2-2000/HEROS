@@ -58,8 +58,8 @@ extern int16_t mouse_x;
 extern int16_t mouse_y;
 extern int16_t prev_mouse_x;
 extern int16_t prev_mouse_y;
-extern int16_t prev_draw_x;
-extern int16_t prev_draw_y;
+extern int prev_draw_x;
+extern int prev_draw_y;
 
 
 // several global indicators

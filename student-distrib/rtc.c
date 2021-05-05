@@ -8,7 +8,7 @@
 // static volatile int rtc_interrupt_occured;
 void rtc_set_freq(int rate);
 static int virtual_ctr[] = {-1, -1, -1, -1, -1, 0, 0};
-static volatile int ticks[] = {0, 0, 0, 0, 0, 20, 500};
+static volatile int ticks[] = {0, 0, 0, 0, 0, 40, 500};
 void system_time();
 /*
  * rtc_init
@@ -65,11 +65,10 @@ void rtc_interrupt_handler() {
         // erase_mouse();
 
         show_screen();
-        prev_draw_x = mouse_x;
-        prev_draw_y = mouse_y;
+
         patch_mouse(prev_draw_x, prev_draw_y);
         render_mouse(mouse_x,mouse_y);
-        ticks[5] = 20;
+        ticks[5] = 40;
     }
     //test_interrupts();
 }
