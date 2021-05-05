@@ -664,7 +664,7 @@ void init_gui() {
     setup_status_bar();
 
 //    for(i = 0; i < 50; i++){
-//        render_string(100,i*10,"test",0xDC143C);
+//        render_sentence(100,i*10,"test",0xDC143C);
 //    }
 
 }
@@ -680,8 +680,8 @@ void setup_status_bar(){
     status_bar[18] = hour%10+48;
     status_bar[20] = mins/10+48;
     status_bar[21] = mins%10+48;
-    render_string(5, VGA_DIMY-24 , " Welcome to HEROS", 0x0000);
-    render_string(VGA_DIMX-250, VGA_DIMY-24 , status_bar, 0x0000);
+    render_sentence(5, VGA_DIMY-24 , " Welcome to HEROS", 0x0000);
+    render_sentence(VGA_DIMX-250, VGA_DIMY-24 , status_bar, 0x0000);
     render_music_icon(VGA_DIMX - 43, VGA_DIMY-27);
     render_terminal_button();
     need_update = 1;
@@ -689,9 +689,10 @@ void setup_status_bar(){
 
 
 void render_terminal_button(){
-    render_string(240-32,VGA_DIMY-24,"|   TERMINAL 0  |",0x0000);
-    render_string(200+200-32,VGA_DIMY-24,"|   TERMINAL 1  |",0x0000);
-    render_string(200+200+200 - 40-32,VGA_DIMY-24,"|   TERMINAL 2  |",0x0000);
+
+    render_sentence(240,VGA_DIMY-24,"TERMINAL 0",0x0000);
+    render_sentence(200+200,VGA_DIMY-24,"TERMINAL 1",0x0000);
+    render_sentence(200+200+200 - 40 ,VGA_DIMY-24,"TERMINAL 2",0x0000);
 
 }
 
@@ -780,31 +781,31 @@ void draw_terminal(char* video_cache,int terminal_id, int focus) {
         for (j = 0; j < MODEX_TER_COLS; ++j)
             if (*(video_cache+((MODEX_TER_COLS * i + j) << 1)) != '\0')
                 cur_line[j] = *(video_cache+((MODEX_TER_COLS * i + j) << 1));
-        render_string(terminal_window[terminal_id].pos_x+4, terminal_window[terminal_id].pos_y+24+16*i, cur_line, 0xFFFFFF);
+        render_sentence(terminal_window[terminal_id].pos_x+4, terminal_window[terminal_id].pos_y+24+16*i, cur_line, 0xFFFFFF);
     }
     //}
 
     need_update=1;
 }
 //
-void render_font(int x_start, int y_start, char ch, uint32_t color) {
+void render_word(int x_start, int y_start, char ch, uint32_t color) {
     char* font = (char*)font_8x16[(uint8_t)(ch)];
-    int x,y;
     int set;
-    for (y=0; y < 16; y++) {
-        for (x=0; x < 8; x++) {
-            set = font[y] & 1 << (8-x);
+    int i,j;
+    for (j=0; j < 16; j++) {
+        for (i=0; i < 8; i++) {
+            set = font[j] & 1 << (8-i);
             if(set) {
-                Pdraw(x_start + x, y_start + y, color);
+                Pdraw(x_start + i, y_start + j, color);
             }
         }
     }
 }
 
-void render_string(int x_start, int y_start, char* string, uint32_t color) {
+void render_sentence(int x_start, int y_start, char* string, uint32_t color) {
     int i;
     for(i = 0; i < strlen(string); i++) {
-        render_font(x_start + i*8, y_start, string[i], color);
+        render_word(x_start + i*8, y_start, string[i], color);
     }
 }
 
@@ -812,10 +813,10 @@ void render_window(int x, int y, int width, int height, char* title, uint8_t is_
     Rdraw(width, height, x, y,0x000000);
     if(is_focus) {
         Rdraw(width - 4, 20,x + 2, y + 2,  0x2F4F4F);
-        render_string(x+16, y+8, title, 0xFFFFFF);
+        render_sentence(x+16, y+8, title, 0xFFFFFF);
     } else {
         Rdraw(width - 4, 20, x + 2, y + 2, 0xBEBEBE);
-        render_string(x+16, y+8, title, 0xFFFFFF);
+        render_sentence(x+16, y+8, title, 0xFFFFFF);
     }
 }
 
