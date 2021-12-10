@@ -3,7 +3,9 @@
 - Zhenning Zhang (zz45)
 - Kanya Mo (kanyamo2)
 - Ruiqi Li (ruiqili4)
-
+  ![Screenshot](./result.png)
+  ![Certificte](./Certificte.jpg)
+  
 # Basic
 -  GDT, IDT, Paging Setup
 -  PIT, Keyboard, RTC Interrupt handler
@@ -31,6 +33,3 @@
 - Virtualized RTC 
   * acceleration when scheduling
 - Randomness
-
-# Screenshot
-![](../result.png)
