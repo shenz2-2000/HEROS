@@ -33,3 +33,7 @@
 - Virtualized RTC 
   * acceleration when scheduling
 - Randomness
+
+
+# Academic Integrity
+For learning purposes only, don't copy my code directly. **I'm not responsible for your essential plagiarism.**
